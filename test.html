@@ -147,27 +147,44 @@ body.danger #dangerOverlay{animation:danger 1s ease-in-out infinite}
 .tickers .empty{grid-column:1/-1;font-size:13px}
 
 /* ---------- RIGHT: store ---------- */
-#upgrades{display:flex;flex-wrap:wrap;gap:6px;min-height:58px}
-.upg{width:52px;height:52px;border-radius:8px;border:2px solid var(--line);background:var(--panel2);font-size:26px;display:flex;align-items:center;justify-content:center;position:relative;padding:0}
-.upg.scandal{border-color:#a32020;background:radial-gradient(circle,#2c1414,#160909)}
-.upg.scandal::after{content:"⚖";position:absolute;right:1px;bottom:-2px;font-size:12px}
-.upg.click{border-color:#2a6aa8;background:radial-gradient(circle,#13253a,#0b1522)}
-.upg.mult{border-color:#9d7f24;background:radial-gradient(circle,#2e2710,#171305)}
-.upg:hover:not(.cant){transform:translateY(-2px);filter:brightness(1.3)}
-.upg.cant{opacity:.4}
-.buyAmt{display:flex;gap:4px;margin-bottom:8px}
-.buyAmt button{flex:1;background:var(--panel2);border:1px solid var(--line);color:var(--muted);padding:5px;border-radius:5px;font-weight:800}
-.buyAmt button.on{color:#06140c;background:var(--green);border-color:var(--green)}
-.bld{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:linear-gradient(90deg,var(--panel2),var(--panel));border:1px solid var(--line);
-  border-radius:8px;padding:8px 10px;margin-bottom:6px;color:var(--text)}
-.bld:hover:not(.cant){border-color:var(--green);filter:brightness(1.15)}
-.bld .ic{font-size:30px;width:42px;text-align:center}
+.secHead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:18px 0 8px;border-bottom:1px solid var(--line);padding-bottom:6px}
+.secHead:first-child{margin-top:0}
+.secHead h2{margin:0;border:none;padding:0}
+.secHead .count{font-size:12px;color:var(--muted)}
+/* Upgrades: a list of named cards, color-coded on the left edge by type */
+#upgrades{display:flex;flex-direction:column;gap:5px}
+.upg{display:grid;grid-template-columns:28px 1fr auto;grid-template-rows:auto auto;column-gap:8px;align-items:center;width:100%;text-align:left;
+  background:var(--panel2);border:1px solid var(--line);border-left:4px solid var(--line);border-radius:6px;padding:6px 10px;color:var(--text)}
+.upg .uIc{grid-row:1/3;font-size:20px;text-align:center}
+.upg .uNm{font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.upg .uTag{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.upg .uCost{grid-column:3;grid-row:1/3;font-weight:800;font-size:13px;color:var(--green);white-space:nowrap}
+.upg.scandal{border-left-color:#c62828} .upg.click{border-left-color:#3a8ad8} .upg.mult{border-left-color:#c9a227}
+.upg:hover:not(.cant){border-top-color:#3d5547;border-right-color:#3d5547;border-bottom-color:#3d5547;filter:brightness(1.15)}
+.upg.cant{opacity:.5} .upg.cant .uCost{color:#ff6b6b}
+.upgMore{background:none;border:1px dashed var(--line);color:var(--muted);padding:6px;border-radius:6px;font-size:12px;font-weight:700}
+.upgMore:hover{color:var(--text);border-color:#3d5547}
+/* Quantity switch in the Industries header */
+.buyAmt{display:flex;gap:2px;background:#070b09;border:1px solid var(--line);border-radius:999px;padding:2px}
+.buyAmt button{background:none;border:none;color:var(--muted);padding:3px 10px;border-radius:999px;font-weight:800;font-size:12px}
+.buyAmt button.on{color:#06140c;background:var(--green)}
+/* Industries: corporate division cards */
+.bld{display:block;width:100%;text-align:left;background:var(--panel);border:1px solid var(--line);border-top:3px solid #2f4a3b;
+  border-radius:6px;padding:8px 10px;margin-bottom:8px;color:var(--text)}
+.bld:hover:not(.cant):not(.mystery){border-color:var(--green)}
+.bld .bTop{display:flex;align-items:center;gap:8px}
+.bld .ic{font-size:22px;width:28px;text-align:center}
 .bld .info{flex:1;min-width:0}
-.bld .nm{font-weight:800;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bld .nm{font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bld .sec{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.bld .cost{font-size:13px;font-weight:700;color:var(--green)}
-.bld .own{font-size:30px;font-weight:900;color:rgba(255,255,255,.25);min-width:40px;text-align:right}
-.bld.mystery{opacity:.35;filter:grayscale(1);cursor:default}
+.bld .tkr{font-family:Consolas,"Courier New",monospace;font-size:11px;font-weight:800;letter-spacing:1px;color:var(--gold);border:1px solid #5a4a1a;border-radius:4px;padding:1px 5px}
+.bld .bBot{display:flex;align-items:center;gap:8px;margin-top:7px;font-size:12px}
+.bld .own{background:#0b1510;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:#cfe9da;font-weight:700;white-space:nowrap}
+.bld .rate{color:var(--muted);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bld .cost{font-weight:800;color:#06140c;background:var(--green);border-radius:5px;padding:3px 8px;white-space:nowrap}
+.bld.cant .cost{background:#3a1515}
+.bld.mystery{border-style:dashed;border-top-width:1px;background:transparent;cursor:default;opacity:.75}
+.bld.mystery .cost,.bld.mystery .tkr,.bld.mystery .own{display:none}
 
 /* ---------- tooltip / modal / toast ---------- */
 #tip{position:fixed;z-index:100;max-width:340px;background:#0a0f0d;border:1px solid #3a5446;border-radius:8px;padding:10px 12px;font-size:13px;
@@ -306,11 +323,12 @@ footer{font-size:11px;color:#5d7367;margin-top:18px;line-height:1.5}
 
   <!-- RIGHT -->
   <div class="col" id="right">
-    <h2 style="margin-top:0">Upgrades</h2>
+    <div class="secHead"><h2>Upgrades</h2><span class="count" id="upgCount"></span></div>
     <div id="upgrades"></div>
-    <h2>Industries</h2>
-    <div class="buyAmt">
-      <button data-amt="1" class="on">×1</button><button data-amt="10">×10</button><button data-amt="100">×100</button>
+    <div class="secHead"><h2>Industries</h2>
+      <div class="buyAmt" role="group" aria-label="Purchase quantity">
+        <button data-amt="1" class="on">×1</button><button data-amt="10">×10</button><button data-amt="100">×100</button>
+      </div>
     </div>
     <div id="buildings"></div>
   </div>
@@ -733,26 +751,43 @@ function buildBuildingRows(){
   INDUSTRIES.forEach((ind, i) => {
     const b = document.createElement("button");
     b.className = "bld"; b.dataset.tt = "bld:" + i;
-    b.innerHTML = `<div class="ic">${ind.icon}</div><div class="info"><div class="nm"></div><div class="sec"></div><div class="cost"></div></div><div class="own"></div>`;
+    b.innerHTML = `<div class="bTop"><span class="ic"></span><div class="info"><div class="nm"></div><div class="sec"></div></div><span class="tkr">${TICKERS[i]}</span></div>
+      <div class="bBot"><span class="own"></span><span class="rate"></span><span class="cost"></span></div>`;
     b.addEventListener("click", () => { if (!b.classList.contains("mystery")) { buyBuilding(i); refreshTip(); } });
     wrap.appendChild(b);
-    bldEls.push({ el:b, nm:b.querySelector(".nm"), sec:b.querySelector(".sec"), cost:b.querySelector(".cost"), own:b.querySelector(".own"), ic:b.querySelector(".ic") });
+    bldEls.push({ el:b, nm:b.querySelector(".nm"), sec:b.querySelector(".sec"), cost:b.querySelector(".cost"), own:b.querySelector(".own"),
+      rate:b.querySelector(".rate"), ic:b.querySelector(".ic") });
   });
 }
-let lastUpgKey = "";
+let lastUpgKey = "", showAllUpgrades = false;
+const UPG_PREVIEW = 6; // cheapest few shown; the rest behind "Show all"
+function upgradeTag(u){
+  if (u.type === "scandal") return "Scandal · " + INDUSTRIES[u.ind].name;
+  if (u.type === "mult") return "Efficiency · " + INDUSTRIES[u.ind].name;
+  return u.kind === "x2" ? "Clicking · click power ×2" : "Clicking · +1% of income per click";
+}
 function rebuildStore(){
   const avail = UPGRADES.filter(upgradeUnlocked).sort((a, b) => a.cost - b.cost);
-  const key = avail.map(u => u.id).join(",");
-  if (key !== lastUpgKey) {
-    lastUpgKey = key;
-    const wrap = $("upgrades"); wrap.innerHTML = "";
-    if (!avail.length) wrap.innerHTML = `<div class="empty">No upgrades available yet. Keep growing.</div>`;
-    avail.forEach(u => {
-      const b = document.createElement("button");
-      b.className = "upg " + u.type; b.dataset.tt = "upg:" + u.id; b.dataset.id = u.id; b.textContent = u.icon;
-      b.addEventListener("click", () => buyUpgrade(u.id));
-      wrap.appendChild(b);
-    });
+  const key = avail.map(u => u.id).join(",") + "|" + showAllUpgrades;
+  if (key === lastUpgKey) return;
+  lastUpgKey = key;
+  $("upgCount").textContent = avail.length ? avail.length + " available" : "";
+  const wrap = $("upgrades"); wrap.innerHTML = "";
+  if (!avail.length) { wrap.innerHTML = `<div class="empty">No upgrades available yet. Keep growing.</div>`; return; }
+  const shown = showAllUpgrades ? avail : avail.slice(0, UPG_PREVIEW);
+  shown.forEach(u => {
+    const b = document.createElement("button");
+    b.className = "upg " + u.type; b.dataset.tt = "upg:" + u.id; b.dataset.id = u.id;
+    b.innerHTML = `<span class="uIc">${u.icon}</span><span class="uNm">${esc(u.name)}</span><span class="uCost">${money(u.cost)}</span><span class="uTag">${esc(upgradeTag(u))}</span>`;
+    b.addEventListener("click", () => buyUpgrade(u.id));
+    wrap.appendChild(b);
+  });
+  if (avail.length > UPG_PREVIEW) {
+    const more = document.createElement("button");
+    more.className = "upgMore";
+    more.textContent = showAllUpgrades ? "Show fewer" : `Show all ${avail.length} upgrades`;
+    more.addEventListener("click", () => { showAllUpgrades = !showAllUpgrades; rebuildStore(); render(); });
+    wrap.appendChild(more);
   }
 }
 function rebuildRap(){
@@ -804,8 +839,8 @@ function render(){
   $("penaltyLobbyN").textContent = S.penaltyLobbyists; $("penaltyLobbyC").textContent = money(pc);
   $("penaltyLobbyBtn").classList.toggle("cant", S.dollars < pc);
 
-  // Buildings: show owned/affordable ones, plus one mystery row
-  let shownMystery = false;
+  // Industries: revealed divisions, plus one "rumored acquisition" teaser for the next one
+  let shownRumor = false;
   INDUSTRIES.forEach((ind, i) => {
     const e = bldEls[i];
     const revealed = S.owned[i] > 0 || i === 0 || S.runEarned >= ind.base * 0.5 || S.owned[i - 1] > 0;
@@ -813,13 +848,15 @@ function render(){
       e.el.style.display = ""; e.el.classList.remove("mystery");
       e.ic.textContent = ind.icon; e.nm.textContent = ind.name; e.sec.textContent = ind.sector;
       const c = buildingCost(i, buyAmt);
-      e.cost.textContent = money(c) + (buyAmt > 1 ? ` (×${buyAmt})` : "");
-      e.own.textContent = S.owned[i] || "";
+      e.cost.textContent = `Acquire ×${buyAmt} · ${money(c)}`;
+      e.own.textContent = "Owned " + fmt(S.owned[i]);
+      e.rate.textContent = S.owned[i] ? money(D.indCps[i]) + "/s" : "Not yet acquired";
       e.el.classList.toggle("cant", S.dollars < c);
-    } else if (!shownMystery) {
-      shownMystery = true;
+    } else if (!shownRumor) {
+      shownRumor = true;
       e.el.style.display = ""; e.el.classList.add("mystery"); e.el.classList.remove("cant");
-      e.ic.textContent = "❓"; e.nm.textContent = "???"; e.sec.textContent = "Unknown industry"; e.cost.textContent = money(buildingCost(i, buyAmt)); e.own.textContent = "";
+      e.ic.textContent = "🔍"; e.nm.textContent = "Rumored acquisition"; e.sec.textContent = "Due diligence underway";
+      e.rate.textContent = `Revealed after earning ${money(ind.base * 0.5)} this run`;
     } else e.el.style.display = "none";
   });
 
@@ -862,7 +899,7 @@ function tipHTML(key){
   const [kind, id] = key.split(":");
   if (kind === "bld") {
     const i = +id, ind = INDUSTRIES[i];
-    if (bldEls[i].el.classList.contains("mystery")) return `<div class="tn">???</div><div class="td">Keep earning to reveal this industry.</div>`;
+    if (bldEls[i].el.classList.contains("mystery")) return `<div class="tn">🔍 Rumored acquisition</div><div class="td">Your analysts are circling a new division. Earn ${money(ind.base * 0.5)} this run to find out what it is.</div>`;
     const each = ind.cps * D.indMult[i], share = D.cps ? D.indCps[i] / D.cps * 100 : 0;
     return `<div class="tn">${ind.icon} ${esc(ind.name)}</div><div class="ts">${esc(ind.sector)}</div>
       <div class="td">${esc(ind.flavor)}</div>
