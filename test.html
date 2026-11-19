@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clickonomics [TEST]</title>
+<style>
+:root{
+  --bg:#0b100e; --panel:#121a16; --panel2:#18231d; --line:#26362d;
+  --green:#3ddc84; --green2:#1f8f52; --gold:#e8c35a; --blue:#5ab0ff;
+  --red:#ff2424; --red2:#7a0000; --text:#dfe9e3; --muted:#86a092;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{
+  background:radial-gradient(ellipse at 20% 0%,#183026 0%,#0b100e 55%,#060807 100%);
+  color:var(--text); font-family:"Segoe UI",system-ui,Roboto,Helvetica,Arial,sans-serif;
+  overflow:hidden; user-select:none;
+}
+button{font-family:inherit;cursor:pointer}
+#app{display:grid;grid-template-columns:minmax(300px,1fr) minmax(380px,1.25fr) minmax(340px,1fr);height:100vh}
+.col{overflow-y:auto;padding:16px;border-right:1px solid var(--line)}
+.col:last-child{border-right:none}
+.col::-webkit-scrollbar{width:10px}.col::-webkit-scrollbar-thumb{background:#26362d;border-radius:5px}
+h2{font-size:13px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin:18px 0 8px;border-bottom:1px solid var(--line);padding-bottom:6px}
+
+/* ---------- LEFT: bank + big dollar ---------- */
+.brand{text-align:center}
+.brand h1{margin:0;font-size:30px;letter-spacing:6px;font-weight:900;
+  background:linear-gradient(180deg,#9dffc6,#2fbf6f);-webkit-background-clip:text;background-clip:text;color:transparent}
+.brand .tag{font-size:12px;color:var(--muted);font-style:italic;margin-top:2px}
+.nameRow{position:relative;max-width:320px;margin:12px auto 0}
+#companyName{display:block;width:100%;text-align:center;background:rgba(0,0,0,.25);border:1px dashed #3d5547;
+  color:var(--gold);font-size:16px;font-weight:700;padding:6px 30px;border-radius:6px;cursor:text;user-select:text;-webkit-user-select:text}
+#companyName:hover{border-color:var(--gold)}
+#companyName:focus{border-style:solid;border-color:var(--gold);background:rgba(0,0,0,.5);outline:none;box-shadow:0 0 0 3px rgba(232,195,90,.15)}
+#editName{position:absolute;right:4px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);font-size:16px;padding:4px 6px;border-radius:4px}
+#editName:hover{color:var(--gold)}
+.bank{text-align:center;margin:14px 0 6px;background:rgba(0,0,0,.35);border:1px solid var(--line);border-radius:10px;padding:12px}
+#dollars{font-size:clamp(24px,2.6vw,36px);font-weight:900;color:#eafff1;text-shadow:0 0 12px rgba(61,220,132,.45);word-break:break-word}
+#cps{font-size:14px;color:var(--muted);margin-top:4px}
+#bigDollarWrap{position:relative;display:flex;justify-content:center;align-items:center;height:330px}
+#bigDollarWrap::before,#bigDollarWrap::after{content:"";position:absolute;width:262px;height:262px;border-radius:50%;
+  border:2px solid rgba(61,220,132,.55);animation:ripple 3s ease-out infinite;pointer-events:none}
+#bigDollarWrap::after{animation-delay:1.5s}
+@keyframes ripple{from{transform:scale(1);opacity:.8}to{transform:scale(1.35);opacity:0}}
+#bigDollar{position:relative;width:250px;height:250px;border-radius:50%;border:none;padding:0;
+  background:radial-gradient(circle at 34% 28%,#b6ffd3 0%,#43d483 22%,#178a49 60%,#0a4a27 100%);
+  box-shadow:0 0 0 8px #0c3a21,0 0 0 12px #2fbf6f,0 0 0 14px #0c3a21,0 18px 40px rgba(0,0,0,.7),0 0 60px rgba(61,220,132,.35);
+  transition:transform .08s ease;display:flex;align-items:center;justify-content:center}
+#bigDollar span{font-family:Georgia,"Times New Roman",serif;font-weight:900;font-size:180px;line-height:1;color:#eafff1;
+  text-shadow:0 4px 0 #0b5a2f,0 0 18px rgba(255,255,255,.4);pointer-events:none}
+#bigDollar:hover{transform:scale(1.04)}
+#bigDollar:active{transform:scale(.94)}
+#bigDollar.pop{animation:pop .12s ease}
+@keyframes pop{50%{transform:scale(.93) rotate(-3deg)}}
+#clickInfo{text-align:center;color:var(--muted);font-size:13px}
+.floater{position:fixed;pointer-events:none;font-weight:900;color:#9dffc6;font-size:20px;text-shadow:0 2px 4px #000;
+  animation:floatUp 1s ease-out forwards;z-index:50;white-space:nowrap}
+@keyframes floatUp{to{transform:translateY(-90px);opacity:0}}
+#ticker{margin-top:16px;background:#050807;border:1px solid var(--line);border-radius:6px;padding:10px 12px;font-size:13px;min-height:58px;
+  color:#c9d8cf;font-style:italic;transition:opacity .4s}
+#ticker b{color:var(--gold);font-style:normal;letter-spacing:1px;margin-right:6px}
+
+/* ---------- CENTER: regulatory ---------- */
+#reg{position:relative;border:4px solid var(--red);border-radius:10px;padding:0 16px 16px;text-align:center;overflow:hidden;
+  background:repeating-linear-gradient(45deg,#2b0404 0 16px,#200202 16px 32px);
+  box-shadow:0 0 30px rgba(255,0,0,.45),inset 0 0 60px rgba(0,0,0,.7);animation:regpulse 2s ease-in-out infinite}
+@keyframes regpulse{50%{box-shadow:0 0 55px rgba(255,0,0,.8),inset 0 0 60px rgba(0,0,0,.7)}}
+#reg.urgent{animation:regpulse .45s ease-in-out infinite}
+.reg-stripe{height:14px;margin:0 -16px;background:repeating-linear-gradient(-45deg,var(--red) 0 12px,#000 12px 24px)}
+.reg-head{margin:0 -16px 10px;background:#000;color:var(--red);font-weight:900;letter-spacing:4px;font-size:13px;padding:6px}
+#regLabel{font-weight:900;letter-spacing:5px;color:#ffb3b3;font-size:15px}
+#fineAmt{font-family:"Courier New",Consolas,monospace;font-weight:900;font-size:clamp(28px,3.4vw,52px);color:var(--red);line-height:1.15;
+  text-shadow:0 0 6px #ff0000,0 0 20px #b00000,0 0 40px #700000;word-break:break-word;margin:6px 0}
+.reg-timer{font-weight:800;letter-spacing:3px;color:#ffd5d5;font-size:13px}
+#fineTimer{display:block;font-family:"Courier New",Consolas,monospace;font-size:clamp(32px,3.6vw,54px);color:#fff;letter-spacing:4px;
+  text-shadow:0 0 10px #ff2a2a,0 0 24px #a00}
+#reg.urgent #fineTimer{animation:blink .9s steps(2) infinite}
+@keyframes blink{50%{color:var(--red)}}
+.reg-bar{height:12px;background:#000;border:1px solid #600;border-radius:6px;overflow:hidden;margin:10px 0}
+#fineBar{height:100%;width:100%;background:linear-gradient(90deg,#ff2424,#ff7a1a);transition:width .3s linear}
+#fineInfo{font-size:12px;color:#ffc9c9;margin-bottom:10px;line-height:1.5}
+#payBtn{width:100%;padding:14px;font-size:18px;font-weight:900;letter-spacing:2px;border-radius:8px;border:2px solid #fff;
+  background:linear-gradient(180deg,#ff3b3b,#a30000);color:#fff;text-shadow:0 1px 2px #000;box-shadow:0 4px 0 #4a0000}
+#payBtn:hover:not(:disabled){filter:brightness(1.15)}
+#payBtn:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 #4a0000}
+#payBtn:disabled{background:#3a1010;color:#a77;border-color:#622;box-shadow:none;cursor:not-allowed}
+#reg.rebate{border-color:var(--green);background:repeating-linear-gradient(45deg,#03200f 0 16px,#021a0c 16px 32px);animation:none;box-shadow:0 0 30px rgba(61,220,132,.4)}
+#reg.rebate .reg-stripe{background:repeating-linear-gradient(-45deg,var(--green) 0 12px,#000 12px 24px)}
+#reg.rebate .reg-head{color:var(--green)}
+#reg.rebate #fineAmt{color:var(--green);text-shadow:0 0 8px #3ddc84,0 0 24px #0a7a3a}
+#reg.rebate #regLabel,#reg.rebate .reg-timer,#reg.rebate #fineInfo{color:#c8ffdf}
+#reg.rebate #fineTimer{text-shadow:0 0 10px #3ddc84}
+#reg.rebate #fineBar{background:linear-gradient(90deg,#3ddc84,#c8ff5a)}
+#reg.rebate #payBtn{background:linear-gradient(180deg,#3ddc84,#137a3e);box-shadow:0 4px 0 #063d1d}
+#dangerOverlay{position:fixed;inset:0;pointer-events:none;z-index:40;box-shadow:inset 0 0 0 0 rgba(255,0,0,0);transition:box-shadow .5s}
+body.danger #dangerOverlay{animation:danger 1s ease-in-out infinite}
+@keyframes danger{50%{box-shadow:inset 0 0 120px 20px rgba(255,0,0,.45)}}
+
+.lobby{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.lobbyBtn{text-align:left;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;color:var(--text)}
+.lobbyBtn:hover:not(.cant){border-color:var(--gold);background:#1f2d25}
+.lobbyBtn .t{font-weight:800;font-size:15px}
+.lobbyBtn .d{font-size:12px;color:var(--muted);margin:3px 0 6px}
+.lobbyBtn .c{font-weight:700;color:var(--green)}
+.lobbyBtn .n{float:right;font-size:22px;font-weight:900;color:var(--gold);opacity:.8}
+.cant{opacity:.55}
+.cant .c,.cant .cost{color:#ff6b6b !important}
+
+.tabs{display:flex;gap:4px;margin-top:18px;border-bottom:1px solid var(--line)}
+.tab{background:transparent;border:1px solid transparent;border-bottom:none;color:var(--muted);padding:8px 14px;font-weight:700;letter-spacing:1px;border-radius:6px 6px 0 0}
+.tab.on{background:var(--panel);border-color:var(--line);color:var(--text)}
+.tabBody{background:var(--panel);border:1px solid var(--line);border-top:none;border-radius:0 0 8px 8px;padding:12px;font-size:14px}
+.tabBody[hidden]{display:none}
+#rapSheet details{border-bottom:1px solid var(--line);padding:6px 0}
+#rapSheet summary{cursor:pointer;font-weight:700}
+#rapSheet summary .sec{color:var(--muted);font-weight:400;font-size:12px;margin-left:6px}
+#rapSheet p{margin:6px 0 2px 22px;color:#bfcfc6;font-size:13px;line-height:1.45}
+.empty{color:var(--muted);font-style:italic}
+#stats div{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed #22302a}
+#stats span:last-child{font-weight:700;color:#eafff1;text-align:right}
+.saveBtns{display:flex;flex-wrap:wrap;gap:8px}
+.btn{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:8px 12px;border-radius:6px;font-weight:700}
+.btn:hover{border-color:var(--green)}
+.btn.danger{border-color:#6a1b1b;color:#ff9b9b}
+.btn.danger:hover{background:#3a0f0f}
+.note{color:var(--muted);font-size:12px;margin-top:10px;line-height:1.5}
+
+/* ---------- CENTER: stock market ---------- */
+.mkt{background:#070b09;border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.mktHead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px}
+.mktName{font-weight:800;font-size:14px;letter-spacing:1px}
+.mktSub{font-size:11px;color:var(--muted)}
+.mktPx{text-align:right;white-space:nowrap}
+#idxPx{font-family:Consolas,"Courier New",monospace;font-weight:800;font-size:18px;color:#eafff1}
+.chg{font-family:Consolas,"Courier New",monospace;font-size:12px;font-weight:700;color:var(--muted)}
+.chg.up{color:var(--green)} .chg.down{color:#ff5c5c}
+#idxChart{display:block;width:100%;height:150px;cursor:crosshair}
+.tickers{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;margin-top:8px}
+.tk{background:#070b09;border:1px solid var(--line);border-radius:6px;padding:6px 8px}
+.tk:hover{border-color:#3d5547}
+.tkTop{display:flex;justify-content:space-between;align-items:baseline;gap:6px}
+.tkSym{font-family:Consolas,"Courier New",monospace;font-weight:800;font-size:13px;letter-spacing:1px}
+.tkPx{font-family:Consolas,"Courier New",monospace;font-size:12px;color:#dfe9e3;white-space:nowrap}
+.tk canvas{display:block;width:100%;height:38px;margin-top:3px}
+.tickers .empty{grid-column:1/-1;font-size:13px}
+
+/* ---------- RIGHT: store ---------- */
+#upgrades{display:flex;flex-wrap:wrap;gap:6px;min-height:58px}
+.upg{width:52px;height:52px;border-radius:8px;border:2px solid var(--line);background:var(--panel2);font-size:26px;display:flex;align-items:center;justify-content:center;position:relative;padding:0}
+.upg.scandal{border-color:#a32020;background:radial-gradient(circle,#2c1414,#160909)}
+.upg.scandal::after{content:"⚖";position:absolute;right:1px;bottom:-2px;font-size:12px}
+.upg.click{border-color:#2a6aa8;background:radial-gradient(circle,#13253a,#0b1522)}
+.upg.mult{border-color:#9d7f24;background:radial-gradient(circle,#2e2710,#171305)}
+.upg:hover:not(.cant){transform:translateY(-2px);filter:brightness(1.3)}
+.upg.cant{opacity:.4}
+.buyAmt{display:flex;gap:4px;margin-bottom:8px}
+.buyAmt button{flex:1;background:var(--panel2);border:1px solid var(--line);color:var(--muted);padding:5px;border-radius:5px;font-weight:800}
+.buyAmt button.on{color:#06140c;background:var(--green);border-color:var(--green)}
+.bld{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:linear-gradient(90deg,var(--panel2),var(--panel));border:1px solid var(--line);
+  border-radius:8px;padding:8px 10px;margin-bottom:6px;color:var(--text)}
+.bld:hover:not(.cant){border-color:var(--green);filter:brightness(1.15)}
+.bld .ic{font-size:30px;width:42px;text-align:center}
+.bld .info{flex:1;min-width:0}
+.bld .nm{font-weight:800;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bld .sec{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bld .cost{font-size:13px;font-weight:700;color:var(--green)}
+.bld .own{font-size:30px;font-weight:900;color:rgba(255,255,255,.25);min-width:40px;text-align:right}
+.bld.mystery{opacity:.35;filter:grayscale(1);cursor:default}
+
+/* ---------- tooltip / modal / toast ---------- */
+#tip{position:fixed;z-index:100;max-width:340px;background:#0a0f0d;border:1px solid #3a5446;border-radius:8px;padding:10px 12px;font-size:13px;
+  box-shadow:0 10px 30px rgba(0,0,0,.7);pointer-events:none;display:none;line-height:1.45}
+#tip .tn{font-weight:900;font-size:15px;color:#fff}
+#tip .ts{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+#tip .td{font-style:italic;color:#c3d3ca;margin:6px 0}
+#tip .tb{color:var(--green)} #tip .tp{color:#ff6b6b} #tip .tc{margin-top:6px;font-weight:700}
+/* Touch screens: pin the tooltip to the bottom of the screen instead of following the finger */
+#tip.docked{left:50% !important;top:auto !important;bottom:12px;transform:translateX(-50%);width:min(94vw,520px);max-width:none;
+  pointer-events:auto;border-color:var(--green2);box-shadow:0 -6px 30px rgba(0,0,0,.8)}
+#tip.docked::after{content:"Tap here or anywhere empty to close";display:block;margin-top:8px;font-size:11px;color:var(--muted);text-align:center}
+#modalBg{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;z-index:200}
+#modal{background:var(--panel);border:2px solid var(--line);border-radius:12px;padding:20px;width:min(560px,92vw);max-height:88vh;overflow:auto}
+#modal.bad{border-color:var(--red);box-shadow:0 0 60px rgba(255,0,0,.5)}
+#modal h3{margin:0 0 10px;font-size:22px}
+#modal.bad h3{color:var(--red);letter-spacing:2px}
+#modal textarea{width:100%;height:140px;background:#050807;color:#9dffc6;border:1px solid var(--line);border-radius:6px;font-family:Consolas,monospace;font-size:12px;padding:8px;user-select:text}
+#modal .row{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+#toasts{position:fixed;left:16px;bottom:16px;z-index:150;display:flex;flex-direction:column;gap:6px}
+.toast{background:#0a0f0d;border:1px solid var(--green2);border-left:4px solid var(--green);padding:8px 12px;border-radius:6px;font-size:13px;max-width:320px;animation:tin .3s ease}
+.toast.bad{border-color:#7a1b1b;border-left-color:var(--red)}
+@keyframes tin{from{transform:translateX(-30px);opacity:0}}
+footer{font-size:11px;color:#5d7367;margin-top:18px;line-height:1.5}
+
+@media (max-width:1050px){
+  body{overflow:auto}
+  #app{grid-template-columns:1fr;height:auto}
+  .col{overflow:visible;border-right:none;border-bottom:1px solid var(--line)}
+}
+</style>
+</head>
+<body>
+<div id="dangerOverlay"></div>
+<div id="app">
+  <!-- LEFT -->
+  <div class="col" id="left">
+    <div class="brand">
+      <h1>CLICKONOMICS</h1>
+      <div class="tag">Maximize shareholder value. Minimize everything else.</div>
+    </div>
+    <div class="nameRow">
+      <input id="companyName" maxlength="40" spellcheck="false" autocomplete="off" title="Click to rename your company" aria-label="Company name">
+      <button id="editName" title="Rename your company" aria-label="Rename your company">✎</button>
+    </div>
+    <div class="bank">
+      <div id="dollars">$0</div>
+      <div id="cps">per second: $0</div>
+    </div>
+    <div id="bigDollarWrap"><button id="bigDollar" aria-label="Make money"><span>$</span></button></div>
+    <div id="clickInfo">+$1 per click</div>
+    <div id="ticker"><b>WIRE</b><span id="tickerText">Markets open. Ethics closed.</span></div>
+  </div>
+
+  <!-- CENTER -->
+  <div class="col" id="center">
+    <section id="reg">
+      <div class="reg-stripe"></div>
+      <div class="reg-head" id="regHead">⚠ FEDERAL REGULATORY ENFORCEMENT ⚠</div>
+      <div id="regLabel">FINES OWED</div>
+      <div id="fineAmt">$0</div>
+      <div class="reg-timer" id="timerLabel">PAYMENT DUE IN<span id="fineTimer">24:00:00</span></div>
+      <div class="reg-bar"><div id="fineBar"></div></div>
+      <div id="fineInfo"></div>
+      <button id="payBtn">PAY FINES</button>
+    </section>
+
+    <h2>Lobbying</h2>
+    <div class="lobby">
+      <button class="lobbyBtn" id="timerLobbyBtn" data-tt="lobby:timer">
+        <span class="n" id="timerLobbyN">0</span>
+        <div class="t">⏳ Timer Lobbyist</div>
+        <div class="d">+1 hour to the regulatory deadline.</div>
+        <div class="c" id="timerLobbyC">$0</div>
+      </button>
+      <button class="lobbyBtn" id="penaltyLobbyBtn" data-tt="lobby:penalty">
+        <span class="n" id="penaltyLobbyN">0</span>
+        <div class="t">🤝 Penalty Lobbyist</div>
+        <div class="d">−1% regulatory fines. Can go negative.</div>
+        <div class="c" id="penaltyLobbyC">$0</div>
+      </button>
+    </div>
+
+    <h2>Market</h2>
+    <div class="mkt">
+      <div class="mktHead">
+        <div>
+          <div class="mktName">CLKX · Clickonomics Composite</div>
+          <div class="mktSub">All industries' income per second, adjusted for investor mood · last 3 min</div>
+        </div>
+        <div class="mktPx"><div id="idxPx">$0</div><div id="idxChg" class="chg">—</div></div>
+      </div>
+      <canvas id="idxChart" aria-label="Composite index chart"></canvas>
+    </div>
+    <div class="tickers" id="tickers"></div>
+
+    <div class="tabs">
+      <button class="tab on" data-tab="rap">Rap Sheet</button>
+      <button class="tab" data-tab="stats">Stats</button>
+      <button class="tab" data-tab="save">Save</button>
+    </div>
+    <div class="tabBody" id="tab-rap"><div id="rapSheet"></div></div>
+    <div class="tabBody" id="tab-stats" hidden><div id="stats"></div></div>
+    <div class="tabBody" id="tab-save" hidden>
+      <div class="saveBtns">
+        <button class="btn" id="saveNow">💾 Save now</button>
+        <button class="btn" id="exportBtn">📤 Export save</button>
+        <button class="btn" id="importBtn">📥 Import save</button>
+        <button class="btn danger" id="resetBtn">🔥 Hard reset</button>
+      </div>
+      <div class="note" id="saveNote">Autosaves to this browser every 30 seconds.</div>
+      <div class="note">The regulatory clock runs in real time, even while this tab is closed. If it hits zero with fines unpaid, regulators seize everything.</div>
+    </div>
+    <footer>Satire. Some upgrades are invented; others are dark-humor riffs on widely reported historical corporate scandals, product recalls and settlements. None are legal findings about anyone. No real companies were harmed in the making of this game, which is more than can be said for their customers.</footer>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="col" id="right">
+    <h2 style="margin-top:0">Upgrades</h2>
+    <div id="upgrades"></div>
+    <h2>Industries</h2>
+    <div class="buyAmt">
+      <button data-amt="1" class="on">×1</button><button data-amt="10">×10</button><button data-amt="100">×100</button>
+    </div>
+    <div id="buildings"></div>
+  </div>
+</div>
+
+<div id="tip"></div>
+<div id="modalBg"><div id="modal"></div></div>
+<div id="toasts"></div>
+
+<script>
+"use strict";
+/* =========================================================
+   CONSTANTS
+   ========================================================= */
+const SAVE_KEY = "coryClicker.TEST.save.v1"; // TEST: separate from the real save
+const HOUR = 3600 * 1000;
+const BASE_TIMER = 24 * HOUR;
+const BASE_FINE_RATE = 0.10;      // fines accrue as 10% of all revenue, times the fine multiplier
+const COST_GROWTH = 1.14;
+const TIMER_LOBBY = { base: 50000, growth: 1.6 };
+const PENALTY_LOBBY = { base: 10000, growth: 1.3 };
+
+/* =========================================================
+   NUMBER FORMATTING
+   ========================================================= */
+const SMALL_ILLIONS = ["million","billion","trillion","quadrillion","quintillion","sextillion","septillion","octillion","nonillion"];
+const UNITS = ["","un","duo","tre","quattuor","quin","sex","septen","octo","novem"];
+const TENS  = ["","dec","vigint","trigint","quadragint","quinquagint","sexagint","septuagint","octogint","nonagint"];
+function illionName(i){ // i=1 -> million (10^6), i=10 -> decillion (10^33)
+  if (i <= 9) return SMALL_ILLIONS[i-1];
+  if (i === 100) return "centillion";
+  if (i > 100) return null;
+  return UNITS[i % 10] + TENS[Math.floor(i / 10)] + "illion";
+}
+function fmt(n){
+  if (!isFinite(n)) return "∞";
+  const neg = n < 0; n = Math.abs(n);
+  let s;
+  if (n < 1000) s = (n < 100 && n % 1) ? n.toFixed(1) : Math.floor(n).toString();
+  else if (n < 1e6) s = Math.floor(n).toLocaleString("en-US");
+  else {
+    let k = Math.floor(parseInt(n.toExponential().split("e")[1], 10) / 3);
+    let v = (n / Math.pow(10, k * 3)).toFixed(3);
+    if (v === "1000.000") { k++; v = "1.000"; }
+    const name = illionName(k - 1);
+    s = name ? v + " " + name : n.toExponential(3);
+  }
+  return (neg ? "-" : "") + s;
+}
+const money = n => (n < 0 ? "-$" : "$") + fmt(Math.abs(n));
+function fmtTime(ms){
+  ms = Math.max(0, ms);
+  const t = Math.floor(ms / 1000);
+  const h = Math.floor(t / 3600), m = Math.floor(t % 3600 / 60), s = t % 60;
+  return String(h).padStart(2,"0") + ":" + String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0");
+}
+function fmtDuration(ms){
+  const t = Math.floor(ms / 1000), d = Math.floor(t / 86400), h = Math.floor(t % 86400 / 3600), m = Math.floor(t % 3600 / 60);
+  return (d ? d + "d " : "") + (h ? h + "h " : "") + m + "m";
+}
+
+/* =========================================================
+   INDUSTRIES
+   ========================================================= */
+const INDUSTRIES = [
+  { key:"lemon",      name:"Unlicensed Lemonade Stand", sector:"Street Commerce",                         icon:"🍋", base:12,     cps:0.15,  flavor:"No permits. No lemons. No problem." },
+  { key:"food",       name:"Ingredient Supplier",       sector:"Food / Ingredient",                       icon:"🌾", base:120,    cps:1.2,   flavor:"Sourcing ingredients from the lowest bidder since forever." },
+  { key:"mfg",        name:"Processing Plant",          sector:"Food Manufacturing",                      icon:"🏭", base:1500,   cps:10,    flavor:"The line never stops. Neither does the inspector's paperwork." },
+  { key:"additives",  name:"Additive Laboratory",       sector:"Food Additives / Industrial Processing",  icon:"🧪", base:18000,  cps:60,    flavor:"Shelf life: eternal. Ingredient list: classified." },
+  { key:"consumer",   name:"Consumer Goods Factory",    sector:"Consumer Products",                       icon:"🧸", base:2.2e5,  cps:380,   flavor:"Safety testing is just a really long customer beta." },
+  { key:"pharma",     name:"Pharma Conglomerate",       sector:"Health Care / Pharmaceuticals",           icon:"💊", base:3e6,    cps:2200,  flavor:"A cure is a one-time sale. A treatment is forever." },
+  { key:"industrial", name:"Refinery Complex",          sector:"Industrial / Energy / Workplace Safety",  icon:"🛢️", base:4.5e7,  cps:13000, flavor:"Hard hats optional. Hard numbers mandatory." },
+  { key:"auto",       name:"Auto & Aero Works",         sector:"Automotive / Aviation",                   icon:"✈️", base:7e8,    cps:80000, flavor:"Moves fast. Breaks things. Sometimes the things are physics." },
+  { key:"tech",       name:"Megabank Data Silo",        sector:"Technology / Banking / Financial Services", icon:"🏦", base:1.1e10, cps:5e5,  flavor:"Your data, your money, our terms of service." },
+  { key:"offshore",   name:"Offshore Shell Network",    sector:"Offshore Holdings",                       icon:"🏝️", base:1.8e11, cps:3.2e6, flavor:"A mailbox on an island that owns a mailbox on another island." },
+];
+const IND_INDEX = Object.fromEntries(INDUSTRIES.map((d,i) => [d.key, i]));
+
+/* =========================================================
+   SCANDAL UPGRADES (+10% to that industry, +1% regulatory fines)
+   ========================================================= */
+const SCANDALS = {
+  auto: [
+    ["Pilot Training Is Paid DLC.", "You saved millions by minimizing pilot retraining and concealing critical information about your shiny new flight-control system, MCAS. After two crashes killed 346 people, Congress discovered that your production schedule had become more important than your safety checklist."],
+    ["Ignition Is an Optional Feature.", "You concealed defective ignition switches that could shut off engines and disable airbags. Why pay for an expensive recall today when you can pay for a much more expensive lawsuit tomorrow?"],
+    ["Clean Diesel, Dirty Little Secret.", "You installed software that recognized emissions testing and temporarily made your vehicles behave. On the road, they polluted far beyond legal limits. Congratulations! You've invented environmentally friendly fraud."],
+    ["Airbag Roulette: Explosive Edition.", "You falsified airbag safety-test results and concealed dangerous inflator ruptures to keep lucrative automotive contracts. Your airbags now offer customers a surprise explosion as an unadvertised feature."],
+    ["Self-Accelerating or Self-Driving. What's the Difference?", "You concealed information about sticking accelerators and minimized reports of unintended acceleration. Narrowly targeted recalls saved money, and your customers received complimentary adrenaline."],
+    ["Crash Testing Is Expensive. Optimism Is Free.", "You deferred fuel-system safety improvements to reduce manufacturing costs. Unfortunately, your Pinto's rear-mounted fuel tank was much more enthusiastic about combustion than your customers anticipated."],
+    ["Mileage May Vary. Wildly.", "You advertise fuel-economy numbers achieved downhill, with a tailwind, by a car with no seats. Real drivers get about half. Your marketing department insists the numbers are aspirational, like a vision board for gas tanks."],
+    ["Autopilot Is Just a Brand Name.", "You name your driver-assistance feature something that sounds like the car drives itself, then bury the part where it absolutely does not in a 400-page manual. Customers take a nap. The legal department does not."],
+    ["Maintenance Logs Written in Pencil.", "Your airline mechanics sign off inspections that never happened so planes can leave on schedule. On-time departures hit a record high. So does the number of auditors who suddenly need to sit down."],
+    ["Counterfeit Parts, Genuine Turbulence.", "You buy jet-engine parts from a supplier whose certificates were forged in a strip-mall print shop. The paperwork looked airworthy. The parts were more of a vibe."],
+  ],
+  pharma: [
+    ["Opioid Epidemic? More Like Customer Retention!", "You aggressively promoted opioid sales, misled regulators, and continued marketing medications to providers you had reason to believe were diverting drugs. The addiction crisis is terrible news for society but excellent news for recurring revenue."],
+    ["Bribery Is Just Networking With Benefits.", "You paid doctors to prescribe your powerful fentanyl spray, including for medically unnecessary purposes. Your innovative business model transforms medical judgment into a commission-based sales funnel."],
+    ["Off-Label, On-Target.", "You promoted medications for unapproved uses and failed to disclose certain drug safety information. Who needs FDA-approved indications when your marketing department has quarterly revenue targets?"],
+    ["Grandma Is an Untapped Market Segment.", "You unlawfully promoted antipsychotic medications for elderly dementia patients despite serious safety concerns. Your sales team discovered that nursing homes are full of potential customers."],
+    ["Every Symptom Is a Sales Opportunity.", "You marketed Depakote for unapproved uses, including treating elderly nursing-home residents with dementia. The medication wasn't approved for those conditions, but your sales department approved the revenue."],
+    ["Consulting: Helping Bad Ideas Scale.", "You advised an opioid manufacturer on strategies to increase OxyContin sales and accelerate revenue. You've successfully optimized the sales funnel without worrying too much about where the funnel leads."],
+    ["Addiction Is the Ultimate Subscription Model.", "You concealed or misrepresented the dangers of cigarettes, disputed nicotine's addictive properties, and promoted supposedly safer alternatives. Your customers may leave terrible reviews, but the repeat-purchase rate is incredible."],
+    ["Your Hospital Bed Has a Sales Quota.", "You imposed hospital admission targets that pressured doctors to admit patients who didn't medically require hospitalization. You've discovered that unnecessary overnight stays are a fantastic revenue stream."],
+    ["Pharmacists Are Just Expensive Vending Machines.", "Federal authorities accused your pharmacy chain of understaffing stores and imposing performance pressures that contributed to dangerous opioid dispensing. You settled the claims without admitting liability. Apparently, quality control slows down the checkout line."],
+    ["Side Effects Include Shareholder Value.", "You marketed your blockbuster painkiller while making misleading cardiovascular safety claims. The medication was eventually withdrawn over heart attack and stroke risks. At least the stockholders felt better for a while."],
+    ["Buy One Cancer Drug, Sell It Twice!", "You extracted additional doses from expensive cancer-drug vials and repackaged them under unsafe conditions. You've invented a pharmaceutical money printer, with sterility treated as an optional feature."],
+    ["Sterile Is More of a Guideline.", "You represented that your injectable medications met strict sterility standards despite dangerously inadequate preparation conditions. Your customers wanted quality assurance. You gave them quality assurance paperwork."],
+    ["Fake It Till You Medically Make It.", "You exaggerated the capabilities and accuracy of your revolutionary blood-testing technology while attracting investors and patients. Why spend billions developing working technology when a black turtleneck and a confident presentation are so much cheaper?"],
+    ["Sleep Apnea Machines With Extra Seasoning.", "You sold breathing machines that were later recalled because degrading foam could release particles or chemicals into patients' airways. Regulators found serious manufacturing and reporting problems. Your engineers insist the foam was never intended as a breakfast topping."],
+  ],
+  industrial: [
+    ["We've Cut Everything Except the Ribbon.", "You reduced refinery maintenance, staffing, training, and safety investment while ignoring warnings about dangerous conditions. The resulting explosion killed 15 workers. Your budget spreadsheets looked fantastic right up until the refinery didn't."],
+    ["Time Is Money. Oil Is Also Money.", "You made a series of risky drilling decisions, some of which saved time and money. The Deepwater Horizon disaster killed 11 workers and released millions of barrels of oil into the Gulf of Mexico. Congratulations on creating the world's least successful ocean-cleaning initiative."],
+    ["Safety Violations Are Just Coal-ateral Damage.", "You prioritized coal production while repeatedly violating mine-safety standards and concealing hazards from inspectors. An explosion killed 29 miners, demonstrating that your productivity bonuses were spectacularly miscalculated."],
+    ["Maintenance Is an Optional Expansion Pack.", "You operated a pesticide plant with inadequate maintenance, depleted staffing, and compromised safety systems after years of cost pressure. A catastrophic toxic gas leak in Bhopal killed thousands. Your cost-control program was impressively comprehensive and catastrophically shortsighted."],
+    ["Fire Exits Are a Profit Leak.", "You run a garment factory with dangerous working conditions and locked exits intended to prevent theft and unauthorized departures. When a fire breaks out, 146 workers die. Your anti-theft system was apparently designed without consulting the fire department."],
+    ["Forever Chemicals, Forever Profits.", "You continued manufacturing with PFOA while withholding important information about chemical exposure and contamination. The chemical persists in the environment, giving your company something even more durable than its quarterly earnings."],
+    ["What Happens in the Water Table Stays in the Water Table.", "You manufactured and disposed of persistent PFAS chemicals that contaminated drinking water. Your company later settled major environmental claims. Unfortunately, the contamination proved considerably harder to remove than the money from your corporate accounts."],
+    ["Our Power Grid Is Literally Fire.", "Your unsafe electrical infrastructure sparks a catastrophic wildfire, killing 84 people. You plead guilty to involuntary manslaughter. The investigation doesn't establish that you deliberately traded safety for profit, but your infrastructure maintenance strategy certainly needs a new marketing team."],
+    ["Asbestos: The Original Forever Subscription.", "Your industry knows that asbestos exposure can cause devastating diseases, yet dangerous information is suppressed or minimized while products keep selling. The customer relationship continues decades after installation, although not in the way your marketing department intended."],
+    ["Sweet Profits, Explosive Atmosphere.", "You operate a sugar refinery with dangerous accumulations of combustible dust and inadequate safety controls. A massive explosion kills 14 workers. Turns out sugar can produce more than a temporary energy boost."],
+  ],
+  food: [
+    ["Bread So White It's a Lie.", "You add alum to make cheap, inferior flour produce bread that looks premium. Historical food adulterers also used fillers such as chalk and plaster. Your customers asked for artisanal baking, and you interpreted that as amateur chemistry."],
+    ["Speedrun: Flour Aging.", "You chemically age and bleach flour using nitrogen trichloride, eliminating costly storage time. Researchers later discover that treated flour causes severe neurological symptoms in dogs. Apparently, industrial chemistry has a few unexpected side quests."],
+    ["Milk Is Mostly Water Anyway.", "You dilute milk to increase profits, then add preservatives or coloring agents to disguise the deception. Some historical adulterators even used formaldehyde. Your premium dairy product now contains significantly less dairy and significantly more audacity."],
+    ["Industrial-Grade Infant Nutrition.", "You use inadequately purified industrial-grade ingredients in powdered infant formula, accidentally introducing arsenic. Thousands of infants are poisoned. It turns out procurement savings are a terrible substitute for ingredient safety testing."],
+    ["Extra Virgin Industrial Lubricant.", "You divert industrial-grade rapeseed oil into the food supply and sell it for human consumption. A catastrophic toxic-oil epidemic follows. Your product was advertised as cooking oil, but the industrial supply chain had other ideas."],
+    ["Château Antifreeze, 1985.", "You add toxic diethylene glycol to inexpensive wine, making it taste sweeter and fuller-bodied. Customers believe they're buying premium wine. You've secretly introduced an automotive chemical into the tasting notes."],
+    ["Fifty Shades of Illegal Red.", "You add unauthorized industrial dyes to chili powder and other food products to make them look brighter and more valuable. Regulators eventually discover the dyes and order major recalls. Your spice blend is now officially too spicy for the legal system."],
+    ["Protein Testing's One Weird Trick.", "Your supply chain uses melamine-contaminated wheat gluten to make ingredients appear richer in protein. The adulterated ingredient enters pet food, triggering widespread recalls and reports of fatal kidney failure. Your laboratory results look amazing; your veterinary reputation does not."],
+    ["Melamine Builds Stronger Profits.", "Your dairy supply chain adds melamine to diluted milk to manipulate protein tests. Hundreds of thousands of children are affected, including infants with serious kidney injuries. You've invented fake protein with very real consequences."],
+    ["Cloudy With a Chance of Plasticizer.", "You replace more expensive food-grade ingredients in beverage clouding agents with industrial plasticizer DEHP. Your drinks still look deliciously cloudy, and you've saved a fortune by making the ingredient list substantially less edible."],
+    ["Turmeric: Now With Heavy Metal!", "You add lead chromate pigment to dull, low-quality turmeric so it appears bright yellow and commands a better price. Your seasoning is now both more colorful and a completely unnecessary source of lead exposure."],
+    ["An Apple a Day Keeps the Lead Inspector Employed.", "Your fruit-purée products contain cinnamon contaminated with lead chromate, exposing children to dangerous amounts of lead. Investigators suspect economically motivated adulteration upstream. Your supplier's quality-control checklist apparently stopped at 'smells like cinnamon.'"],
+  ],
+  mfg: [
+    ["Positive Salmonella Test? Positive Attitude!", "You knowingly ship peanut products after positive Salmonella tests and falsify laboratory results to keep orders moving. A deadly outbreak follows. Your management philosophy is simple: never let a little microbiology interfere with quarterly sales."],
+    ["Listeria: A Limited-Edition Flavor.", "You distribute ice cream contaminated with Listeria despite serious manufacturing and contamination problems. Customers discover that your old-fashioned ice cream comes with a thoroughly modern public-health investigation."],
+    ["Farm to Table to Hospital.", "You ship cantaloupes contaminated with Listeria after unsafe processing and sanitation practices. A deadly nationwide outbreak follows. Your farm-to-table program now has an unfortunate additional destination."],
+    ["Just Add Water. Preferably Clean Water.", "You aggressively market infant formula in developing markets where customers may lack safe drinking water and adequate sanitation. Critics accuse your marketing practices of encouraging dangerous feeding conditions. Your international expansion strategy has become an international boycott."],
+    ["Spread the Love, Not the Salmonella.", "You manufacture peanut butter under conditions that allow Salmonella contamination to reach consumers. A nationwide outbreak triggers a massive recall. Your product's shelf life was impressive, but its public-health record was considerably less so."],
+    ["Over Easy, Under Inspected.", "You sell contaminated eggs while failing to adequately control Salmonella hazards. Someone even tries bribing an inspector to release eggs without required reprocessing. Breakfast is now a federal criminal matter."],
+    ["Every Warehouse Comes With Free Pets.", "You continue distributing consumer products from a warehouse infested with rodents. Federal inspectors discover that your inventory-management system includes an unauthorized wildlife population. Pest control would have been cheaper than the criminal settlement."],
+    ["Lean Finely Textured Euphemism.", "You blast leftover meat trimmings with ammonia gas and sell the result as 'lean textured beef.' A reporter gives it a much catchier nickname. Sales drop faster than your public-relations budget can rise."],
+    ["Horsing Around the Supply Chain.", "Your premium beef lasagna fails a DNA test, revealing ingredients that once won ribbons at a county fair. Nobody in procurement asked why the meat was so cheap or why it kept trying to gallop."],
+    ["The Night Shift Has a Curfew.", "Your sanitation contractor hires children to clean razor-sharp slaughterhouse equipment overnight. You claim you had no idea who was holding the hose. Labor investigators note the hoses were taller than the workers."],
+  ],
+  additives: [
+    ["Dough Rises. Liability Follows.", "You use potassium bromate to strengthen dough and make industrial bread production more consistent. International health authorities raise carcinogenicity concerns, and many jurisdictions reject its use. Your bakery insists the real secret ingredient is efficiency."],
+    ["The Dough Must Flow.", "You use azodicarbonamide to chemically condition flour for faster, more consistent production. The additive remains permitted under U.S. restrictions but isn't authorized for the same use in the EU. Your international compliance department is developing a nervous twitch. Harm from compliant U.S. dietary use has not been established."],
+    ["Long Shelf Life, Shorter Arterial Life.", "You use inexpensive partially hydrogenated oils to improve texture, stability, and shelf life. Unfortunately, artificial trans fats increase cardiovascular risk. Regulators eventually determine that your bargain-basement fats are an exceptionally poor public-health investment."],
+    ["Flavor Suspension, Regulatory Suspension.", "You use brominated vegetable oil to keep citrus flavoring from separating in your beverages. Later safety research raises concerns, and regulators revoke its authorization. Your flavor particles remained perfectly suspended; your permission to use the additive did not."],
+    ["Red Dye No. 3: Now With Extra Red Flags.", "You use a bright synthetic red dye to make candy, frosting, and other products more appealing. Animal studies eventually lead regulators to revoke its food authorization, although the specific cancer mechanism is considered unlikely in humans. Your candy looks fantastic, and your regulatory calendar looks terrible."],
+    ["Titanium White Lies.", "You whiten candy coatings with titanium dioxide, the same pigment used in house paint. One continent bans it as a food additive. You keep selling the brighter version everywhere else and call it regional flavor."],
+    ["Natural Flavor Is Doing Heavy Lifting.", "Your 'natural flavor' is a 47-ingredient lab blend whose only natural component is the word 'natural.' Technically legal. Spiritually a hostage note written in food science."],
+    ["Neon Orange Is a Food Group.", "Your cheese powder uses synthetic dyes at home and paprika abroad, because overseas customers asked nicely and regulators asked firmly. At home, your snacks remain visible from space."],
+    ["Sweet Science, Bought and Paid For.", "You quietly fund nutrition research that blames dietary fat for heart disease while gently ignoring sugar. Decades of food policy follow your lead. Your sponsored scientists insist the grant money tasted completely neutral."],
+    ["Cured Meats, Uncured Concerns.", "You preserve hot dogs with generous nitrites long after health agencies classify processed meat as a carcinogen. Your packaging now proudly reads 'no artificial preservatives,' which is true if you squint at the celery powder."],
+  ],
+  consumer: [
+    ["Hot Sale! Literally.", "You continue selling dehumidifiers despite knowing they can overheat and catch fire. You conceal safety information while preserving sales. Customers wanted less humidity, but your appliances occasionally offer considerably more heat."],
+    ["A Recall Would Ruin Our Workout.", "You fail to promptly report dangerous treadmill entrapment hazards involving children and other users. Your company eventually faces a major civil penalty. Your exercise equipment now provides a more intense workout for your legal department than your customers."],
+    ["Sleep Like a Baby. Read the Recall Later.", "You sell inclined infant sleepers as reports of serious hazards and infant deaths accumulate. The product is eventually recalled. The only thing more inclined than your sleeper is your marketing department's optimism."],
+    ["Smartphones With Built-In Hand Warmers.", "You rush a phone to market with batteries packed tighter than a budget airline. Units begin bursting into flames on planes. Your flagship device becomes the first gadget banned by name in every pre-flight announcement."],
+    ["Hoverboards: Now With Hover-Fires.", "You import self-balancing scooters with bargain-bin lithium cells and no safety certification. They balance beautifully right up until they ignite. Holiday morning gets a lot more exciting than anyone wanted."],
+    ["Talc About a Cover-Up.", "Internal memos show your baby powder's talc may contain asbestos, and you keep reassuring parents for decades anyway. Your product was marketed as gentle. Your legal strategy was not."],
+    ["Some Assembly Required. Wall Anchor Not Included.", "You sell tall, cheap dressers that tip over with alarming ease, and treat the anchor kit as an optional accessory. After tragic reports pile up, the recall finally arrives, years behind the warnings."],
+    ["Planned Obsolescence, Planned Perfectly.", "Your software update quietly throttles older phones so customers think it's time to upgrade. It is, in fact, time to upgrade. You've simply scheduled the feeling for them."],
+    ["Magnetic Personality, Magnetic Hazard.", "You sell desk toys made of tiny, powerful magnets that look exactly like candy. Children swallow them, and the magnets find each other through the intestines. Your warning label was impressively small."],
+    ["Lead Paint: Vintage Charm Included.", "Your overseas supplier swaps in cheaper lead-based paint for your bestselling toy line. Nobody tests a single batch. Your toys are now collectible, mostly by environmental health inspectors."],
+  ],
+  tech: [
+    ["Your Bank Account Is Reproducing Asexually.", "You impose aggressive sales quotas that encourage employees to open millions of unauthorized customer accounts. Customers receive surprise fees and potential credit damage. You've invented banking's first unwanted family plan."],
+    ["Student Debt Is a Lifetime Membership.", "Regulators accuse your loan-servicing company of steering struggling borrowers into expensive forbearance arrangements instead of more beneficial repayment options. Your customers wanted help escaping debt. Your business model preferred they stay a little longer."],
+    ["Oops! You Bought It.", "You design purchase interfaces that generate accidental or unauthorized charges. Employees recommend safeguards, but reducing impulse purchases might hurt revenue. You've successfully converted user-interface confusion into monetization."],
+    ["Your Privacy Is Important to Our Advertisers.", "You mislead users about their privacy controls while allowing extensive access to personal information. Data collection fuels your advertising business. Your privacy policy is technically available, somewhere between page 93 and the heat death of the universe."],
+    ["Location Tracking Is Like Hotel California.", "You continue collecting certain location information even when users believe they've disabled tracking. That data helps your advertising business. Users can check out of location tracking any time they like, but apparently they can never really leave."],
+    ["Alexa, Forget Everything. Just Kidding.", "You retain children's voice recordings despite deletion requests and use recordings to improve speech-recognition technology. Regulators eventually intervene. Your product's memory is impressive, especially when customers explicitly ask it to forget."],
+    ["Patch Tuesday Has Been Rescheduled to Never.", "You fail to implement basic cybersecurity protections and patch known vulnerabilities. Attackers expose sensitive information about approximately 147 million people. Your security program is now an expensive demonstration of why software updates exist."],
+    ["Customer Funds Are a Social Construct.", "Your crypto exchange quietly lends customer deposits to your own trading firm, which bets them on tokens named after dogs. When withdrawals freeze, you explain the money is still there, spiritually."],
+    ["Your Face Is Our Training Data.", "You scrape billions of selfies from the internet to build a facial-recognition database and sell access to anyone with a purchase order. Nobody consented, but the terms of service of the internet itself were apparently very permissive."],
+    ["The Algorithm Isn't Biased, It's Just Good at Math.", "Your automated lending model charges higher rates to borrowers from certain neighborhoods, faithfully learning from decades of discriminatory data. You call it neutral. Regulators call it redlining with extra steps."],
+  ],
+  lemon: [
+    ["Fresh-Squeezed From Concentrate.", "You sell powdered drink mix as 'hand-squeezed heritage lemonade' at artisanal prices. The only thing squeezed by hand is the customer's wallet."],
+    ["Shrinkflation, Now in Cup Form.", "Same price, slightly smaller cup, every single week. By August you are selling lemonade in thimbles and calling it a portion-conscious lifestyle choice."],
+    ["Organic Is a State of Mind.", "Your 'certified organic' sign was certified by you, with a marker, this morning. Your lemons come from an orchard that considers crop dusting a love language."],
+    ["Your Nephews Work for Exposure.", "You staff the stand with relatives under ten and pay them in 'valuable business experience.' The labor department reviews your org chart and has notes."],
+    ["Heat Wave Pricing.", "The temperature hits 104 degrees and so does the price of a cup. You call it dynamic pricing. The local news calls it gouging, then buys a cup anyway."],
+    ["Sugar-Free* (*Contains Sugar).", "Your hand-lettered sign promises sugar-free lemonade. The asterisk, the fine print and the four cups of sugar per pitcher tell a more honest story."],
+    ["The HOA President Drinks Free.", "You keep the neighborhood association from asking about permits by supplying its president with unlimited lemonade. Local government has never been so refreshed or so compromised."],
+  ],
+  offshore: [
+    ["One Address, Four Thousand Headquarters.", "Your registered agent's tiny office building is the official home of thousands of companies. It has one receptionist, one fax machine, and the combined revenue of a mid-sized nation."],
+    ["Transfer Pricing Is an Art Form.", "Your island subsidiary charges your real company billions for the right to use its own logo. Profits vanish where taxes are high and reappear where the beaches are nice."],
+    ["Sanctions Are Strongly Worded Suggestions.", "You route shipments to a sanctioned regime through seven shell companies and a yacht broker. Each step is technically someone else's problem. All seven of them are you."],
+    ["Laundry Day, Every Day.", "Your private bank accepts duffel bags of cash with no questions asked, as long as the bags fit through the teller window. Compliance officers are encouraged to take very long lunches."],
+    ["The Leak Was Very Large.", "Millions of internal documents leak, revealing your client list and every creative tax strategy you ever sold. You respond by suing the journalists and quietly renaming your shell companies."],
+    ["Bearer Shares, Bare Accountability.", "Your companies are owned by whoever physically holds the paper certificates. Nobody can tell who owns what, which is exactly the point and also the entire product."],
+    ["Charity Begins at Home. Specifically Yours.", "Your tax-exempt foundation funds a yacht, two vacation homes and a portrait of you, all classified as cultural programming. The only beneficiary is very well rested."],
+  ],
+};
+// Owning this many of an industry unlocks its next scandal
+const SCANDAL_THRESHOLDS = [1, 5, 10, 25, 40, 50, 75, 100, 125, 150, 175, 200, 250, 300];
+
+/* =========================================================
+   BUILD UPGRADE LIST
+   ========================================================= */
+const UPGRADES = [];
+for (const [key, list] of Object.entries(SCANDALS)) {
+  const ind = IND_INDEX[key], base = INDUSTRIES[ind].base;
+  list.forEach(([name, desc], i) => {
+    const req = SCANDAL_THRESHOLDS[i];
+    UPGRADES.push({ id:`s_${key}_${i}`, type:"scandal", ind, req, name, desc,
+      cost: Math.round(base * Math.pow(COST_GROWTH, req) * 6), icon: INDUSTRIES[ind].icon });
+  });
+}
+// Doublers for the two industries that have no scandal list
+const DOUBLERS = [
+  ["lemon", 1,  "Tap Water Concentrate", "Lemonade is mostly water. So is tap water. The math checks out."],
+  ["lemon", 10, "Lemon-Adjacent Flavoring", "Legally distinct from lemons. Chemically distinct from food."],
+  ["lemon", 50, "Franchise the Sidewalk", "Every sidewalk in the county now hosts a stand you technically don't own."],
+  ["offshore", 1,  "Cayman Mailbox", "Your global headquarters is a numbered PO box next to a smoothie shop."],
+  ["offshore", 10, "Matryoshka LLC", "A company owned by a company owned by a company owned by... you, probably."],
+  ["offshore", 50, "Double Irish With a Dutch Sandwich", "Your tax structure is now officially a lunch order."],
+];
+DOUBLERS.forEach(([key, req, name, desc], i) => {
+  const ind = IND_INDEX[key], base = INDUSTRIES[ind].base;
+  UPGRADES.push({ id:`d_${key}_${i}`, type:"mult", ind, req, name, desc,
+    cost: Math.round(base * Math.pow(COST_GROWTH, req) * 10), icon:"⭐" });
+});
+// Click upgrades
+const CLICKS = [
+  ["c0", "Gold-Plated Mouse",            "Every click now feels expensive. Because it was.",                       100,    "x2"],
+  ["c1", "Repetitive Strain Waiver",     "Employees sign away their wrists. Productivity doubles.",               1000,   "x2"],
+  ["c2", "Unpaid Intern Clickers",       "Exposure is a currency. Ask any intern.",                                25000,  "x2"],
+  ["c3", "Insider Tapping",              "Each click quietly front-runs your own industries.",                     500000, "pct"],
+  ["c4", "Golden Parachute Index Finger","A finger so valuable it has its own severance package.",                 5e7,    "pct"],
+  ["c5", "Fiduciary Duty to Click",      "The board has determined that clicking is in the shareholders' interest.", 5e9,  "pct"],
+  ["c6", "Too Big to Click",             "If your mouse fails, the taxpayers will buy you a new one.",            5e11,   "pct"],
+  ["c7", "Click Laundering",             "Clicks go offshore, come back clean, and bring friends.",                5e13,   "pct"],
+];
+CLICKS.forEach(([id, name, desc, cost, kind]) => {
+  UPGRADES.push({ id, type:"click", kind, name, desc, cost, unlockAt: cost * 0.4, icon: kind === "x2" ? "🖱️" : "👆" });
+});
+UPGRADES.forEach(u => { u.cost = 0; if (u.type === "click") u.unlockAt = 0; }); // TEST: free
+const UPG_BY_ID = Object.fromEntries(UPGRADES.map(u => [u.id, u]));
+
+/* =========================================================
+   STATE
+   ========================================================= */
+function freshRun(now){
+  return {
+    dollars: 0, runEarned: 0,
+    owned: INDUSTRIES.map(() => 0),
+    upgrades: {},
+    timerLobbyists: 0, penaltyLobbyists: 0,
+    fines: 0, deadline: now + BASE_TIMER,
+  };
+}
+function newState(){
+  const now = Date.now();
+  return Object.assign(freshRun(now), {
+    version: 1, company: "Cory Consolidated Holdings",
+    allTimeEarned: 0, clicks: 0, clickEarned: 0,
+    finesPaid: 0, rebatesCollected: 0, bankruptcies: 0, cyclesSurvived: 0,
+    startedAt: now, lastTick: now,
+  });
+}
+let S = newState();
+let buyAmt = 1;
+const D = { cps: 0, clickPower: 1, indMult: [], indCps: [], scandals: 0, fineMult: 1 };
+
+/* =========================================================
+   DERIVED VALUES
+   ========================================================= */
+function maxTimer(){ return BASE_TIMER + S.timerLobbyists * HOUR; }
+function recompute(){
+  const scandalsIn = INDUSTRIES.map(() => 0), doublersIn = INDUSTRIES.map(() => 0);
+  let clickX = 1, clickPct = 0, scandals = 0;
+  for (const id in S.upgrades) {
+    const u = UPG_BY_ID[id]; if (!u) continue;
+    if (u.type === "scandal") { scandalsIn[u.ind]++; scandals++; }
+    else if (u.type === "mult") doublersIn[u.ind]++;
+    else if (u.type === "click") { if (u.kind === "x2") clickX *= 2; else clickPct += 0.01; }
+  }
+  let cps = 0;
+  INDUSTRIES.forEach((ind, i) => {
+    D.indMult[i] = (1 + 0.10 * scandalsIn[i]) * Math.pow(2, doublersIn[i]);
+    D.indCps[i] = S.owned[i] * ind.cps * D.indMult[i];
+    cps += D.indCps[i];
+  });
+  D.cps = cps;
+  D.scandals = scandals;
+  D.clickPct = clickPct;
+  D.clickPower = clickX + cps * clickPct;
+  D.fineMult = 1 + 0.01 * scandals - 0.01 * S.penaltyLobbyists;
+}
+function buildingCost(i, n){
+  const b = INDUSTRIES[i].base * Math.pow(COST_GROWTH, S.owned[i]);
+  return 0; // TEST: free
+}
+const timerLobbyCost   = () => 0; // TEST: free
+const penaltyLobbyCost = () => 0; // TEST: free
+function upgradeUnlocked(u){
+  if (S.upgrades[u.id]) return false;
+  if (u.type === "click") return S.runEarned >= u.unlockAt;
+  return S.owned[u.ind] >= u.req;
+}
+
+/* =========================================================
+   ECONOMY
+   ========================================================= */
+function earn(amount){
+  if (amount <= 0) return;
+  S.dollars += amount; S.runEarned += amount; S.allTimeEarned += amount;
+  S.fines += amount * BASE_FINE_RATE * D.fineMult; // negative multiplier -> rebate accrues
+}
+// Advance simulation to `now`, handling any deadlines crossed along the way.
+function advance(now){
+  let guard = 0;
+  while (guard++ < 1000) {
+    const until = Math.min(now, S.deadline);
+    if (until > S.lastTick) earn(D.cps * (until - S.lastTick) / 1000);
+    S.lastTick = Math.max(S.lastTick, until);
+    if (now < S.deadline) break;
+    if (!settleDeadline(S.deadline, now)) break;
+  }
+  S.lastTick = now;
+}
+// Returns true if the run survives (no fines owed), false on bankruptcy.
+function settleDeadline(at, now){
+  if (S.fines <= 0) {
+    const rebate = -S.fines;
+    S.dollars += rebate; S.rebatesCollected += rebate; S.fines = 0;
+    S.deadline = at + maxTimer(); S.cyclesSurvived++;
+    toast(rebate > 0 ? `Deadline reached. Regulators paid YOU a ${money(rebate)} rebate.` : "Deadline reached with a clean ledger. The clock resets.");
+    return true;
+  }
+  bankrupt(now);
+  return false;
+}
+function bankrupt(now){
+  const owed = S.fines, lost = S.dollars;
+  const keep = { company:S.company, allTimeEarned:S.allTimeEarned, clicks:S.clicks, clickEarned:S.clickEarned,
+    finesPaid:S.finesPaid, rebatesCollected:S.rebatesCollected, bankruptcies:S.bankruptcies + 1,
+    cyclesSurvived:S.cyclesSurvived, startedAt:S.startedAt, version:1 };
+  S = Object.assign(freshRun(now), keep, { lastTick: now });
+  recompute(); rebuildStore(); rebuildRap(); save();
+  showModal("🚨 CEASE & DESIST 🚨",
+    `<p>You failed to pay <b style="color:var(--red)">${money(owed)}</b> in regulatory fines before the deadline.</p>
+     <p>Federal regulators have seized your <b>${money(lost)}</b> in cash, dissolved every industry, voided every upgrade and fired your lobbyists.</p>
+     <p>Your CEO has received a $40 million severance package and a book deal.</p>
+     <p class="note">Bankruptcies so far: ${S.bankruptcies}. Start over. Pay your fines this time.</p>`,
+    [["Rebuild the empire", hideModal]], true);
+}
+function clickDollar(ev){
+  const amt = D.clickPower;
+  earn(amt); S.clicks++; S.clickEarned += amt;
+  const btn = $("bigDollar");
+  btn.classList.remove("pop"); void btn.offsetWidth; btn.classList.add("pop");
+  const r = btn.getBoundingClientRect();
+  const x = ev && ev.clientX ? ev.clientX : r.left + r.width / 2, y = ev && ev.clientY ? ev.clientY : r.top + r.height / 2;
+  const f = document.createElement("div");
+  f.className = "floater"; f.textContent = "+" + money(amt);
+  f.style.left = (x - 20 + (Math.random() * 30 - 15)) + "px"; f.style.top = (y - 30) + "px";
+  document.body.appendChild(f); setTimeout(() => f.remove(), 1000);
+  render();
+}
+function buyBuilding(i){
+  const n = buyAmt, cost = buildingCost(i, n);
+  if (S.dollars < cost) return;
+  S.dollars -= cost; S.owned[i] += n;
+  recompute(); rebuildStore(); render();
+}
+function buyUpgrade(id){
+  const u = UPG_BY_ID[id];
+  if (!u || S.upgrades[id] || S.dollars < u.cost) return;
+  S.dollars -= u.cost; S.upgrades[id] = true;
+  if (u.type === "scandal") MKT.mood[u.ind] *= 0.85; // bad press spooks investors for a while
+  recompute(); rebuildStore(); rebuildRap(); hideTip(); render();
+  if (u.type === "scandal") toast(`Scandal committed: “${u.name}” Regulatory fines +1%.`, true);
+}
+function buyTimerLobbyist(){
+  const c = timerLobbyCost(); if (S.dollars < c) return;
+  S.dollars -= c; S.timerLobbyists++; S.deadline += HOUR;
+  toast("A lobbyist bought you another hour. Deadline +1h.");
+  render(); refreshTip();
+}
+function buyPenaltyLobbyist(){
+  const c = penaltyLobbyCost(); if (S.dollars < c) return;
+  S.dollars -= c; S.penaltyLobbyists++; recompute();
+  if (D.fineMult < 0 && D.fineMult > -0.011) toast("Fine multiplier is now NEGATIVE. The government now pays you to exist.");
+  render(); refreshTip();
+}
+function payFines(){
+  const now = Date.now(); advance(now);
+  if (S.fines > 0) {
+    if (S.dollars < S.fines) return;
+    S.dollars -= S.fines; S.finesPaid += S.fines;
+    toast(`Paid ${money(S.fines)} in fines. No wrongdoing admitted.`);
+  } else {
+    const rebate = -S.fines; S.dollars += rebate; S.rebatesCollected += rebate;
+    toast(rebate > 0 ? `Collected a ${money(rebate)} regulatory rebate.` : "Filed a spotless compliance report.");
+  }
+  S.fines = 0; S.deadline = now + maxTimer(); S.cyclesSurvived++;
+  render();
+}
+
+/* =========================================================
+   DOM / RENDER
+   ========================================================= */
+const $ = id => document.getElementById(id);
+const bldEls = [];
+function buildBuildingRows(){
+  const wrap = $("buildings"); wrap.innerHTML = "";
+  INDUSTRIES.forEach((ind, i) => {
+    const b = document.createElement("button");
+    b.className = "bld"; b.dataset.tt = "bld:" + i;
+    b.innerHTML = `<div class="ic">${ind.icon}</div><div class="info"><div class="nm"></div><div class="sec"></div><div class="cost"></div></div><div class="own"></div>`;
+    b.addEventListener("click", () => { if (!b.classList.contains("mystery")) { buyBuilding(i); refreshTip(); } });
+    wrap.appendChild(b);
+    bldEls.push({ el:b, nm:b.querySelector(".nm"), sec:b.querySelector(".sec"), cost:b.querySelector(".cost"), own:b.querySelector(".own"), ic:b.querySelector(".ic") });
+  });
+}
+let lastUpgKey = "";
+function rebuildStore(){
+  const avail = UPGRADES.filter(upgradeUnlocked).sort((a, b) => a.cost - b.cost);
+  const key = avail.map(u => u.id).join(",");
+  if (key !== lastUpgKey) {
+    lastUpgKey = key;
+    const wrap = $("upgrades"); wrap.innerHTML = "";
+    if (!avail.length) wrap.innerHTML = `<div class="empty">No upgrades available yet. Keep growing.</div>`;
+    avail.forEach(u => {
+      const b = document.createElement("button");
+      b.className = "upg " + u.type; b.dataset.tt = "upg:" + u.id; b.dataset.id = u.id; b.textContent = u.icon;
+      b.addEventListener("click", () => buyUpgrade(u.id));
+      wrap.appendChild(b);
+    });
+  }
+}
+function rebuildRap(){
+  const owned = UPGRADES.filter(u => u.type === "scandal" && S.upgrades[u.id]);
+  const el = $("rapSheet");
+  if (!owned.length) { el.innerHTML = `<div class="empty">Your record is spotless. For now.</div>`; return; }
+  el.innerHTML = `<div class="note" style="margin-top:0">${owned.length} scandal${owned.length > 1 ? "s" : ""} on record. Click one to read the charges.</div>` +
+    owned.map(u => `<details><summary>${u.icon} ${esc(u.name)}<span class="sec">${esc(INDUSTRIES[u.ind].sector)}</span></summary><p>${esc(u.desc)}</p></details>`).join("");
+}
+function esc(s){ return String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c])); }
+
+function render(){
+  const now = Date.now();
+  $("dollars").textContent = money(S.dollars);
+  $("cps").textContent = "per second: " + money(D.cps);
+  $("clickInfo").textContent = "+" + money(D.clickPower) + " per click";
+
+  // Regulatory panel
+  const left = S.deadline - now, rebate = S.fines < 0;
+  const reg = $("reg");
+  reg.classList.toggle("rebate", rebate || (S.fines === 0 && D.fineMult < 0));
+  reg.classList.toggle("urgent", !rebate && S.fines > 0 && left < HOUR);
+  $("regHead").textContent = rebate ? "✔ REGULATORY CAPTURE ACHIEVED ✔" : "⚠ FEDERAL REGULATORY ENFORCEMENT ⚠";
+  $("regLabel").textContent = rebate ? "REBATE OWED TO YOU" : "FINES OWED";
+  $("fineAmt").textContent = money(Math.abs(S.fines));
+  $("timerLabel").firstChild.textContent = rebate ? "PAYOUT IN" : "PAYMENT DUE IN";
+  $("fineTimer").textContent = fmtTime(left);
+  $("fineBar").style.width = Math.max(0, Math.min(100, left / maxTimer() * 100)) + "%";
+  const pct = (D.fineMult * 100).toFixed(0);
+  $("fineInfo").innerHTML =
+    `Fines accrue at ${(BASE_FINE_RATE * 100).toFixed(0)}% of all revenue × <b>${pct}%</b> multiplier ` +
+    `(+${D.scandals}% scandals, −${S.penaltyLobbyists}% lobbyists)<br>` +
+    `${rebate || D.fineMult < 0 ? "Currently accruing rebate" : "Currently accruing"}: <b>${money(Math.abs(D.cps * BASE_FINE_RATE * D.fineMult))}/s</b> · Deadline window: ${maxTimer() / HOUR}h`;
+  const pay = $("payBtn");
+  if (S.fines > 0) {
+    pay.disabled = S.dollars < S.fines;
+    pay.textContent = pay.disabled ? `SHORT ${money(S.fines - S.dollars)} — CAN'T PAY` : `PAY ${money(S.fines)} NOW`;
+  } else {
+    pay.disabled = false;
+    pay.textContent = rebate ? `COLLECT ${money(-S.fines)} REBATE` : "FILE COMPLIANCE REPORT";
+  }
+  document.body.classList.toggle("danger", !rebate && S.fines > 0 && left < HOUR);
+  document.title = (!rebate && S.fines > 0 && left < HOUR) ? `⚠ ${fmtTime(left)} FINES DUE ⚠` : `${money(S.dollars)} · Clickonomics [TEST]`;
+
+  // Lobbyists
+  const tc = timerLobbyCost(), pc = penaltyLobbyCost();
+  $("timerLobbyN").textContent = S.timerLobbyists; $("timerLobbyC").textContent = money(tc);
+  $("timerLobbyBtn").classList.toggle("cant", S.dollars < tc);
+  $("penaltyLobbyN").textContent = S.penaltyLobbyists; $("penaltyLobbyC").textContent = money(pc);
+  $("penaltyLobbyBtn").classList.toggle("cant", S.dollars < pc);
+
+  // Buildings: show owned/affordable ones, plus one mystery row
+  let shownMystery = false;
+  INDUSTRIES.forEach((ind, i) => {
+    const e = bldEls[i];
+    const revealed = S.owned[i] > 0 || i === 0 || S.runEarned >= ind.base * 0.5 || S.owned[i - 1] > 0;
+    if (revealed) {
+      e.el.style.display = ""; e.el.classList.remove("mystery");
+      e.ic.textContent = ind.icon; e.nm.textContent = ind.name; e.sec.textContent = ind.sector;
+      const c = buildingCost(i, buyAmt);
+      e.cost.textContent = money(c) + (buyAmt > 1 ? ` (×${buyAmt})` : "");
+      e.own.textContent = S.owned[i] || "";
+      e.el.classList.toggle("cant", S.dollars < c);
+    } else if (!shownMystery) {
+      shownMystery = true;
+      e.el.style.display = ""; e.el.classList.add("mystery"); e.el.classList.remove("cant");
+      e.ic.textContent = "❓"; e.nm.textContent = "???"; e.sec.textContent = "Unknown industry"; e.cost.textContent = money(buildingCost(i, buyAmt)); e.own.textContent = "";
+    } else e.el.style.display = "none";
+  });
+
+  // Upgrade affordability
+  document.querySelectorAll("#upgrades .upg").forEach(b => {
+    const u = UPG_BY_ID[b.dataset.id]; b.classList.toggle("cant", S.dollars < u.cost);
+  });
+}
+function renderStats(){
+  const rows = [
+    ["Company", esc(S.company)],
+    ["Cash on hand", money(S.dollars)],
+    ["Earned this run", money(S.runEarned)],
+    ["Earned all time", money(S.allTimeEarned)],
+    ["Income per second", money(D.cps)],
+    ["Dollar clicks", fmt(S.clicks)],
+    ["Earned by clicking", money(S.clickEarned)],
+    ["Industries owned", fmt(S.owned.reduce((a, b) => a + b, 0))],
+    ["Upgrades owned", `${Object.keys(S.upgrades).length} / ${UPGRADES.length}`],
+    ["Scandals committed", `${D.scandals} / ${UPGRADES.filter(u => u.type === "scandal").length}`],
+    ["Fine multiplier", (D.fineMult * 100).toFixed(0) + "%"],
+    ["Timer lobbyists", S.timerLobbyists],
+    ["Penalty lobbyists", S.penaltyLobbyists],
+    ["Fines paid (all time)", money(S.finesPaid)],
+    ["Rebates collected", money(S.rebatesCollected)],
+    ["Deadlines survived", S.cyclesSurvived],
+    ["Bankruptcies", S.bankruptcies],
+    ["Playing since", new Date(S.startedAt).toLocaleString()],
+  ];
+  $("stats").innerHTML = rows.map(([a, b]) => `<div><span>${a}</span><span>${b}</span></div>`).join("");
+}
+
+/* =========================================================
+   TOOLTIP
+   ========================================================= */
+const tip = $("tip"); let tipKey = null, tipX = 0, tipY = 0;
+function tipHTML(key){
+  const [kind, id] = key.split(":");
+  if (kind === "bld") {
+    const i = +id, ind = INDUSTRIES[i];
+    if (bldEls[i].el.classList.contains("mystery")) return `<div class="tn">???</div><div class="td">Keep earning to reveal this industry.</div>`;
+    const each = ind.cps * D.indMult[i], share = D.cps ? D.indCps[i] / D.cps * 100 : 0;
+    return `<div class="tn">${ind.icon} ${esc(ind.name)}</div><div class="ts">${esc(ind.sector)}</div>
+      <div class="td">${esc(ind.flavor)}</div>
+      <div>Each produces <b>${money(each)}/s</b> (base ${money(ind.cps)} × ${D.indMult[i].toFixed(2)})</div>
+      <div>${S.owned[i]} owned producing <b>${money(D.indCps[i])}/s</b> (${share.toFixed(1)}% of income)</div>
+      <div class="tc">Cost: ${money(buildingCost(i, buyAmt))}${buyAmt > 1 ? " for " + buyAmt : ""}</div>`;
+  }
+  if (kind === "upg") {
+    const u = UPG_BY_ID[id]; if (!u) return "";
+    let sec, bonus, pen = "";
+    if (u.type === "scandal") {
+      sec = INDUSTRIES[u.ind].sector + " · Scandal";
+      bonus = `+10% ${esc(INDUSTRIES[u.ind].name)} output`;
+      pen = `<div class="tp">Penalty: +1% Regulatory Fines</div>`;
+    } else if (u.type === "mult") {
+      sec = INDUSTRIES[u.ind].sector + " · Efficiency"; bonus = `${esc(INDUSTRIES[u.ind].name)} output ×2`;
+    } else {
+      sec = "Clicking"; bonus = u.kind === "x2" ? "Click power ×2" : "Clicks also earn +1% of your income per second";
+    }
+    return `<div class="tn">${u.icon} ${esc(u.name)}</div><div class="ts">${esc(sec)}</div><div class="td">${esc(u.desc)}</div>
+      <div class="tb">Bonus: ${bonus}</div>${pen}<div class="tc">Cost: ${money(u.cost)}</div>`;
+  }
+  if (kind === "lobby") {
+    if (id === "timer") return `<div class="tn">⏳ Timer Lobbyist</div><div class="td">Convinces a subcommittee that deadlines are more of a suggestion.</div>
+      <div class="tb">+1 hour to the regulatory timer (also extends the current countdown)</div>
+      <div>Owned: ${S.timerLobbyists} · Window: ${maxTimer() / HOUR}h</div><div class="tc">Cost: ${money(timerLobbyCost())}</div>`;
+    return `<div class="tn">🤝 Penalty Lobbyist</div><div class="td">Rewrites the penalty schedule over a very long lunch.</div>
+      <div class="tb">−1% regulatory fine multiplier. Below 0%, fines turn into revenue paid to you.</div>
+      <div>Owned: ${S.penaltyLobbyists} · Multiplier now: ${(D.fineMult * 100).toFixed(0)}%</div><div class="tc">Cost: ${money(penaltyLobbyCost())}</div>`;
+  }
+  if (kind === "mkt") {
+    const i = +id, ind = INDUSTRIES[i], h = MKT.ind[i], m = MKT.mood[i];
+    const c = pctChange(h);
+    const moodTxt = m > 1.04 ? "Bullish 🐂" : m < 0.96 ? "Bearish 🐻" : "Neutral";
+    return `<div class="tn">${ind.icon} ${TICKERS[i]} · ${esc(ind.name)}</div><div class="ts">${esc(ind.sector)}</div>
+      <div>Share price: <b>${money(h[h.length - 1] || 0)}</b></div>
+      <div>Actual income: <b>${money(D.indCps[i])}/s</b></div>
+      <div>Investor mood: <b>${moodTxt}</b> (${(m * 100).toFixed(0)}% of income)</div>
+      <div>3-minute change: <b>${c === null ? "n/a" : (c >= 0 ? "▲ +" : "▼ ") + c.toFixed(1) + "%"}</b></div>
+      <div class="td">The price tracks this industry's income per second. Scandals spook investors for a minute or two.</div>`;
+  }
+  return "";
+}
+let touchMode = false; // set from the most recent pointer type, so hybrid laptops work both ways
+document.addEventListener("pointerdown", e => { touchMode = e.pointerType === "touch"; }, true);
+function placeTip(){
+  tip.classList.toggle("docked", touchMode);
+  if (touchMode) return; // CSS pins it to the bottom
+  const w = tip.offsetWidth, h = tip.offsetHeight;
+  let x = tipX - w - 16, y = tipY - 10;
+  if (x < 8) x = tipX + 18;
+  if (y + h > innerHeight - 8) y = innerHeight - h - 8;
+  tip.style.left = x + "px"; tip.style.top = Math.max(8, y) + "px";
+}
+function refreshTip(){ if (tipKey) { tip.innerHTML = tipHTML(tipKey); placeTip(); } }
+function hideTip(){ tipKey = null; tip.style.display = "none"; }
+document.addEventListener("mouseover", e => {
+  const t = e.target.closest("[data-tt]");
+  if (!t) { hideTip(); return; }
+  if (t.dataset.tt !== tipKey) { tipKey = t.dataset.tt; tip.style.display = "block"; refreshTip(); }
+});
+document.addEventListener("mousemove", e => { tipX = e.clientX; tipY = e.clientY; if (tipKey && !touchMode) placeTip(); });
+
+/* =========================================================
+   MODAL / TOAST
+   ========================================================= */
+function showModal(title, html, buttons, bad){
+  const m = $("modal");
+  m.className = bad ? "bad" : "";
+  m.innerHTML = `<h3>${title}</h3><div>${html}</div><div class="row"></div>`;
+  const row = m.querySelector(".row");
+  buttons.forEach(([label, fn, cls]) => {
+    const b = document.createElement("button"); b.className = "btn " + (cls || ""); b.textContent = label;
+    b.addEventListener("click", fn); row.appendChild(b);
+  });
+  $("modalBg").style.display = "flex";
+}
+function hideModal(){ $("modalBg").style.display = "none"; }
+function toast(msg, bad){
+  const t = document.createElement("div"); t.className = "toast" + (bad ? " bad" : ""); t.textContent = msg;
+  $("toasts").appendChild(t);
+  setTimeout(() => { t.style.transition = "opacity .5s"; t.style.opacity = 0; setTimeout(() => t.remove(), 500); }, 5000);
+  while ($("toasts").children.length > 5) $("toasts").firstChild.remove();
+}
+
+/* =========================================================
+   SAVE / LOAD
+   ========================================================= */
+function encodeSave(){ return btoa(unescape(encodeURIComponent(JSON.stringify(S)))); }
+function decodeSave(str){ return JSON.parse(decodeURIComponent(escape(atob(str.trim())))); }
+function sanitize(o){
+  const base = newState();
+  if (!o || typeof o !== "object") throw new Error("Not a save");
+  for (const k in base) if (k in o && typeof o[k] === typeof base[k]) base[k] = o[k];
+  base.owned = INDUSTRIES.map((_, i) => Math.max(0, Math.floor(+((o.owned || [])[i]) || 0)));
+  base.upgrades = {};
+  for (const id in (o.upgrades || {})) if (UPG_BY_ID[id]) base.upgrades[id] = true;
+  for (const k of ["dollars","runEarned","allTimeEarned","fines","deadline","lastTick"]) if (!isFinite(base[k])) throw new Error("Corrupt save");
+  return base;
+}
+function save(){
+  S.lastTick = Math.max(S.lastTick, 0);
+  try { localStorage.setItem(SAVE_KEY, encodeSave()); $("saveNote").textContent = "Saved at " + new Date().toLocaleTimeString() + ". Autosaves every 30 seconds."; }
+  catch (e) { $("saveNote").textContent = "Save failed: " + e.message; }
+}
+function applyLoaded(obj, isImport){
+  S = sanitize(obj);
+  recompute();
+  const now = Date.now(), away = now - S.lastTick;
+  const before = S.dollars, finesBefore = S.fines, bankBefore = S.bankruptcies;
+  advance(now);
+  recompute(); rebuildStore(); rebuildRap(); $("companyName").value = S.company; render();
+  if (S.bankruptcies === bankBefore && away > 60000 && !isImport) {
+    showModal("Welcome back",
+      `<p>You were away for <b>${fmtDuration(away)}</b>.</p>
+       <p>Your industries earned <b style="color:var(--green)">${money(S.dollars - before)}</b> while you were gone.</p>
+       <p>Regulatory fines changed by <b style="color:var(--red)">${money(S.fines - finesBefore)}</b>. Time left to pay: <b>${fmtTime(S.deadline - now)}</b>.</p>`,
+      [["Back to work", hideModal]]);
+  }
+}
+function load(){
+  let raw = null;
+  try { raw = localStorage.getItem(SAVE_KEY); }
+  catch (e) { toast("This browser blocks local storage here, so autosave is off. Use Export to keep your progress.", true); return; }
+  if (!raw) return;
+  try { applyLoaded(decodeSave(raw), false); }
+  catch (e) { console.error(e); toast("Couldn't read your save; starting fresh.", true); }
+}
+function exportSave(){
+  save();
+  showModal("Export save", `<p class="note" style="margin-top:0">Copy this text somewhere safe.</p><textarea id="exportTxt" readonly>${encodeSave()}</textarea>`,
+    [["Copy", () => { const t = $("exportTxt"); t.select(); navigator.clipboard ? navigator.clipboard.writeText(t.value).then(() => toast("Save copied to clipboard.")) : document.execCommand("copy"); }],
+     ["Close", hideModal]]);
+}
+function importSave(){
+  showModal("Import save", `<p class="note" style="margin-top:0">Paste a save string. This replaces your current game.</p><textarea id="importTxt" placeholder="Paste save here..."></textarea>`,
+    [["Load", () => {
+        try { applyLoaded(decodeSave($("importTxt").value), true); save(); hideModal(); toast("Save imported."); }
+        catch (e) { toast("That save string is invalid.", true); }
+      }],
+     ["Cancel", hideModal]]);
+}
+function hardReset(){
+  showModal("Hard reset?", `<p>This wipes everything: cash, industries, upgrades, lobbyists and lifetime stats. It cannot be undone.</p>`,
+    [["Wipe it all", () => { S = newState(); $("companyName").value = S.company; recompute(); rebuildStore(); rebuildRap(); save(); render(); hideModal(); toast("Fresh start. The regulators have forgotten you."); }, "danger"],
+     ["Cancel", hideModal]], true);
+}
+
+/* =========================================================
+   NEWS TICKER
+   ========================================================= */
+const NEWS = [
+  "Analysts upgrade your stock to 'Morally Bankrupt (Strong Buy)'.",
+  "PR department replaces the word 'scandal' with 'learning journey' in all communications.",
+  "Local regulator threatens to send a 'very stern letter'.",
+  "Your lobbyist spotted golfing with an entire Senate subcommittee. Again.",
+  "Quarterly earnings call ends with standing ovation and three subpoenas.",
+  "Company pledges to be 'carbon neutral by 2099, conditions apply'.",
+  "Ethics hotline rerouted to the sales department for 'synergy'.",
+  "Board approves record bonuses to celebrate record settlements.",
+  "New mission statement: 'Doing well by doing whatever.'",
+  "Compliance department downsized to a single motivational poster.",
+  "Your annual report is printed on paper made from shredded internal memos.",
+  "Survey finds 0 out of 10 customers recommend you. Shareholders: 10 out of 10.",
+  "Whistleblower promoted to Director of Not Saying Anything.",
+  "Corporate retreat theme announced: 'Plausible Deniability'.",
+];
+function newsLine(){
+  const left = S.deadline - Date.now();
+  if (S.fines > 0 && left < HOUR) return "BREAKING: Federal marshals are warming up the padlock truck. PAY YOUR FINES.";
+  if (S.fines > 0 && S.dollars < S.fines && Math.random() < 0.4) return "Auditors note that your fines now exceed your cash. Someone in accounting is sweating.";
+  if (D.fineMult < 0 && Math.random() < 0.4) return "Regulators issue a refund check to you and thank you for your continued patronage.";
+  if (S.bankruptcies > 0 && Math.random() < 0.15) return `Business press notes this is your company's ${S.bankruptcies + 1}${["st","nd","rd"][((S.bankruptcies + 1) % 10) - 1] && ![11,12,13].includes((S.bankruptcies + 1) % 100) ? ["st","nd","rd"][((S.bankruptcies + 1) % 10) - 1] : "th"} incarnation.`;
+  if (D.scandals > 0 && Math.random() < 0.3) {
+    const owned = UPGRADES.filter(u => u.type === "scandal" && S.upgrades[u.id]);
+    const u = owned[Math.floor(Math.random() * owned.length)];
+    return `Op-ed: "${u.name}" called "a bold business decision" by people who own your stock.`;
+  }
+  return NEWS[Math.floor(Math.random() * NEWS.length)];
+}
+function rotateNews(){
+  const t = $("ticker"); t.style.opacity = 0;
+  setTimeout(() => { $("tickerText").textContent = newsLine(); t.style.opacity = 1; }, 400);
+}
+
+/* =========================================================
+   STOCK MARKET VISUALS
+   Each listed industry's share price = its income per second x investor mood.
+   Mood is a mean-reverting random walk (65%-135%); scandals knock it down 15%.
+   History lives in memory only (one sample per second, last 3 minutes).
+   ========================================================= */
+const TICKERS = ["LMON", "GRAN", "PROC", "ADTV", "GOOD", "PHRM", "BOOM", "CRSH", "DATA", "SHEL"];
+const MKT_LEN = 180;
+const MKT = { idx: [], ind: INDUSTRIES.map(() => []), mood: INDUSTRIES.map(() => 1), hover: -1 };
+const UP = "#3ddc84", DOWN = "#ff5c5c";
+const SHORT = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc"];
+function fmtShort(n){
+  if (!isFinite(n) || n <= 0) return "$0";
+  if (n < 1000) return "$" + (n < 10 ? n.toFixed(2) : n < 100 ? n.toFixed(1) : n.toFixed(0));
+  const k = Math.floor(Math.log10(n) / 3);
+  if (k >= SHORT.length) return "$" + n.toExponential(2);
+  const v = n / Math.pow(1000, k);
+  return "$" + (v < 10 ? v.toFixed(2) : v < 100 ? v.toFixed(1) : v.toFixed(0)) + SHORT[k];
+}
+function pctChange(h){
+  const first = h.find(v => v > 0), last = h[h.length - 1];
+  if (!first || !last) return null;
+  return (last / first - 1) * 100;
+}
+function pushCap(arr, v){ arr.push(v); if (arr.length > MKT_LEN) arr.shift(); }
+function sampleMarket(){
+  let total = 0;
+  INDUSTRIES.forEach((_, i) => {
+    let m = MKT.mood[i];
+    m += (1 - m) * 0.06 + (Math.random() - 0.5) * 0.05;
+    m = Math.min(1.35, Math.max(0.65, m));
+    MKT.mood[i] = m;
+    const v = (D.indCps[i] || 0) * m;
+    pushCap(MKT.ind[i], v); total += v;
+  });
+  pushCap(MKT.idx, total);
+}
+function drawChart(cv, data, big){
+  const dpr = window.devicePixelRatio || 1, w = cv.clientWidth, h = cv.clientHeight;
+  if (!w || !h) return;
+  if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+  const ctx = cv.getContext("2d");
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, w, h);
+  const padR = big ? 58 : 5, padT = big ? 10 : 5, padB = big ? 8 : 5;
+  const plotW = w - padR, plotH = h - padT - padB;
+  const live = data.filter(v => v > 0);
+  if (data.length < 2 || !live.length) {
+    ctx.strokeStyle = "rgba(255,255,255,.15)"; ctx.setLineDash([4, 4]); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(0, h / 2); ctx.lineTo(plotW, h / 2); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = "#86a092"; ctx.font = (big ? 13 : 11) + "px Segoe UI, sans-serif"; ctx.textAlign = "center";
+    ctx.fillText(big ? "Market opens when your first industry starts earning" : "Not listed", plotW / 2, h / 2 - 6);
+    return;
+  }
+  const start = data.findIndex(v => v > 0); // line begins at the "IPO" (first earning sample)
+  const shown = data.slice(start);
+  let lo = Math.min(...shown), hi = Math.max(...shown);
+  if (hi === lo) { hi = hi * 1.05 + 1e-9; lo = lo * 0.95; }
+  const span = hi - lo; hi += span * 0.08; lo = Math.max(0, lo - span * 0.08);
+  const X = i => (i + MKT_LEN - data.length) / (MKT_LEN - 1) * plotW; // right-aligned: newest sample at the right edge
+  const Y = v => padT + (1 - (v - lo) / (hi - lo)) * plotH;
+  const color = data[data.length - 1] >= (live[0] || 0) ? UP : DOWN;
+
+  if (big) { // recessive grid + right-hand axis labels
+    ctx.font = "11px Consolas, monospace"; ctx.textAlign = "left"; ctx.textBaseline = "middle";
+    for (let g = 0; g <= 3; g++) {
+      const v = lo + (hi - lo) * (g / 3), y = Y(v);
+      ctx.strokeStyle = "rgba(255,255,255,.06)"; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(0, Math.round(y) + 0.5); ctx.lineTo(plotW, Math.round(y) + 0.5); ctx.stroke();
+      ctx.fillStyle = "#86a092"; ctx.fillText(fmtShort(v), plotW + 6, y);
+    }
+  }
+  // area + line
+  ctx.beginPath();
+  for (let i = start; i < data.length; i++) { const x = X(i), y = Y(data[i]); i > start ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+  ctx.lineWidth = 2; ctx.lineJoin = "round"; ctx.strokeStyle = color; ctx.stroke();
+  ctx.lineTo(X(data.length - 1), padT + plotH); ctx.lineTo(X(start), padT + plotH); ctx.closePath();
+  const grad = ctx.createLinearGradient(0, padT, 0, padT + plotH);
+  grad.addColorStop(0, color + "40"); grad.addColorStop(1, color + "00");
+  ctx.fillStyle = grad; ctx.fill();
+  // latest point
+  const lx = X(data.length - 1), ly = Y(data[data.length - 1]);
+  ctx.beginPath(); ctx.arc(lx, ly, big ? 4 : 3, 0, Math.PI * 2);
+  ctx.fillStyle = color; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = "#070b09"; ctx.stroke();
+
+  if (big && MKT.hover >= start && MKT.hover < data.length) { // crosshair + readout
+    const i = MKT.hover, x = X(i), y = Y(data[i]);
+    ctx.strokeStyle = "rgba(255,255,255,.35)"; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(Math.round(x) + 0.5, padT); ctx.lineTo(Math.round(x) + 0.5, padT + plotH); ctx.stroke();
+    ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2); ctx.fillStyle = color; ctx.fill(); ctx.strokeStyle = "#070b09"; ctx.lineWidth = 2; ctx.stroke();
+    const ago = data.length - 1 - i;
+    const label = `${money(data[i])}/s · ${ago ? ago + "s ago" : "now"}`;
+    ctx.font = "bold 12px Segoe UI, sans-serif"; ctx.textBaseline = "middle";
+    const tw = ctx.measureText(label).width + 14;
+    let bx = x + 10; if (bx + tw > plotW) bx = x - 10 - tw;
+    ctx.fillStyle = "rgba(10,15,13,.95)"; ctx.strokeStyle = "#3a5446"; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.roundRect ? ctx.roundRect(bx, padT + 2, tw, 22, 4) : ctx.rect(bx, padT + 2, tw, 22); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = "#eafff1"; ctx.textAlign = "left"; ctx.fillText(label, bx + 7, padT + 13);
+  }
+}
+const tkEls = [];
+let lastTickerKey = null;
+function rebuildTickers(){
+  const listed = INDUSTRIES.map((_, i) => i).filter(i => S.owned[i] > 0);
+  const key = listed.join(",");
+  if (key === lastTickerKey) return;
+  lastTickerKey = key;
+  const wrap = $("tickers"); wrap.innerHTML = ""; tkEls.length = 0;
+  if (!listed.length) { wrap.innerHTML = `<div class="empty">No listed companies yet. Buy an industry to take it public.</div>`; return; }
+  listed.forEach(i => {
+    const d = document.createElement("div");
+    d.className = "tk"; d.dataset.tt = "mkt:" + i;
+    d.innerHTML = `<div class="tkTop"><span class="tkSym">${INDUSTRIES[i].icon} ${TICKERS[i]}</span><span class="tkPx"></span></div><div class="chg"></div><canvas></canvas>`;
+    wrap.appendChild(d);
+    tkEls.push({ i, px:d.querySelector(".tkPx"), chg:d.querySelector(".chg"), cv:d.querySelector("canvas") });
+  });
+}
+function setChange(el, h){
+  const c = pctChange(h);
+  el.classList.toggle("up", c !== null && c >= 0); el.classList.toggle("down", c !== null && c < 0);
+  el.textContent = c === null ? "—" : (c >= 0 ? "▲ +" : "▼ ") + c.toFixed(2) + "% (3m)";
+}
+function drawMarket(){
+  rebuildTickers();
+  const idx = MKT.idx;
+  $("idxPx").textContent = money(idx[idx.length - 1] || 0) + "/s";
+  setChange($("idxChg"), idx);
+  drawChart($("idxChart"), idx, true);
+  tkEls.forEach(t => {
+    const h = MKT.ind[t.i];
+    t.px.textContent = fmtShort(h[h.length - 1] || 0);
+    setChange(t.chg, h);
+    drawChart(t.cv, h, false);
+  });
+}
+$("idxChart").addEventListener("mousemove", e => {
+  const r = e.currentTarget.getBoundingClientRect(), plotW = r.width - 58, n = MKT.idx.length;
+  const i = Math.round((e.clientX - r.left) / plotW * (MKT_LEN - 1)) - (MKT_LEN - n);
+  MKT.hover = Math.max(0, Math.min(n - 1, i));
+  drawChart($("idxChart"), MKT.idx, true);
+});
+$("idxChart").addEventListener("mouseleave", () => { MKT.hover = -1; drawChart($("idxChart"), MKT.idx, true); });
+window.addEventListener("resize", drawMarket);
+
+/* =========================================================
+   WIRING
+   ========================================================= */
+buildBuildingRows();
+$("bigDollar").addEventListener("click", clickDollar);
+$("payBtn").addEventListener("click", payFines);
+$("timerLobbyBtn").addEventListener("click", buyTimerLobbyist);
+$("penaltyLobbyBtn").addEventListener("click", buyPenaltyLobbyist);
+$("saveNow").addEventListener("click", () => { save(); toast("Game saved."); });
+$("exportBtn").addEventListener("click", exportSave);
+$("importBtn").addEventListener("click", importSave);
+$("resetBtn").addEventListener("click", hardReset);
+$("companyName").addEventListener("input", e => { S.company = e.target.value.trim() || "Unnamed Holdings"; });
+$("companyName").addEventListener("keydown", e => {
+  if (e.key === "Enter") e.target.blur();
+  if (e.key === "Escape") { S.company = nameBeforeEdit; e.target.value = S.company; e.target.blur(); }
+});
+let nameBeforeEdit = "";
+$("companyName").addEventListener("focus", () => { nameBeforeEdit = S.company; });
+$("companyName").addEventListener("change", e => { e.target.value = S.company; save(); toast(`Company renamed to ${S.company}.`); });
+$("editName").addEventListener("click", () => { const i = $("companyName"); i.focus(); i.select(); });
+document.querySelectorAll(".buyAmt button").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll(".buyAmt button").forEach(x => x.classList.toggle("on", x === b));
+  buyAmt = +b.dataset.amt; render(); refreshTip();
+}));
+document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll(".tab").forEach(x => x.classList.toggle("on", x === b));
+  document.querySelectorAll(".tabBody").forEach(x => x.hidden = x.id !== "tab-" + b.dataset.tab);
+  if (b.dataset.tab === "stats") renderStats();
+}));
+$("modalBg").addEventListener("click", e => { if (e.target === $("modalBg") && !$("modal").classList.contains("bad")) hideModal(); });
+
+recompute();
+$("companyName").value = S.company;
+load();
+rebuildStore(); rebuildRap(); render();
+$("tickerText").textContent = newsLine();
+for (let k = 0; k < 60; k++) sampleMarket(); // seed a minute of history so charts aren't empty
+drawMarket();
+
+let tickCount = 0;
+setInterval(() => {
+  advance(Date.now());
+  rebuildStore(); render();
+  if (++tickCount % 10 === 0) { sampleMarket(); drawMarket(); if (!$("tab-stats").hidden) renderStats(); refreshTip(); }
+}, 100);
+setInterval(save, 30000);
+setInterval(rotateNews, 12000);
+window.addEventListener("beforeunload", save);
+</script>
+<!-- ===== TEST BUILD ONLY: everything is free, plus shortcuts for the regulatory clock ===== -->
+<style>
+#testBar{position:fixed;top:0;left:50%;transform:translateX(-50%);z-index:300;display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:center;
+  background:#ffd400;color:#000;padding:5px 10px;border-radius:0 0 8px 8px;font-size:12px;font-weight:800;box-shadow:0 4px 14px rgba(0,0,0,.6)}
+#testBar button{background:#000;color:#ffd400;border:none;border-radius:4px;padding:4px 8px;font-weight:700;font-size:12px}
+#testBar button:hover{background:#333}
+</style>
+<div id="testBar">
+  <span>TEST BUILD · all purchases free</span>
+  <button data-t="deadline10">Deadline → 10s</button>
+  <button data-t="deadline1h">Deadline → 59m</button>
+  <button data-t="cash">+$1 billion</button>
+  <button data-t="fines">+$1 billion fines</button>
+  <button data-t="rebate">Fines → −$1 million</button>
+</div>
+<script>
+document.getElementById("testBar").addEventListener("click", e => {
+  const t = e.target.dataset.t; if (!t) return;
+  const now = Date.now();
+  if (t === "deadline10") S.deadline = now + 10000;
+  if (t === "deadline1h") S.deadline = now + 59 * 60000;
+  if (t === "cash") earn(1e9);
+  if (t === "fines") S.fines += 1e9;
+  if (t === "rebate") S.fines = -1e6;
+  rebuildStore(); render();
+});
+</script>
+</body>
+</html>
