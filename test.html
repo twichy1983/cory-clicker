@@ -105,6 +105,11 @@ body.danger #dangerOverlay{animation:danger 1s ease-in-out infinite}
 .lobbyBtn .d{font-size:12px;color:var(--muted);margin:3px 0 6px}
 .lobbyBtn .c{font-weight:700;color:var(--green)}
 .lobbyBtn .n{float:right;font-size:22px;font-weight:900;color:var(--gold);opacity:.8}
+.lobbyCol{display:flex;flex-direction:column;gap:4px}
+.lobbyCol .lobbyBtn{flex:1}
+.fireBtn{background:transparent;border:1px dashed #5a2323;color:#ff9b9b;border-radius:6px;padding:5px 8px;font-size:12px;font-weight:700}
+.fireBtn:hover:not(:disabled){background:#2a0d0d;border-style:solid}
+.fireBtn:disabled{opacity:.35;cursor:not-allowed}
 .cant{opacity:.55}
 .cant .c,.cant .cost{color:#ff6b6b !important}
 
@@ -272,18 +277,24 @@ footer{font-size:11px;color:#5d7367;margin-top:18px;line-height:1.5}
 
     <h2>Lobbying</h2>
     <div class="lobby">
-      <button class="lobbyBtn" id="timerLobbyBtn" data-tt="lobby:timer">
-        <span class="n" id="timerLobbyN">0</span>
-        <div class="t">⏳ Timer Lobbyist</div>
-        <div class="d">+1 hour to the regulatory deadline.</div>
-        <div class="c" id="timerLobbyC">$0</div>
-      </button>
-      <button class="lobbyBtn" id="penaltyLobbyBtn" data-tt="lobby:penalty">
-        <span class="n" id="penaltyLobbyN">0</span>
-        <div class="t">🤝 Penalty Lobbyist</div>
-        <div class="d">−1% regulatory fines. Can go negative.</div>
-        <div class="c" id="penaltyLobbyC">$0</div>
-      </button>
+      <div class="lobbyCol">
+        <button class="lobbyBtn" id="timerLobbyBtn" data-tt="lobby:timer">
+          <span class="n" id="timerLobbyN">0</span>
+          <div class="t">⏳ Timer Lobbyist</div>
+          <div class="d">+1 hour to the regulatory deadline.</div>
+          <div class="c" id="timerLobbyC">$0</div>
+        </button>
+        <button class="fireBtn" id="timerFireBtn" data-tt="fire:timer">Fire one · <span id="timerFireC">$0</span></button>
+      </div>
+      <div class="lobbyCol">
+        <button class="lobbyBtn" id="penaltyLobbyBtn" data-tt="lobby:penalty">
+          <span class="n" id="penaltyLobbyN">0</span>
+          <div class="t">🤝 Penalty Lobbyist</div>
+          <div class="d">−1% regulatory fines. Can go negative.</div>
+          <div class="c" id="penaltyLobbyC">$0</div>
+        </button>
+        <button class="fireBtn" id="penaltyFireBtn" data-tt="fire:penalty">Fire one · <span id="penaltyFireC">$0</span></button>
+      </div>
     </div>
 
     <h2>Market</h2>
@@ -313,6 +324,7 @@ footer{font-size:11px;color:#5d7367;margin-top:18px;line-height:1.5}
         <button class="btn" id="saveNow">💾 Save now</button>
         <button class="btn" id="exportBtn">📤 Export save</button>
         <button class="btn" id="importBtn">📥 Import save</button>
+        <button class="btn danger" id="bankruptBtn">📉 Declare bankruptcy</button>
         <button class="btn danger" id="resetBtn">🔥 Hard reset</button>
       </div>
       <div class="note" id="saveNote">Autosaves to this browser every 30 seconds.</div>
@@ -635,6 +647,9 @@ function buildingCost(i, n){
 }
 const timerLobbyCost   = () => 0; // TEST: free
 const penaltyLobbyCost = () => 0; // TEST: free
+// Firing costs double what the most recently hired lobbyist of that type cost to hire
+const timerFireCost    = () => 0; // TEST: free
+const penaltyFireCost  = () => 0; // TEST: free
 function upgradeUnlocked(u){
   if (S.upgrades[u.id]) return false;
   if (u.type === "click") return S.runEarned >= u.unlockAt;
@@ -673,7 +688,7 @@ function settleDeadline(at, now){
   bankrupt(now);
   return false;
 }
-function bankrupt(now){
+function bankrupt(now, voluntary){
   const owed = S.fines, lost = S.dollars;
   const keep = { company:S.company, allTimeEarned:S.allTimeEarned, clicks:S.clicks, clickEarned:S.clickEarned,
     finesPaid:S.finesPaid, rebatesCollected:S.rebatesCollected, bankruptcies:S.bankruptcies + 1,
@@ -681,6 +696,15 @@ function bankrupt(now){
     achievements:S.achievements, playTime:S.playTime };
   S = Object.assign(freshRun(now), keep, { lastTick: now });
   recompute(); rebuildStore(); rebuildRap(); save();
+  if (voluntary) {
+    showModal("📉 Chapter 11 Filed",
+      `<p>You walked into bankruptcy court with <b>${money(lost)}</b> in cash and <b style="color:var(--red)">${money(Math.max(0, owed))}</b> in unpaid fines, and walked out with neither.</p>
+       <p>Every industry has been dissolved, every upgrade voided and every lobbyist let go. The regulators' slate, and their clock, start fresh.</p>
+       <p>Achievements, play time and lifetime stats are untouched.</p>
+       <p class="note">Bankruptcies so far: ${S.bankruptcies}.</p>`,
+      [["Start the next venture", hideModal]], true);
+    return;
+  }
   showModal("🚨 CEASE & DESIST 🚨",
     `<p>You failed to pay <b style="color:var(--red)">${money(owed)}</b> in regulatory fines before the deadline.</p>
      <p>Federal regulators have seized your <b>${money(lost)}</b> in cash, dissolved every industry, voided every upgrade and fired your lobbyists.</p>
@@ -725,6 +749,19 @@ function buyPenaltyLobbyist(){
   const c = penaltyLobbyCost(); if (S.dollars < c) return;
   S.dollars -= c; S.penaltyLobbyists++; recompute();
   if (D.fineMult < 0 && D.fineMult > -0.011) toast("Fine multiplier is now NEGATIVE. The government now pays you to exist.");
+  render(); refreshTip();
+}
+function fireTimerLobbyist(){
+  const c = timerFireCost(); if (S.timerLobbyists < 1 || S.dollars < c) return;
+  S.dollars -= c; S.timerLobbyists--;
+  S.deadline = Math.max(Date.now() + 60000, S.deadline - HOUR); // never fire your way into instant bankruptcy
+  toast(`Fired a Timer Lobbyist for ${money(c)} in severance. Deadline −1h.`, true);
+  render(); refreshTip();
+}
+function firePenaltyLobbyist(){
+  const c = penaltyFireCost(); if (S.penaltyLobbyists < 1 || S.dollars < c) return;
+  S.dollars -= c; S.penaltyLobbyists--; recompute();
+  toast(`Fired a Penalty Lobbyist for ${money(c)} in severance. Fines +1%.`, true);
   render(); refreshTip();
 }
 function payFines(){
@@ -838,6 +875,11 @@ function render(){
   $("timerLobbyBtn").classList.toggle("cant", S.dollars < tc);
   $("penaltyLobbyN").textContent = S.penaltyLobbyists; $("penaltyLobbyC").textContent = money(pc);
   $("penaltyLobbyBtn").classList.toggle("cant", S.dollars < pc);
+  const tf = timerFireCost(), pf = penaltyFireCost();
+  $("timerFireC").textContent = S.timerLobbyists ? money(tf) : "none hired";
+  $("timerFireBtn").disabled = !S.timerLobbyists || S.dollars < tf;
+  $("penaltyFireC").textContent = S.penaltyLobbyists ? money(pf) : "none hired";
+  $("penaltyFireBtn").disabled = !S.penaltyLobbyists || S.dollars < pf;
 
   // Industries: revealed divisions, plus one "rumored acquisition" teaser for the next one
   let shownRumor = false;
@@ -921,6 +963,14 @@ function tipHTML(key){
     }
     return `<div class="tn">${u.icon} ${esc(u.name)}</div><div class="ts">${esc(sec)}</div><div class="td">${esc(u.desc)}</div>
       <div class="tb">Bonus: ${bonus}</div>${pen}<div class="tc">Cost: ${money(u.cost)}</div>`;
+  }
+  if (kind === "fire") {
+    const timer = id === "timer", n = timer ? S.timerLobbyists : S.penaltyLobbyists;
+    return `<div class="tn">🔥 Fire a ${timer ? "Timer" : "Penalty"} Lobbyist</div>
+      <div class="td">Lobbyists know where the bodies are buried. Their severance packages reflect that.</div>
+      <div class="tp">${timer ? "−1 hour from the deadline window and the current countdown (always leaves at least 1 minute)" : "+1% regulatory fine multiplier"}</div>
+      <div>Hired: ${n}</div>
+      <div class="tc">${n ? "Severance: " + money(timer ? timerFireCost() : penaltyFireCost()) + " (2× the last hire)" : "Nobody to fire"}</div>`;
   }
   if (kind === "lobby") {
     if (id === "timer") return `<div class="tn">⏳ Timer Lobbyist</div><div class="td">Convinces a subcommittee that deadlines are more of a suggestion.</div>
@@ -1055,6 +1105,13 @@ function importSave(){
         catch (e) { toast("That save string is invalid.", true); }
       }],
      ["Cancel", hideModal]]);
+}
+function declareBankruptcy(){
+  showModal("Declare bankruptcy?",
+    `<p>You lose your cash, every industry, every upgrade and every lobbyist, and your unpaid fines are wiped. The regulatory clock restarts at its full ${BASE_TIMER / HOUR} hours.</p>
+     <p>You keep your achievements, play time and lifetime stats. This counts as a bankruptcy and can't be undone.</p>`,
+    [["File for bankruptcy", () => { hideModal(); bankrupt(Date.now(), true); }, "danger"],
+     ["Cancel", hideModal]], true);
 }
 function hardReset(){
   showModal("Hard reset?", `<p>This wipes everything: cash, industries, upgrades, lobbyists and lifetime stats. It cannot be undone.</p>`,
@@ -1373,6 +1430,9 @@ $("bigDollar").addEventListener("click", clickDollar);
 $("payBtn").addEventListener("click", payFines);
 $("timerLobbyBtn").addEventListener("click", buyTimerLobbyist);
 $("penaltyLobbyBtn").addEventListener("click", buyPenaltyLobbyist);
+$("timerFireBtn").addEventListener("click", fireTimerLobbyist);
+$("penaltyFireBtn").addEventListener("click", firePenaltyLobbyist);
+$("bankruptBtn").addEventListener("click", declareBankruptcy);
 $("saveNow").addEventListener("click", () => { save(); toast("Game saved."); });
 $("exportBtn").addEventListener("click", exportSave);
 $("importBtn").addEventListener("click", importSave);
