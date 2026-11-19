@@ -178,8 +178,13 @@ body.danger #dangerOverlay{animation:danger 1s ease-in-out infinite}
 #tip .tb{color:var(--green)} #tip .tp{color:#ff6b6b} #tip .tc{margin-top:6px;font-weight:700}
 /* Touch screens: pin the tooltip to the bottom of the screen instead of following the finger */
 #tip.docked{left:50% !important;top:auto !important;bottom:12px;transform:translateX(-50%);width:min(94vw,520px);max-width:none;
-  pointer-events:auto;border-color:var(--green2);box-shadow:0 -6px 30px rgba(0,0,0,.8)}
-#tip.docked::after{content:"Tap here or anywhere empty to close";display:block;margin-top:8px;font-size:11px;color:var(--muted);text-align:center}
+  max-height:45vh;overflow:hidden;pointer-events:none;border-color:var(--green2);box-shadow:0 -6px 30px rgba(0,0,0,.8)}
+#tip.docked.top{top:12px !important;bottom:auto} /* shown on the opposite half from the tapped item */
+#tip.docked::after{content:"Tap empty space to close";display:block;margin-top:6px;font-size:11px;color:var(--muted);text-align:center}
+@media (max-height:500px){ /* landscape phones: smaller, narrower panel */
+  #tip.docked{width:min(60vw,460px);font-size:12px;padding:6px 10px;line-height:1.35}
+  #tip.docked .tn{font-size:13px} #tip.docked .td{margin:3px 0} #tip.docked::after{margin-top:3px}
+}
 #modalBg{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;z-index:200}
 #modal{background:var(--panel);border:2px solid var(--line);border-radius:12px;padding:20px;width:min(560px,92vw);max-height:88vh;overflow:auto}
 #modal.bad{border-color:var(--red);box-shadow:0 0 60px rgba(255,0,0,.5)}
@@ -344,7 +349,7 @@ function fmt(n){
   if (!isFinite(n)) return "∞";
   const neg = n < 0; n = Math.abs(n);
   let s;
-  if (n < 1000) s = (n < 100 && n % 1) ? n.toFixed(1) : Math.floor(n).toString();
+  if (n < 1000) s = (n < 1 && n % 1) ? n.toFixed(2) : (n < 100 && n % 1) ? n.toFixed(1) : Math.floor(n).toString();
   else if (n < 1e6) s = Math.floor(n).toLocaleString("en-US");
   else {
     let k = Math.floor(parseInt(n.toExponential().split("e")[1], 10) / 3);
@@ -924,6 +929,10 @@ function hideTip(){ tipKey = null; tip.style.display = "none"; }
 document.addEventListener("mouseover", e => {
   const t = e.target.closest("[data-tt]");
   if (!t) { hideTip(); return; }
+  if (touchMode) { // put the panel on the half of the screen away from what was tapped
+    const r = t.getBoundingClientRect();
+    tip.classList.toggle("top", r.top + r.height / 2 > innerHeight / 2);
+  }
   if (t.dataset.tt !== tipKey) { tipKey = t.dataset.tt; tip.style.display = "block"; refreshTip(); }
 });
 document.addEventListener("mousemove", e => { tipX = e.clientX; tipY = e.clientY; if (tipKey && !touchMode) placeTip(); });
