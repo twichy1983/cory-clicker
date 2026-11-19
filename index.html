@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cory Clicker</title>
+<title>Clickonomics</title>
 <style>
 :root{
   --bg:#0b100e; --panel:#121a16; --panel2:#18231d; --line:#26362d;
@@ -29,9 +29,13 @@ h2{font-size:13px;letter-spacing:3px;text-transform:uppercase;color:var(--muted)
 .brand h1{margin:0;font-size:30px;letter-spacing:6px;font-weight:900;
   background:linear-gradient(180deg,#9dffc6,#2fbf6f);-webkit-background-clip:text;background-clip:text;color:transparent}
 .brand .tag{font-size:12px;color:var(--muted);font-style:italic;margin-top:2px}
-#companyName{display:block;margin:12px auto 0;width:100%;max-width:320px;text-align:center;background:transparent;border:1px dashed transparent;
-  color:var(--gold);font-size:16px;font-weight:700;padding:4px;border-radius:4px}
-#companyName:hover,#companyName:focus{border-color:var(--line);outline:none}
+.nameRow{position:relative;max-width:320px;margin:12px auto 0}
+#companyName{display:block;width:100%;text-align:center;background:rgba(0,0,0,.25);border:1px dashed #3d5547;
+  color:var(--gold);font-size:16px;font-weight:700;padding:6px 30px;border-radius:6px;cursor:text;user-select:text;-webkit-user-select:text}
+#companyName:hover{border-color:var(--gold)}
+#companyName:focus{border-style:solid;border-color:var(--gold);background:rgba(0,0,0,.5);outline:none;box-shadow:0 0 0 3px rgba(232,195,90,.15)}
+#editName{position:absolute;right:4px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);font-size:16px;padding:4px 6px;border-radius:4px}
+#editName:hover{color:var(--gold)}
 .bank{text-align:center;margin:14px 0 6px;background:rgba(0,0,0,.35);border:1px solid var(--line);border-radius:10px;padding:12px}
 #dollars{font-size:clamp(24px,2.6vw,36px);font-weight:900;color:#eafff1;text-shadow:0 0 12px rgba(61,220,132,.45);word-break:break-word}
 #cps{font-size:14px;color:var(--muted);margin-top:4px}
@@ -179,10 +183,13 @@ footer{font-size:11px;color:#5d7367;margin-top:18px;line-height:1.5}
   <!-- LEFT -->
   <div class="col" id="left">
     <div class="brand">
-      <h1>CORY CLICKER</h1>
+      <h1>CLICKONOMICS</h1>
       <div class="tag">Maximize shareholder value. Minimize everything else.</div>
     </div>
-    <input id="companyName" maxlength="40" spellcheck="false" title="Click to rename your company">
+    <div class="nameRow">
+      <input id="companyName" maxlength="40" spellcheck="false" autocomplete="off" title="Click to rename your company" aria-label="Company name">
+      <button id="editName" title="Rename your company" aria-label="Rename your company">✎</button>
+    </div>
     <div class="bank">
       <div id="dollars">$0</div>
       <div id="cps">per second: $0</div>
@@ -688,7 +695,7 @@ function render(){
     pay.textContent = rebate ? `COLLECT ${money(-S.fines)} REBATE` : "FILE COMPLIANCE REPORT";
   }
   document.body.classList.toggle("danger", !rebate && S.fines > 0 && left < HOUR);
-  document.title = (!rebate && S.fines > 0 && left < HOUR) ? `⚠ ${fmtTime(left)} FINES DUE ⚠` : `${money(S.dollars)} · Cory Clicker`;
+  document.title = (!rebate && S.fines > 0 && left < HOUR) ? `⚠ ${fmtTime(left)} FINES DUE ⚠` : `${money(S.dollars)} · Clickonomics`;
 
   // Lobbyists
   const tc = timerLobbyCost(), pc = penaltyLobbyCost();
@@ -937,6 +944,14 @@ $("exportBtn").addEventListener("click", exportSave);
 $("importBtn").addEventListener("click", importSave);
 $("resetBtn").addEventListener("click", hardReset);
 $("companyName").addEventListener("input", e => { S.company = e.target.value.trim() || "Unnamed Holdings"; });
+$("companyName").addEventListener("keydown", e => {
+  if (e.key === "Enter") e.target.blur();
+  if (e.key === "Escape") { S.company = nameBeforeEdit; e.target.value = S.company; e.target.blur(); }
+});
+let nameBeforeEdit = "";
+$("companyName").addEventListener("focus", () => { nameBeforeEdit = S.company; });
+$("companyName").addEventListener("change", e => { e.target.value = S.company; save(); toast(`Company renamed to ${S.company}.`); });
+$("editName").addEventListener("click", () => { const i = $("companyName"); i.focus(); i.select(); });
 document.querySelectorAll(".buyAmt button").forEach(b => b.addEventListener("click", () => {
   document.querySelectorAll(".buyAmt button").forEach(x => x.classList.toggle("on", x === b));
   buyAmt = +b.dataset.amt; render(); refreshTip();
