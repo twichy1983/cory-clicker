@@ -190,6 +190,19 @@ body.danger #dangerOverlay{animation:danger 1s ease-in-out infinite}
 #toasts{position:fixed;left:16px;bottom:16px;z-index:150;display:flex;flex-direction:column;gap:6px}
 .toast{background:#0a0f0d;border:1px solid var(--green2);border-left:4px solid var(--green);padding:8px 12px;border-radius:6px;font-size:13px;max-width:320px;animation:tin .3s ease}
 .toast.bad{border-color:#7a1b1b;border-left-color:var(--red)}
+.toast.gold{border-color:#7a6420;border-left-color:var(--gold);color:#fff3cf}
+/* Achievements */
+.achHead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;font-weight:700}
+.achBar{height:8px;background:#000;border:1px solid var(--line);border-radius:4px;overflow:hidden;margin-bottom:10px}
+.achBar div{height:100%;background:linear-gradient(90deg,#9d7f24,var(--gold))}
+.achCat{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin:10px 0 5px}
+.achCat span{float:right;letter-spacing:0}
+.achGrid{display:flex;flex-wrap:wrap;gap:5px}
+.ach{width:44px;height:44px;border-radius:8px;border:2px solid #9d7f24;background:radial-gradient(circle,#2e2710,#171305);
+  display:flex;align-items:center;justify-content:center;font-size:22px}
+.ach.locked{border-color:var(--line);background:#0b100e;filter:grayscale(1);opacity:.35;font-size:16px}
+.ach:hover{filter:brightness(1.3)}
+.ach.locked:hover{opacity:.6}
 @keyframes tin{from{transform:translateX(-30px);opacity:0}}
 footer{font-size:11px;color:#5d7367;margin-top:18px;line-height:1.5}
 
@@ -267,10 +280,12 @@ footer{font-size:11px;color:#5d7367;margin-top:18px;line-height:1.5}
     <div class="tabs">
       <button class="tab on" data-tab="rap">Rap Sheet</button>
       <button class="tab" data-tab="stats">Stats</button>
+      <button class="tab" data-tab="ach">🏆 <span id="achTabCount">0</span></button>
       <button class="tab" data-tab="save">Save</button>
     </div>
     <div class="tabBody" id="tab-rap"><div id="rapSheet"></div></div>
     <div class="tabBody" id="tab-stats" hidden><div id="stats"></div></div>
+    <div class="tabBody" id="tab-ach" hidden><div id="achievements"></div></div>
     <div class="tabBody" id="tab-save" hidden>
       <div class="saveBtns">
         <button class="btn" id="saveNow">💾 Save now</button>
@@ -557,6 +572,7 @@ function newState(){
     version: 1, company: "Cory Consolidated Holdings",
     allTimeEarned: 0, clicks: 0, clickEarned: 0,
     finesPaid: 0, rebatesCollected: 0, bankruptcies: 0, cyclesSurvived: 0,
+    achievements: {}, playTime: 0,
     startedAt: now, lastTick: now,
   });
 }
@@ -637,7 +653,8 @@ function bankrupt(now){
   const owed = S.fines, lost = S.dollars;
   const keep = { company:S.company, allTimeEarned:S.allTimeEarned, clicks:S.clicks, clickEarned:S.clickEarned,
     finesPaid:S.finesPaid, rebatesCollected:S.rebatesCollected, bankruptcies:S.bankruptcies + 1,
-    cyclesSurvived:S.cyclesSurvived, startedAt:S.startedAt, version:1 };
+    cyclesSurvived:S.cyclesSurvived, startedAt:S.startedAt, version:1,
+    achievements:S.achievements, playTime:S.playTime };
   S = Object.assign(freshRun(now), keep, { lastTick: now });
   recompute(); rebuildStore(); rebuildRap(); save();
   showModal("🚨 CEASE & DESIST 🚨",
@@ -649,7 +666,7 @@ function bankrupt(now){
 }
 function clickDollar(ev){
   const amt = D.clickPower;
-  earn(amt); S.clicks++; S.clickEarned += amt;
+  earn(amt); S.clicks++; S.clickEarned += amt; recordClick();
   const btn = $("bigDollar");
   btn.classList.remove("pop"); void btn.offsetWidth; btn.classList.add("pop");
   const r = btn.getBoundingClientRect();
@@ -824,6 +841,8 @@ function renderStats(){
     ["Rebates collected", money(S.rebatesCollected)],
     ["Deadlines survived", S.cyclesSurvived],
     ["Bankruptcies", S.bankruptcies],
+    ["Achievements", `${Object.keys(S.achievements).length} / ${ACH.length}`],
+    ["Play time", fmtDuration(S.playTime * 1000)],
     ["Playing since", new Date(S.startedAt).toLocaleString()],
   ];
   $("stats").innerHTML = rows.map(([a, b]) => `<div><span>${a}</span><span>${b}</span></div>`).join("");
@@ -867,6 +886,13 @@ function tipHTML(key){
     return `<div class="tn">🤝 Penalty Lobbyist</div><div class="td">Rewrites the penalty schedule over a very long lunch.</div>
       <div class="tb">−1% regulatory fine multiplier. Below 0%, fines turn into revenue paid to you.</div>
       <div>Owned: ${S.penaltyLobbyists} · Multiplier now: ${(D.fineMult * 100).toFixed(0)}%</div><div class="tc">Cost: ${money(penaltyLobbyCost())}</div>`;
+  }
+  if (kind === "ach") {
+    const a = ACH_BY_ID[id]; if (!a) return "";
+    const when = S.achievements[id];
+    return `<div class="tn">${when ? a.icon : "🔒"} ${esc(a.name)}</div><div class="ts">${esc(a.cat)}</div>
+      <div class="td">${esc(a.desc)}</div>
+      ${when ? `<div class="tb">Unlocked ${new Date(when).toLocaleString()}</div>` : `<div style="color:var(--muted)">Locked</div>`}`;
   }
   if (kind === "mkt") {
     const i = +id, ind = INDUSTRIES[i], h = MKT.ind[i], m = MKT.mood[i];
@@ -917,7 +943,7 @@ function showModal(title, html, buttons, bad){
 }
 function hideModal(){ $("modalBg").style.display = "none"; }
 function toast(msg, bad){
-  const t = document.createElement("div"); t.className = "toast" + (bad ? " bad" : ""); t.textContent = msg;
+  const t = document.createElement("div"); t.className = "toast" + (bad === "gold" ? " gold" : bad ? " bad" : ""); t.textContent = msg;
   $("toasts").appendChild(t);
   setTimeout(() => { t.style.transition = "opacity .5s"; t.style.opacity = 0; setTimeout(() => t.remove(), 500); }, 5000);
   while ($("toasts").children.length > 5) $("toasts").firstChild.remove();
@@ -935,6 +961,9 @@ function sanitize(o){
   base.owned = INDUSTRIES.map((_, i) => Math.max(0, Math.floor(+((o.owned || [])[i]) || 0)));
   base.upgrades = {};
   for (const id in (o.upgrades || {})) if (UPG_BY_ID[id]) base.upgrades[id] = true;
+  base.achievements = {};
+  for (const id in (o.achievements || {})) if (ACH_BY_ID[id] && isFinite(o.achievements[id])) base.achievements[id] = +o.achievements[id];
+  if (!isFinite(base.playTime) || base.playTime < 0) base.playTime = 0;
   for (const k of ["dollars","runEarned","allTimeEarned","fines","deadline","lastTick"]) if (!isFinite(base[k])) throw new Error("Corrupt save");
   return base;
 }
@@ -975,14 +1004,14 @@ function exportSave(){
 function importSave(){
   showModal("Import save", `<p class="note" style="margin-top:0">Paste a save string. This replaces your current game.</p><textarea id="importTxt" placeholder="Paste save here..."></textarea>`,
     [["Load", () => {
-        try { applyLoaded(decodeSave($("importTxt").value), true); save(); hideModal(); toast("Save imported."); }
+        try { applyLoaded(decodeSave($("importTxt").value), true); resetMarket(); lastAchKey = ""; checkAchievements(true); save(); hideModal(); toast("Save imported."); }
         catch (e) { toast("That save string is invalid.", true); }
       }],
      ["Cancel", hideModal]]);
 }
 function hardReset(){
   showModal("Hard reset?", `<p>This wipes everything: cash, industries, upgrades, lobbyists and lifetime stats. It cannot be undone.</p>`,
-    [["Wipe it all", () => { S = newState(); $("companyName").value = S.company; recompute(); rebuildStore(); rebuildRap(); save(); render(); hideModal(); toast("Fresh start. The regulators have forgotten you."); }, "danger"],
+    [["Wipe it all", () => { S = newState(); $("companyName").value = S.company; recompute(); rebuildStore(); rebuildRap(); resetMarket(); lastAchKey = ""; checkAchievements(true); renderAchievements(); save(); render(); hideModal(); toast("Fresh start. The regulators have forgotten you."); }, "danger"],
      ["Cancel", hideModal]], true);
 }
 
@@ -1046,6 +1075,11 @@ function pctChange(h){
   const first = h.find(v => v > 0), last = h[h.length - 1];
   if (!first || !last) return null;
   return (last / first - 1) * 100;
+}
+function resetMarket(){ // fresh history for a new or imported game, so old charts can't award achievements
+  MKT.idx.length = 0; MKT.ind.forEach(h => h.length = 0); MKT.mood.fill(1);
+  for (let k = 0; k < 60; k++) sampleMarket();
+  lastTickerKey = null; drawMarket();
 }
 function pushCap(arr, v){ arr.push(v); if (arr.length > MKT_LEN) arr.shift(); }
 function sampleMarket(){
@@ -1168,6 +1202,123 @@ $("idxChart").addEventListener("mouseleave", () => { MKT.hover = -1; drawChart($
 window.addEventListener("resize", drawMarket);
 
 /* =========================================================
+   ACHIEVEMENTS
+   Cosmetic trophies, checked once a second. They survive bankruptcy
+   (hard reset wipes them) and are stored as { id: unlockTimestamp }.
+   ========================================================= */
+const recentClicks = [];
+let peakClickRate = 0;
+function recordClick(){
+  const now = performance.now();
+  recentClicks.push(now);
+  while (recentClicks.length && now - recentClicks[0] > 1000) recentClicks.shift();
+  peakClickRate = Math.max(peakClickRate, recentClicks.length);
+}
+const totalOwned = () => S.owned.reduce((a, b) => a + b, 0);
+const scandalsOwned = () => UPGRADES.filter(u => u.type === "scandal" && S.upgrades[u.id]).length;
+const upgradesOwned = () => Object.keys(S.upgrades).length;
+const anyStock = fn => MKT.ind.some((h, i) => S.owned[i] > 0 && fn(h, i));
+const IND_ACH = [
+  ["Sidewalk Mogul", "🍋"], ["Supply Chain Gang", "🌾"], ["Assembly Line Dancing", "🏭"], ["Better Living Through Chemistry", "🧪"],
+  ["Choking Hazard Included", "🧸"], ["Big Pharma, Small Ethics", "💊"], ["Hard Hat Optional", "🛢️"], ["Recall of the Wild", "✈️"],
+  ["Data Hoarder", "🏦"], ["Island Time", "🏝️"],
+];
+const ACH = [];
+const A = (cat, id, icon, name, desc, test) => ACH.push({ cat, id, icon, name, desc, test });
+
+// Industries
+IND_ACH.forEach(([name, icon], i) => A("Industries", "ind_" + INDUSTRIES[i].key, icon, name, `Own your first ${INDUSTRIES[i].name}.`, () => S.owned[i] >= 1));
+A("Industries", "own_10",   "🏢", "Conglomerate in Training", "Own 10 industries in total.",    () => totalOwned() >= 10);
+A("Industries", "own_100",  "🏙️", "Vertical Integration",     "Own 100 industries in total.",   () => totalOwned() >= 100);
+A("Industries", "own_500",  "🌆", "Monopoly Money",           "Own 500 industries in total.",   () => totalOwned() >= 500);
+A("Industries", "own_1000", "🌐", "Antitrust Magnet",         "Own 1,000 industries in total.", () => totalOwned() >= 1000);
+A("Industries", "own_100x", "💯", "Century Club",             "Own 100 of a single industry.",  () => S.owned.some(n => n >= 100));
+A("Industries", "own_all",  "🗂️", "Diversified Portfolio",    "Own at least one of every industry.", () => S.owned.every(n => n >= 1));
+
+// Income per second
+[[10, "🪙", "Pocket Change"], [1e3, "💵", "Side Hustle"], [1e6, "💰", "Seven Figures a Second"],
+ [1e9, "🤑", "Billionaire Per Second"], [1e12, "🏛️", "Too Big to Fail"], [1e15, "🚀", "Post-Scarcity Greed"]]
+  .forEach(([n, icon, name]) => A("Income", "cps_" + n, icon, name, `Earn ${money(n).replace(".000", "")} per second.`, () => D.cps >= n));
+
+// Clicking
+[[100, "👆", "Finger Exercise"], [1000, "🖐️", "Repetitive Strain"], [10000, "🦾", "Carpal Tunnel Syndicate"], [100000, "🤖", "Click Farm"]]
+  .forEach(([n, icon, name]) => A("Clicking", "clicks_" + n, icon, name, `Click the dollar ${fmt(n)} times.`, () => S.clicks >= n));
+[[5, "⚡", "Day Trader Fingers"], [10, "🌩️", "High-Frequency Trader"], [15, "💥", "Flash Crash Finger"]]
+  .forEach(([n, icon, name]) => A("Clicking", "cspeed_" + n, icon, name, `Click ${n} times within one second.`, () => peakClickRate >= n));
+
+// Upgrades & scandals
+[[1, "🛒", "First Acquisition"], [10, "📦", "Shopping Spree"], [25, "🏷️", "Bulk Discount"], [50, "🧾", "Expense Account"], [100, "💳", "Unlimited Corporate Card"]]
+  .forEach(([n, icon, name]) => A("Upgrades", "upg_" + n, icon, name, `Buy ${n} upgrade${n > 1 ? "s" : ""}.`, () => upgradesOwned() >= n));
+A("Upgrades", "upg_all", "👑", "Fully Optimized", "Buy every upgrade in the game.", () => upgradesOwned() >= UPGRADES.length);
+[[1, "⚖️", "First Offense"], [10, "🚔", "Repeat Offender"], [50, "🕴️", "Career Criminal"], [100, "📜", "Rap Sheet Longer Than the Fine Print"]]
+  .forEach(([n, icon, name]) => A("Upgrades", "scan_" + n, icon, name, `Commit ${n} scandal${n > 1 ? "s" : ""}.`, () => scandalsOwned() >= n));
+A("Upgrades", "scan_ind", "☣️", "Industry Pariah", "Commit every scandal in a single industry.",
+  () => INDUSTRIES.some((_, i) => { const s = UPGRADES.filter(u => u.type === "scandal" && u.ind === i); return s.length && s.every(u => S.upgrades[u.id]); }));
+
+// Lobbying & regulators
+A("Lobbying", "lob_t1",  "⏳", "Buying Time",                 "Hire your first Timer Lobbyist.",            () => S.timerLobbyists >= 1);
+A("Lobbying", "lob_t10", "📅", "Deadline Extension Specialist", "Hire 10 Timer Lobbyists.",                 () => S.timerLobbyists >= 10);
+A("Lobbying", "lob_t24", "🗓️", "Two-Day Shipping on Justice", "Stretch the deadline window to 48 hours.",   () => S.timerLobbyists >= 24);
+A("Lobbying", "lob_p1",  "🤝", "Friends in Low Places",       "Hire your first Penalty Lobbyist.",          () => S.penaltyLobbyists >= 1);
+A("Lobbying", "lob_p25", "🍸", "K Street Regular",            "Hire 25 Penalty Lobbyists.",                 () => S.penaltyLobbyists >= 25);
+A("Lobbying", "lob_p50", "🚪", "Revolving Door",              "Hire 50 Penalty Lobbyists.",                 () => S.penaltyLobbyists >= 50);
+A("Lobbying", "lob_cap", "🎩", "Regulatory Capture",          "Push the fine multiplier to 0% or below.",   () => D.fineMult <= 0);
+A("Lobbying", "reg_pay", "🧾", "Cost of Doing Business",      "Pay your fines before a deadline.",          () => S.finesPaid > 0);
+A("Lobbying", "reg_7",   "🎭", "Compliance Theater",          "Get through 7 regulatory deadlines.",        () => S.cyclesSurvived >= 7);
+A("Lobbying", "reg_1b",  "🏦", "Settlement Specialist",       "Pay $1 billion in fines over your career.",  () => S.finesPaid >= 1e9);
+A("Lobbying", "reg_reb", "🎁", "Government Subsidy",          "Collect a regulatory rebate.",               () => S.rebatesCollected > 0);
+A("Lobbying", "reg_bk",  "📉", "Chapter 11",                  "Go bankrupt. It happens to the best of us.", () => S.bankruptcies >= 1);
+
+// Play time (active time with the game open)
+[[600, "☕", "Trial Period", "10 minutes"], [3600, "🕐", "Clocked In", "1 hour"], [18000, "🌙", "Overtime", "5 hours"],
+ [86400, "🛌", "Workaholic", "24 hours"], [360000, "🪦", "Corporate Lifer", "100 hours"]]
+  .forEach(([s, icon, name, label]) => A("Play Time", "time_" + s, icon, name, `Play for ${label} in total.`, () => S.playTime >= s));
+
+// Stock market
+A("Stock Market", "mkt_bull",  "🐂", "Bull Run",          "Have any stock gain 10% within 3 minutes.",   () => anyStock(h => (pctChange(h) || 0) >= 10));
+A("Stock Market", "mkt_moon",  "🌕", "To the Moon",       "Have any stock gain 50% within 3 minutes.",   () => anyStock(h => (pctChange(h) || 0) >= 50));
+A("Stock Market", "mkt_bear",  "🐻", "Bear Market",       "Have any stock lose 10% within 3 minutes.",   () => anyStock(h => (pctChange(h) || 0) <= -10));
+A("Stock Market", "mkt_index", "📈", "Index Fund",        "Grow the CLKX composite 25% within 3 minutes.", () => (pctChange(MKT.idx) || 0) >= 25);
+A("Stock Market", "mkt_herd",  "🐃", "Herd Mentality",    "Have 3 stocks rated Bullish at the same time.", () => MKT.mood.filter((m, i) => S.owned[i] > 0 && m > 1.04).length >= 3);
+A("Stock Market", "mkt_press", "📰", "Bad Press",         "Let a scandal drive a stock's investor mood below 80%.", () => MKT.mood.some((m, i) => S.owned[i] > 0 && m < 0.8));
+A("Stock Market", "mkt_blue",  "💎", "Blue Chip",         "Get a single stock's share price to $1 million.", () => MKT.ind.some(h => (h[h.length - 1] || 0) >= 1e6));
+A("Stock Market", "mkt_crash", "🕳️", "Black Monday",      "Watch the composite index lose 90% of its value.",
+  () => { const h = MKT.idx, hi = Math.max(0, ...h); return hi > 0 && h[h.length - 1] <= hi * 0.1; });
+
+const ACH_BY_ID = Object.fromEntries(ACH.map(a => [a.id, a]));
+const ACH_CATS = [...new Set(ACH.map(a => a.cat))];
+
+function checkAchievements(quiet){
+  const fresh = [];
+  for (const a of ACH) {
+    if (S.achievements[a.id]) continue;
+    let ok = false; try { ok = a.test(); } catch (e) { ok = false; }
+    if (ok) { S.achievements[a.id] = Date.now(); fresh.push(a); }
+  }
+  if (fresh.length && !quiet) {
+    if (fresh.length <= 3) fresh.forEach(a => toast(`🏆 Achievement unlocked: ${a.name}`, "gold"));
+    else toast(`🏆 ${fresh.length} achievements unlocked!`, "gold");
+  }
+  $("achTabCount").textContent = Object.keys(S.achievements).length + "/" + ACH.length;
+  if (fresh.length && !$("tab-ach").hidden) renderAchievements();
+}
+let lastAchKey = "";
+function renderAchievements(){
+  const got = Object.keys(S.achievements).length;
+  const key = got + ":" + ACH.length;
+  if (key === lastAchKey && $("achievements").childElementCount) return;
+  lastAchKey = key;
+  let html = `<div class="achHead"><span>Achievements</span><span>${got} / ${ACH.length}</span></div>
+    <div class="achBar"><div style="width:${(got / ACH.length * 100).toFixed(1)}%"></div></div>`;
+  for (const cat of ACH_CATS) {
+    const list = ACH.filter(a => a.cat === cat), n = list.filter(a => S.achievements[a.id]).length;
+    html += `<div class="achCat">${esc(cat)}<span>${n}/${list.length}</span></div><div class="achGrid">` +
+      list.map(a => `<div class="ach${S.achievements[a.id] ? "" : " locked"}" data-tt="ach:${a.id}">${S.achievements[a.id] ? a.icon : "🔒"}</div>`).join("") + `</div>`;
+  }
+  $("achievements").innerHTML = html;
+}
+
+/* =========================================================
    WIRING
    ========================================================= */
 buildBuildingRows();
@@ -1196,6 +1347,7 @@ document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () =>
   document.querySelectorAll(".tab").forEach(x => x.classList.toggle("on", x === b));
   document.querySelectorAll(".tabBody").forEach(x => x.hidden = x.id !== "tab-" + b.dataset.tab);
   if (b.dataset.tab === "stats") renderStats();
+  if (b.dataset.tab === "ach") renderAchievements();
 }));
 $("modalBg").addEventListener("click", e => { if (e.target === $("modalBg") && !$("modal").classList.contains("bad")) hideModal(); });
 
@@ -1207,11 +1359,20 @@ $("tickerText").textContent = newsLine();
 for (let k = 0; k < 60; k++) sampleMarket(); // seed a minute of history so charts aren't empty
 drawMarket();
 
-let tickCount = 0;
+let tickCount = 0, lastPlayTick = Date.now();
+checkAchievements(true); // quietly award anything an older save already qualifies for
 setInterval(() => {
   advance(Date.now());
   rebuildStore(); render();
-  if (++tickCount % 10 === 0) { sampleMarket(); drawMarket(); if (!$("tab-stats").hidden) renderStats(); refreshTip(); }
+  const nowMs = Date.now();
+  S.playTime += Math.min(1, Math.max(0, (nowMs - lastPlayTick) / 1000)); // active time only; gaps from sleep/closed tab don't count
+  lastPlayTick = nowMs;
+  if (++tickCount % 10 === 0) {
+    sampleMarket(); drawMarket(); checkAchievements();
+    if (!$("tab-stats").hidden) renderStats();
+    if (!$("tab-ach").hidden) renderAchievements();
+    refreshTip();
+  }
 }, 100);
 setInterval(save, 30000);
 setInterval(rotateNews, 12000);
