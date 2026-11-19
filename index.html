@@ -245,7 +245,7 @@ footer{font-size:11px;color:#5d7367;margin-top:18px;line-height:1.5}
       <div class="note" id="saveNote">Autosaves to this browser every 30 seconds.</div>
       <div class="note">The regulatory clock runs in real time, even while this tab is closed. If it hits zero with fines unpaid, regulators seize everything.</div>
     </div>
-    <footer>Satire. Upgrade descriptions are dark-humor riffs on widely reported historical corporate scandals, product recalls and settlements; they are not legal findings about anyone. No real companies were harmed in the making of this game, which is more than can be said for their customers.</footer>
+    <footer>Satire. Some upgrades are invented; others are dark-humor riffs on widely reported historical corporate scandals, product recalls and settlements. None are legal findings about anyone. No real companies were harmed in the making of this game, which is more than can be said for their customers.</footer>
   </div>
 
   <!-- RIGHT -->
@@ -344,6 +344,10 @@ const SCANDALS = {
     ["Airbag Roulette: Explosive Edition.", "You falsified airbag safety-test results and concealed dangerous inflator ruptures to keep lucrative automotive contracts. Your airbags now offer customers a surprise explosion as an unadvertised feature."],
     ["Self-Accelerating or Self-Driving. What's the Difference?", "You concealed information about sticking accelerators and minimized reports of unintended acceleration. Narrowly targeted recalls saved money, and your customers received complimentary adrenaline."],
     ["Crash Testing Is Expensive. Optimism Is Free.", "You deferred fuel-system safety improvements to reduce manufacturing costs. Unfortunately, your Pinto's rear-mounted fuel tank was much more enthusiastic about combustion than your customers anticipated."],
+    ["Mileage May Vary. Wildly.", "You advertise fuel-economy numbers achieved downhill, with a tailwind, by a car with no seats. Real drivers get about half. Your marketing department insists the numbers are aspirational, like a vision board for gas tanks."],
+    ["Autopilot Is Just a Brand Name.", "You name your driver-assistance feature something that sounds like the car drives itself, then bury the part where it absolutely does not in a 400-page manual. Customers take a nap. The legal department does not."],
+    ["Maintenance Logs Written in Pencil.", "Your airline mechanics sign off inspections that never happened so planes can leave on schedule. On-time departures hit a record high. So does the number of auditors who suddenly need to sit down."],
+    ["Counterfeit Parts, Genuine Turbulence.", "You buy jet-engine parts from a supplier whose certificates were forged in a strip-mall print shop. The paperwork looked airworthy. The parts were more of a vibe."],
   ],
   pharma: [
     ["Opioid Epidemic? More Like Customer Retention!", "You aggressively promoted opioid sales, misled regulators, and continued marketing medications to providers you had reason to believe were diverting drugs. The addiction crisis is terrible news for society but excellent news for recurring revenue."],
@@ -395,6 +399,9 @@ const SCANDALS = {
     ["Spread the Love, Not the Salmonella.", "You manufacture peanut butter under conditions that allow Salmonella contamination to reach consumers. A nationwide outbreak triggers a massive recall. Your product's shelf life was impressive, but its public-health record was considerably less so."],
     ["Over Easy, Under Inspected.", "You sell contaminated eggs while failing to adequately control Salmonella hazards. Someone even tries bribing an inspector to release eggs without required reprocessing. Breakfast is now a federal criminal matter."],
     ["Every Warehouse Comes With Free Pets.", "You continue distributing consumer products from a warehouse infested with rodents. Federal inspectors discover that your inventory-management system includes an unauthorized wildlife population. Pest control would have been cheaper than the criminal settlement."],
+    ["Lean Finely Textured Euphemism.", "You blast leftover meat trimmings with ammonia gas and sell the result as 'lean textured beef.' A reporter gives it a much catchier nickname. Sales drop faster than your public-relations budget can rise."],
+    ["Horsing Around the Supply Chain.", "Your premium beef lasagna fails a DNA test, revealing ingredients that once won ribbons at a county fair. Nobody in procurement asked why the meat was so cheap or why it kept trying to gallop."],
+    ["The Night Shift Has a Curfew.", "Your sanitation contractor hires children to clean razor-sharp slaughterhouse equipment overnight. You claim you had no idea who was holding the hose. Labor investigators note the hoses were taller than the workers."],
   ],
   additives: [
     ["Dough Rises. Liability Follows.", "You use potassium bromate to strengthen dough and make industrial bread production more consistent. International health authorities raise carcinogenicity concerns, and many jurisdictions reject its use. Your bakery insists the real secret ingredient is efficiency."],
@@ -402,11 +409,23 @@ const SCANDALS = {
     ["Long Shelf Life, Shorter Arterial Life.", "You use inexpensive partially hydrogenated oils to improve texture, stability, and shelf life. Unfortunately, artificial trans fats increase cardiovascular risk. Regulators eventually determine that your bargain-basement fats are an exceptionally poor public-health investment."],
     ["Flavor Suspension, Regulatory Suspension.", "You use brominated vegetable oil to keep citrus flavoring from separating in your beverages. Later safety research raises concerns, and regulators revoke its authorization. Your flavor particles remained perfectly suspended; your permission to use the additive did not."],
     ["Red Dye No. 3: Now With Extra Red Flags.", "You use a bright synthetic red dye to make candy, frosting, and other products more appealing. Animal studies eventually lead regulators to revoke its food authorization, although the specific cancer mechanism is considered unlikely in humans. Your candy looks fantastic, and your regulatory calendar looks terrible."],
+    ["Titanium White Lies.", "You whiten candy coatings with titanium dioxide, the same pigment used in house paint. One continent bans it as a food additive. You keep selling the brighter version everywhere else and call it regional flavor."],
+    ["Natural Flavor Is Doing Heavy Lifting.", "Your 'natural flavor' is a 47-ingredient lab blend whose only natural component is the word 'natural.' Technically legal. Spiritually a hostage note written in food science."],
+    ["Neon Orange Is a Food Group.", "Your cheese powder uses synthetic dyes at home and paprika abroad, because overseas customers asked nicely and regulators asked firmly. At home, your snacks remain visible from space."],
+    ["Sweet Science, Bought and Paid For.", "You quietly fund nutrition research that blames dietary fat for heart disease while gently ignoring sugar. Decades of food policy follow your lead. Your sponsored scientists insist the grant money tasted completely neutral."],
+    ["Cured Meats, Uncured Concerns.", "You preserve hot dogs with generous nitrites long after health agencies classify processed meat as a carcinogen. Your packaging now proudly reads 'no artificial preservatives,' which is true if you squint at the celery powder."],
   ],
   consumer: [
     ["Hot Sale! Literally.", "You continue selling dehumidifiers despite knowing they can overheat and catch fire. You conceal safety information while preserving sales. Customers wanted less humidity, but your appliances occasionally offer considerably more heat."],
     ["A Recall Would Ruin Our Workout.", "You fail to promptly report dangerous treadmill entrapment hazards involving children and other users. Your company eventually faces a major civil penalty. Your exercise equipment now provides a more intense workout for your legal department than your customers."],
     ["Sleep Like a Baby. Read the Recall Later.", "You sell inclined infant sleepers as reports of serious hazards and infant deaths accumulate. The product is eventually recalled. The only thing more inclined than your sleeper is your marketing department's optimism."],
+    ["Smartphones With Built-In Hand Warmers.", "You rush a phone to market with batteries packed tighter than a budget airline. Units begin bursting into flames on planes. Your flagship device becomes the first gadget banned by name in every pre-flight announcement."],
+    ["Hoverboards: Now With Hover-Fires.", "You import self-balancing scooters with bargain-bin lithium cells and no safety certification. They balance beautifully right up until they ignite. Holiday morning gets a lot more exciting than anyone wanted."],
+    ["Talc About a Cover-Up.", "Internal memos show your baby powder's talc may contain asbestos, and you keep reassuring parents for decades anyway. Your product was marketed as gentle. Your legal strategy was not."],
+    ["Some Assembly Required. Wall Anchor Not Included.", "You sell tall, cheap dressers that tip over with alarming ease, and treat the anchor kit as an optional accessory. After tragic reports pile up, the recall finally arrives, years behind the warnings."],
+    ["Planned Obsolescence, Planned Perfectly.", "Your software update quietly throttles older phones so customers think it's time to upgrade. It is, in fact, time to upgrade. You've simply scheduled the feeling for them."],
+    ["Magnetic Personality, Magnetic Hazard.", "You sell desk toys made of tiny, powerful magnets that look exactly like candy. Children swallow them, and the magnets find each other through the intestines. Your warning label was impressively small."],
+    ["Lead Paint: Vintage Charm Included.", "Your overseas supplier swaps in cheaper lead-based paint for your bestselling toy line. Nobody tests a single batch. Your toys are now collectible, mostly by environmental health inspectors."],
   ],
   tech: [
     ["Your Bank Account Is Reproducing Asexually.", "You impose aggressive sales quotas that encourage employees to open millions of unauthorized customer accounts. Customers receive surprise fees and potential credit damage. You've invented banking's first unwanted family plan."],
@@ -416,6 +435,27 @@ const SCANDALS = {
     ["Location Tracking Is Like Hotel California.", "You continue collecting certain location information even when users believe they've disabled tracking. That data helps your advertising business. Users can check out of location tracking any time they like, but apparently they can never really leave."],
     ["Alexa, Forget Everything. Just Kidding.", "You retain children's voice recordings despite deletion requests and use recordings to improve speech-recognition technology. Regulators eventually intervene. Your product's memory is impressive, especially when customers explicitly ask it to forget."],
     ["Patch Tuesday Has Been Rescheduled to Never.", "You fail to implement basic cybersecurity protections and patch known vulnerabilities. Attackers expose sensitive information about approximately 147 million people. Your security program is now an expensive demonstration of why software updates exist."],
+    ["Customer Funds Are a Social Construct.", "Your crypto exchange quietly lends customer deposits to your own trading firm, which bets them on tokens named after dogs. When withdrawals freeze, you explain the money is still there, spiritually."],
+    ["Your Face Is Our Training Data.", "You scrape billions of selfies from the internet to build a facial-recognition database and sell access to anyone with a purchase order. Nobody consented, but the terms of service of the internet itself were apparently very permissive."],
+    ["The Algorithm Isn't Biased, It's Just Good at Math.", "Your automated lending model charges higher rates to borrowers from certain neighborhoods, faithfully learning from decades of discriminatory data. You call it neutral. Regulators call it redlining with extra steps."],
+  ],
+  lemon: [
+    ["Fresh-Squeezed From Concentrate.", "You sell powdered drink mix as 'hand-squeezed heritage lemonade' at artisanal prices. The only thing squeezed by hand is the customer's wallet."],
+    ["Shrinkflation, Now in Cup Form.", "Same price, slightly smaller cup, every single week. By August you are selling lemonade in thimbles and calling it a portion-conscious lifestyle choice."],
+    ["Organic Is a State of Mind.", "Your 'certified organic' sign was certified by you, with a marker, this morning. Your lemons come from an orchard that considers crop dusting a love language."],
+    ["Your Nephews Work for Exposure.", "You staff the stand with relatives under ten and pay them in 'valuable business experience.' The labor department reviews your org chart and has notes."],
+    ["Heat Wave Pricing.", "The temperature hits 104 degrees and so does the price of a cup. You call it dynamic pricing. The local news calls it gouging, then buys a cup anyway."],
+    ["Sugar-Free* (*Contains Sugar).", "Your hand-lettered sign promises sugar-free lemonade. The asterisk, the fine print and the four cups of sugar per pitcher tell a more honest story."],
+    ["The HOA President Drinks Free.", "You keep the neighborhood association from asking about permits by supplying its president with unlimited lemonade. Local government has never been so refreshed or so compromised."],
+  ],
+  offshore: [
+    ["One Address, Four Thousand Headquarters.", "Your registered agent's tiny office building is the official home of thousands of companies. It has one receptionist, one fax machine, and the combined revenue of a mid-sized nation."],
+    ["Transfer Pricing Is an Art Form.", "Your island subsidiary charges your real company billions for the right to use its own logo. Profits vanish where taxes are high and reappear where the beaches are nice."],
+    ["Sanctions Are Strongly Worded Suggestions.", "You route shipments to a sanctioned regime through seven shell companies and a yacht broker. Each step is technically someone else's problem. All seven of them are you."],
+    ["Laundry Day, Every Day.", "Your private bank accepts duffel bags of cash with no questions asked, as long as the bags fit through the teller window. Compliance officers are encouraged to take very long lunches."],
+    ["The Leak Was Very Large.", "Millions of internal documents leak, revealing your client list and every creative tax strategy you ever sold. You respond by suing the journalists and quietly renaming your shell companies."],
+    ["Bearer Shares, Bare Accountability.", "Your companies are owned by whoever physically holds the paper certificates. Nobody can tell who owns what, which is exactly the point and also the entire product."],
+    ["Charity Begins at Home. Specifically Yours.", "Your tax-exempt foundation funds a yacht, two vacation homes and a portrait of you, all classified as cultural programming. The only beneficiary is very well rested."],
   ],
 };
 // Owning this many of an industry unlocks its next scandal
