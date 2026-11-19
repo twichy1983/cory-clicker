@@ -1116,7 +1116,7 @@ function drawChart(cv, data, big){
   }
 }
 const tkEls = [];
-let lastTickerKey = "";
+let lastTickerKey = null;
 function rebuildTickers(){
   const listed = INDUSTRIES.map((_, i) => i).filter(i => S.owned[i] > 0);
   const key = listed.join(",");
