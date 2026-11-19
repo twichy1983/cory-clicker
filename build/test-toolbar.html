@@ -1,0 +1,27 @@
+<!-- ===== TEST BUILD ONLY: everything is free, plus shortcuts for the regulatory clock ===== -->
+<style>
+#testBar{position:fixed;top:0;left:50%;transform:translateX(-50%);z-index:300;display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:center;
+  background:#ffd400;color:#000;padding:5px 10px;border-radius:0 0 8px 8px;font-size:12px;font-weight:800;box-shadow:0 4px 14px rgba(0,0,0,.6)}
+#testBar button{background:#000;color:#ffd400;border:none;border-radius:4px;padding:4px 8px;font-weight:700;font-size:12px}
+#testBar button:hover{background:#333}
+</style>
+<div id="testBar">
+  <span>TEST BUILD · all purchases free</span>
+  <button data-t="deadline10">Deadline → 10s</button>
+  <button data-t="deadline1h">Deadline → 59m</button>
+  <button data-t="cash">+$1 billion</button>
+  <button data-t="fines">+$1 billion fines</button>
+  <button data-t="rebate">Fines → −$1 million</button>
+</div>
+<script>
+document.getElementById("testBar").addEventListener("click", e => {
+  const t = e.target.dataset.t; if (!t) return;
+  const now = Date.now();
+  if (t === "deadline10") S.deadline = now + 10000;
+  if (t === "deadline1h") S.deadline = now + 59 * 60000;
+  if (t === "cash") earn(1e9);
+  if (t === "fines") S.fines += 1e9;
+  if (t === "rebate") S.fines = -1e6;
+  rebuildStore(); render();
+});
+</script>

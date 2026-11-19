@@ -352,6 +352,14 @@ footer{font-size:11px;color:#5d7367;margin-top:18px;line-height:1.5}
 
 <script>
 "use strict";
+/* Platform hooks. On the web build these are plain localStorage / no-ops.
+   A portal build (e.g. crazygames.html) defines window.PLATFORM first to route them to its SDK. */
+const Platform = Object.assign({
+  init: async () => {},
+  getItem: k => localStorage.getItem(k),
+  setItem: (k, v) => localStorage.setItem(k, v),
+  loadingStart(){}, loadingStop(){}, gameplayStart(){}, gameplayStop(){}, happytime(){},
+}, window.PLATFORM || {});
 /* =========================================================
    CONSTANTS
    ========================================================= */
@@ -1026,7 +1034,10 @@ document.addEventListener("mousemove", e => { tipX = e.clientX; tipY = e.clientY
 /* =========================================================
    MODAL / TOAST
    ========================================================= */
+let modalOpen = false, booted = false; // dialogs count as a break in play for portal SDKs
 function showModal(title, html, buttons, bad){
+  if (!modalOpen && booted) Platform.gameplayStop();
+  modalOpen = true;
   const m = $("modal");
   m.className = bad ? "bad" : "";
   m.innerHTML = `<h3>${title}</h3><div>${html}</div><div class="row"></div>`;
@@ -1037,7 +1048,11 @@ function showModal(title, html, buttons, bad){
   });
   $("modalBg").style.display = "flex";
 }
-function hideModal(){ $("modalBg").style.display = "none"; }
+function hideModal(){
+  if (modalOpen && booted) Platform.gameplayStart();
+  modalOpen = false;
+  $("modalBg").style.display = "none";
+}
 function toast(msg, bad){
   const t = document.createElement("div"); t.className = "toast" + (bad === "gold" ? " gold" : bad ? " bad" : ""); t.textContent = msg;
   $("toasts").appendChild(t);
@@ -1065,7 +1080,7 @@ function sanitize(o){
 }
 function save(){
   S.lastTick = Math.max(S.lastTick, 0);
-  try { localStorage.setItem(SAVE_KEY, encodeSave()); $("saveNote").textContent = "Saved at " + new Date().toLocaleTimeString() + ". Autosaves every 30 seconds."; }
+  try { Platform.setItem(SAVE_KEY, encodeSave()); $("saveNote").textContent = "Saved at " + new Date().toLocaleTimeString() + ". Autosaves every 30 seconds."; }
   catch (e) { $("saveNote").textContent = "Save failed: " + e.message; }
 }
 function applyLoaded(obj, isImport){
@@ -1085,7 +1100,7 @@ function applyLoaded(obj, isImport){
 }
 function load(){
   let raw = null;
-  try { raw = localStorage.getItem(SAVE_KEY); }
+  try { raw = Platform.getItem(SAVE_KEY); }
   catch (e) { toast("This browser blocks local storage here, so autosave is off. Use Export to keep your progress.", true); return; }
   if (!raw) return;
   try { applyLoaded(decodeSave(raw), false); }
@@ -1391,6 +1406,7 @@ A("Stock Market", "mkt_crash", "🕳️", "Black Monday",      "Watch the compos
 const ACH_BY_ID = Object.fromEntries(ACH.map(a => [a.id, a]));
 const ACH_CATS = [...new Set(ACH.map(a => a.cat))];
 
+const MAJOR_ACH = new Set(["cps_1000000000", "cps_1000000000000", "cps_1000000000000000", "lob_cap", "upg_all", "scan_100", "mkt_moon"]);
 function checkAchievements(quiet){
   const fresh = [];
   for (const a of ACH) {
@@ -1399,6 +1415,7 @@ function checkAchievements(quiet){
     if (ok) { S.achievements[a.id] = Date.now(); fresh.push(a); }
   }
   if (fresh.length && !quiet) {
+    if (fresh.some(a => MAJOR_ACH.has(a.id))) Platform.happytime(); // portal confetti, saved for big milestones
     if (fresh.length <= 3) fresh.forEach(a => toast(`🏆 Achievement unlocked: ${a.name}`, "gold"));
     else toast(`🏆 ${fresh.length} achievements unlocked!`, "gold");
   }
@@ -1457,6 +1474,9 @@ document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () =>
 }));
 $("modalBg").addEventListener("click", e => { if (e.target === $("modalBg") && !$("modal").classList.contains("bad")) hideModal(); });
 
+(async () => { // boot: let the platform (if any) initialise before loading the save
+Platform.loadingStart();
+try { await Platform.init(); } catch (e) { console.warn("Platform init failed; continuing with local saves.", e); }
 recompute();
 $("companyName").value = S.company;
 load();
@@ -1464,6 +1484,9 @@ rebuildStore(); rebuildRap(); render();
 $("tickerText").textContent = newsLine();
 for (let k = 0; k < 60; k++) sampleMarket(); // seed a minute of history so charts aren't empty
 drawMarket();
+Platform.loadingStop();
+booted = true;
+if (!modalOpen) Platform.gameplayStart();
 
 let tickCount = 0, lastPlayTick = Date.now();
 checkAchievements(true); // quietly award anything an older save already qualifies for
@@ -1483,6 +1506,7 @@ setInterval(() => {
 setInterval(save, 30000);
 setInterval(rotateNews, 12000);
 window.addEventListener("beforeunload", save);
+})();
 </script>
 </body>
 </html>

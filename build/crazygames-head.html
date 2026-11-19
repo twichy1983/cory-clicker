@@ -1,0 +1,30 @@
+<!-- ===== CRAZYGAMES BUILD: SDK v3 + platform adapter (inserted after <title>) ===== -->
+<script src="https://sdk.crazygames.com/crazygames-sdk-v3.js"></script>
+<script>
+/* Routes the game's Platform hooks to the CrazyGames HTML5 SDK v3:
+   saves go through the Data module (synced to CrazyGames accounts, localStorage for guests),
+   and loading / gameplay / happytime events are reported to the portal.
+   If the SDK is missing (ad blocker, offline) or "disabled" (any non-CrazyGames domain),
+   everything falls back to plain localStorage and the events become no-ops. */
+window.PLATFORM = (() => {
+  let sdk = null;
+  const call = fn => { if (sdk) { try { fn(sdk); } catch (e) { console.warn("CrazyGames SDK call failed", e); } } };
+  return {
+    async init(){
+      const s = window.CrazyGames && window.CrazyGames.SDK;
+      if (!s) return;
+      await s.init();
+      if (s.environment === "disabled") return;
+      sdk = s;
+      call(x => x.game.loadingStart());
+    },
+    getItem: k => sdk ? sdk.data.getItem(k) : localStorage.getItem(k),
+    setItem: (k, v) => sdk ? sdk.data.setItem(k, v) : localStorage.setItem(k, v),
+    loadingStart(){},  // reported from init(), once the SDK is ready
+    loadingStop(){ call(x => x.game.loadingStop()); },
+    gameplayStart(){ call(x => x.game.gameplayStart()); },
+    gameplayStop(){ call(x => x.game.gameplayStop()); },
+    happytime(){ call(x => x.game.happytime()); },
+  };
+})();
+</script>
