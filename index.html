@@ -176,6 +176,10 @@ body.danger #dangerOverlay{animation:danger 1s ease-in-out infinite}
 #tip .ts{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
 #tip .td{font-style:italic;color:#c3d3ca;margin:6px 0}
 #tip .tb{color:var(--green)} #tip .tp{color:#ff6b6b} #tip .tc{margin-top:6px;font-weight:700}
+/* Touch screens: pin the tooltip to the bottom of the screen instead of following the finger */
+#tip.docked{left:50% !important;top:auto !important;bottom:12px;transform:translateX(-50%);width:min(94vw,520px);max-width:none;
+  pointer-events:auto;border-color:var(--green2);box-shadow:0 -6px 30px rgba(0,0,0,.8)}
+#tip.docked::after{content:"Tap here or anywhere empty to close";display:block;margin-top:8px;font-size:11px;color:var(--muted);text-align:center}
 #modalBg{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;z-index:200}
 #modal{background:var(--panel);border:2px solid var(--line);border-radius:12px;padding:20px;width:min(560px,92vw);max-height:88vh;overflow:auto}
 #modal.bad{border-color:var(--red);box-shadow:0 0 60px rgba(255,0,0,.5)}
@@ -877,7 +881,11 @@ function tipHTML(key){
   }
   return "";
 }
+let touchMode = false; // set from the most recent pointer type, so hybrid laptops work both ways
+document.addEventListener("pointerdown", e => { touchMode = e.pointerType === "touch"; }, true);
 function placeTip(){
+  tip.classList.toggle("docked", touchMode);
+  if (touchMode) return; // CSS pins it to the bottom
   const w = tip.offsetWidth, h = tip.offsetHeight;
   let x = tipX - w - 16, y = tipY - 10;
   if (x < 8) x = tipX + 18;
@@ -891,7 +899,7 @@ document.addEventListener("mouseover", e => {
   if (!t) { hideTip(); return; }
   if (t.dataset.tt !== tipKey) { tipKey = t.dataset.tt; tip.style.display = "block"; refreshTip(); }
 });
-document.addEventListener("mousemove", e => { tipX = e.clientX; tipY = e.clientY; if (tipKey) placeTip(); });
+document.addEventListener("mousemove", e => { tipX = e.clientX; tipY = e.clientY; if (tipKey && !touchMode) placeTip(); });
 
 /* =========================================================
    MODAL / TOAST
