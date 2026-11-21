@@ -1,0 +1,135 @@
+import { JW, JH, rand, pick, clamp, rr, vgrad, hgrad, INK, emoji, label, plainText, button, inBox } from "./draw.js";
+import { floatText, burst, jobAlert, endJob, jobReward, payOut } from "./framework.js";
+import { money } from "../core/format.js";
+import { toast } from "../ui/toast.js";
+
+/* ---------------------------------------------------------
+   JOB: PRICE HIKE (Pharma Conglomerate)
+   Hold to raise the price for revenue; keep public outrage below 100%.
+   --------------------------------------------------------- */
+const PRICE_BTNS = { hike: { x: 70, y: 760, w: 330, h: 120 }, cut: { x: 430, y: 760, w: 330, h: 120 },
+  spin: { x: 900, y: 760, w: 330, h: 120 }, bribe: { x: 1270, y: 760, w: 330, h: 120 } };
+const PRICE = {
+  revRate: 4.6,                       // revenue % per second scales with log10(price/5 + 1)
+  heatK: 8, calm: 3,                  // outrage per second = heat² × heatK − calm   (heat = log10(price / 5))
+  spin: 22, spinMax: 3, spinRecharge: 3.5,   // PR SPIN: up to 3 charges, one refills every 3.5 s, so save some
+  bribe: 60, bribeCd: 9, bribeCost: 8,        // BRIBE: big drop, long recharge, costs revenue
+  viralMin: 3.2, viralMax: 5.2, viralHit: 26, viralHeat: 6,   // viral stories: big, sudden outrage spikes
+  profitShare: .6,                    // a full revenue meter also pays 60% of the job reward as cash, win or lose
+};
+const PRICE_NEWS = ["📰 Grandma rations her pills, internet furious", "📰 Kid's GoFundMe for LIFEPILL goes viral", "📰 Senator calls price 'obscene' on live TV",
+  "📰 Patients charter buses to Canada", "📰 Leaked memo: 'They'll pay. They have to.'", "📰 CEO spotted buying third island", "📰 Nurses' union calls for boycott"];
+const PriceGame = {
+  time: 30, meter: "QUARTERLY REVENUE",
+  tagline: "You bought the only factory still making an old life-saving pill. Patients can't skip it, so the price is whatever you say. Squeeze them dry, but don't let the outrage reach Congress.",
+  rules: [
+    "<b>Hold HIKE</b> to raise the price and <b>hold CUT</b> to lower it. The higher the price, the faster the money pours in.",
+    "High prices make <b>public outrage</b> climb fast. If it reaches 100%, Congress drags you to a hearing and you're busted.",
+    `<b>🎤 PR SPIN</b> issues a fake apology (−${PRICE.spin} outrage). You hold <b>${PRICE.spinMax} charges</b> and one refills every ${PRICE.spinRecharge} seconds, so don't waste them.`,
+    `<b>💼 BRIBE</b> a senator for a big drop (−${PRICE.bribe} outrage), but it eats ${PRICE.bribeCost}% of your revenue and takes ${PRICE.bribeCd} seconds to recharge.`,
+    "<b>Viral stories</b> hit without warning and spike outrage hard. Keep an eye on the meter and a PR spin in reserve.",
+    "Fill the <b>revenue meter</b> before time runs out.",
+    "<b>💵 Every dollar of gouging profit is yours to keep</b> as cash, even if you get busted. Capitalism.",
+  ],
+  winTitle: "Your money or your life!", winText: "Record quarter. Patients are now choosing between their pill and their rent. The shareholders chose a second yacht.",
+  lose: { busted: "Outrage boiled over. You testified before Congress and smirked the whole time, which somehow made it worse.", time: "Time's up. Patients can still afford rent. You left money on the table." },
+  init(G){ Object.assign(G, { price: 5, outrage: 0, hike: false, cut: false, spins: PRICE.spinMax, spinT: 0, bribeCd: 0, hist: [5], histT: 0,
+    nextNews: rand(PRICE.viralMin, PRICE.viralMax), news: "", newsT: 0, profit: 0, paidProfit: 0 }); },
+  step(G, dt){
+    if (G.hike) G.price = Math.min(99999, G.price * Math.pow(2.3, dt));
+    if (G.cut) G.price = Math.max(5, G.price * Math.pow(.3, dt));
+    const gain = Math.log10(G.price / 5 + 1) * PRICE.revRate * dt;
+    G.pct = Math.min(100, G.pct + gain);
+    G.profit += gain / 100 * jobReward() * PRICE.profitShare;   // real cash, paid out when the shift ends
+    const heat = Math.max(0, Math.log10(G.price / 5));
+    G.outrage = clamp(G.outrage + (heat * heat * PRICE.heatK - PRICE.calm) * dt, 0, 100);
+    if (G.spins < PRICE.spinMax && (G.spinT += dt) >= PRICE.spinRecharge) { G.spins++; G.spinT = 0; }
+    G.bribeCd = Math.max(0, G.bribeCd - dt); G.newsT = Math.max(0, G.newsT - dt);
+    if (G.t >= G.nextNews) {   // a viral story; worse when the price is already high
+      G.nextNews = G.t + rand(PRICE.viralMin, PRICE.viralMax);
+      const hit = Math.round(PRICE.viralHit + heat * PRICE.viralHeat);
+      G.outrage = Math.min(100, G.outrage + hit); G.news = pick(PRICE_NEWS); G.newsT = 2.6;
+      floatText(`+${hit}% outrage`, 1565, 140, true); jobAlert("📰 GOING VIRAL!", "bad");
+    }
+    if ((G.histT += dt) > .25) { G.histT = 0; G.hist.push(G.price); if (G.hist.length > 60) G.hist.shift(); }
+    if (G.outrage >= 100) { jobAlert("🏛️ CONGRESSIONAL HEARING!", "bad"); endJob("busted"); }
+    else if (G.pct >= 100) endJob("win");
+  },
+  extra(G){ return `😠 ${Math.floor(G.outrage)}% · 💵 ${money(G.profit)}`; },
+  resultNote(G, kind){ return `💵 You keep ${money(G.paidProfit)} in price-gouging profits${kind === "win" ? "." : ", even though you lost. Capitalism."}`; },
+  cursor(G, x, y){ return Object.values(PRICE_BTNS).some(b => inBox(x, y, b)); },
+  down(G, x, y){
+    if (inBox(x, y, PRICE_BTNS.hike)) G.hike = true;
+    else if (inBox(x, y, PRICE_BTNS.cut)) G.cut = true;
+    else if (inBox(x, y, PRICE_BTNS.spin) && G.spins > 0) {
+      G.outrage = Math.max(0, G.outrage - PRICE.spin); G.spins--;
+      floatText(pick(["“Thoughts and prayers.”", "“We hear you.”", "“Blame the middlemen.”", "“It's complicated.”", "“Innovation isn't free.”", "“Have you tried being healthy?”"]), 1065, 700);
+    } else if (inBox(x, y, PRICE_BTNS.bribe) && G.bribeCd === 0) {
+      G.outrage = Math.max(0, G.outrage - PRICE.bribe); G.bribeCd = PRICE.bribeCd; G.pct = Math.max(0, G.pct - PRICE.bribeCost);
+      floatText(`Senator bought! −${PRICE.bribeCost}% revenue`, 1300, 700); burst(1435, 760, "#7cfc7c", 16, 300);
+    }
+  },
+  up(G){ G.hike = false; G.cut = false; },
+  stop(G){   // whatever happened, the gouging profits are paid out as real cash
+    G.hike = false; G.cut = false;
+    if (G.profit > 0 && !G.paidProfit) { G.paidProfit = G.profit; payOut(G.profit); toast(`💵 You kept ${money(G.profit)} in price-gouging profits.`, "gold"); }
+  },
+  draw(ctx, G, now){
+    ctx.fillStyle = vgrad(ctx, 0, JH, [[0, "#3b2418"], [1, "#24150e"]]); ctx.fillRect(0, 0, JW, JH);
+    ctx.fillStyle = "rgba(255,255,255,.04)"; for (let x = 0; x < JW; x += 120) ctx.fillRect(x, 0, 60, 700);
+    // wall screen with the price chart
+    const S0 = { x: 110, y: 110, w: 900, h: 560 };
+    rr(ctx, S0.x - 14, S0.y - 14, S0.w + 28, S0.h + 28, 18); ctx.fillStyle = "#121212"; ctx.fill(); ctx.lineWidth = 6; ctx.strokeStyle = INK; ctx.stroke();
+    ctx.fillStyle = "#0d1b14"; ctx.fillRect(S0.x, S0.y, S0.w, S0.h);
+    ctx.strokeStyle = "rgba(124,252,124,.12)"; ctx.lineWidth = 2;
+    for (let i = 1; i < 6; i++) { ctx.beginPath(); ctx.moveTo(S0.x, S0.y + i * S0.h / 6); ctx.lineTo(S0.x + S0.w, S0.y + i * S0.h / 6); ctx.stroke(); }
+    const lo = Math.log10(5), hi = Math.max(Math.log10(200), Math.log10(Math.max(...G.hist)) + .2);
+    ctx.beginPath(); G.hist.forEach((p, i) => { const x = S0.x + 30 + i * (S0.w - 60) / 59, y = S0.y + S0.h - 40 - (Math.log10(p) - lo) / (hi - lo) * (S0.h - 120); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); });
+    ctx.lineWidth = 8; ctx.strokeStyle = "#ff4d4d"; ctx.lineJoin = "round"; ctx.stroke();
+    plainText(ctx, "LIFEPILL™ PRICE PER BOTTLE", S0.x + 30, S0.y + 40, 28, "#7cfc7c", "left", 900);
+    plainText(ctx, "cost to make: $1.20", S0.x + 30, S0.y + 76, 22, "rgba(124,252,124,.6)", "left", 700);
+    label(ctx, "$" + (G.price < 100 ? G.price.toFixed(2) : Math.round(G.price).toLocaleString("en-US")), S0.x + S0.w - 30, S0.y + 60, 64, "#ff6b5b", "right");
+    // pill bottle with a price tag
+    ctx.save(); ctx.translate(1230, 380);
+    rr(ctx, -95, -150, 190, 290, 30); ctx.fillStyle = hgrad(ctx, -95, 95, [[0, "#c25e00"], [.4, "#ff9a2f"], [1, "#b05000"]]); ctx.fill(); ctx.lineWidth = 7; ctx.strokeStyle = INK; ctx.stroke();
+    rr(ctx, -110, -215, 220, 75, 16); ctx.fillStyle = "#fff"; ctx.fill(); ctx.stroke();
+    rr(ctx, -80, -70, 160, 130, 12); ctx.fillStyle = "#fffdf3"; ctx.fill(); ctx.lineWidth = 4; ctx.stroke();
+    plainText(ctx, "LIFEPILL™", 0, -30, 30, "#c25e00", "center", 900); plainText(ctx, "Skip a dose? Don't.", 0, 10, 17, "#555");
+    ctx.restore();
+    ctx.save(); ctx.translate(1350, 250); ctx.rotate(.25 + Math.sin(now * 3) * .05);
+    rr(ctx, 0, 0, 190, 90, 14); ctx.fillStyle = "#fff36b"; ctx.fill(); ctx.lineWidth = 5; ctx.strokeStyle = INK; ctx.stroke();
+    plainText(ctx, "$" + (G.price < 1000 ? Math.round(G.price) : Math.round(G.price / 1000) + "K"), 95, 45, 40, "#1b1b1b", "center", 900);
+    ctx.restore();
+    // outrage thermometer
+    rr(ctx, 1530, 110, 70, 520, 35); ctx.fillStyle = "#1b1b1b"; ctx.fill(); ctx.lineWidth = 6; ctx.strokeStyle = INK; ctx.stroke();
+    const oh = 500 * G.outrage / 100; rr(ctx, 1540, 620 - oh, 50, oh, 25); ctx.fillStyle = G.outrage > 70 ? "#ff3b30" : G.outrage > 40 ? "#ff9f1c" : "#ffd23f"; ctx.fill();
+    plainText(ctx, "OUTRAGE", 1565, 670, 22, "#ffb3b3", "center", 900);
+    const crowd = Math.floor(G.outrage / 9);
+    for (let i = 0; i < crowd; i++) emoji(ctx, ["😠", "🪧", "😷", "🤬", "👵", "🪧"][i % 6], 1080 + (i % 6) * 70, 610 - Math.floor(i / 6) * 60 + Math.sin(now * 8 + i) * 6, 54);
+    button(ctx, PRICE_BTNS.hike.x, PRICE_BTNS.hike.y, PRICE_BTNS.hike.w, PRICE_BTNS.hike.h, "📈 HIKE", "#2fb35a", G.hike);
+    button(ctx, PRICE_BTNS.cut.x, PRICE_BTNS.cut.y, PRICE_BTNS.cut.w, PRICE_BTNS.cut.h, "📉 CUT", "#5c7cfa", G.cut);
+    button(ctx, PRICE_BTNS.spin.x, PRICE_BTNS.spin.y, PRICE_BTNS.spin.w, PRICE_BTNS.spin.h,
+      G.spins > 0 ? "🎤 PR SPIN" : `PR SPIN ${(PRICE.spinRecharge - G.spinT).toFixed(1)}s`, "#e8590c", false, G.spins === 0);
+    for (let i = 0; i < PRICE.spinMax; i++) {   // charge pips, with the next one filling up
+      const cx = PRICE_BTNS.spin.x + PRICE_BTNS.spin.w / 2 + (i - 1) * 46, cy = PRICE_BTNS.spin.y - 28;
+      ctx.beginPath(); ctx.arc(cx, cy, 15, 0, Math.PI * 2); ctx.fillStyle = "#2a1a12"; ctx.fill(); ctx.lineWidth = 4; ctx.strokeStyle = INK; ctx.stroke();
+      if (i < G.spins) { ctx.beginPath(); ctx.arc(cx, cy, 11, 0, Math.PI * 2); ctx.fillStyle = "#ff9f1c"; ctx.fill(); }
+      else if (i === G.spins) { ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, 11, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * G.spinT / PRICE.spinRecharge); ctx.closePath(); ctx.fillStyle = "rgba(255,159,28,.5)"; ctx.fill(); }
+    }
+    button(ctx, PRICE_BTNS.bribe.x, PRICE_BTNS.bribe.y, PRICE_BTNS.bribe.w, PRICE_BTNS.bribe.h, G.bribeCd > 0 ? `BRIBE ${Math.ceil(G.bribeCd)}s` : "💼 BRIBE", "#7048e8", false, G.bribeCd > 0);
+    plainText(ctx, `−${PRICE.spin} outrage`, PRICE_BTNS.spin.x + PRICE_BTNS.spin.w / 2, PRICE_BTNS.spin.y + PRICE_BTNS.spin.h + 28, 22, "#d9c2a8");
+    plainText(ctx, `−${PRICE.bribe} outrage, −${PRICE.bribeCost}% revenue`, PRICE_BTNS.bribe.x + PRICE_BTNS.bribe.w / 2, PRICE_BTNS.bribe.y + PRICE_BTNS.bribe.h + 28, 22, "#d9c2a8");
+    if (G.newsT > 0) {   // breaking-news banner across the price screen
+      const a = Math.min(1, G.newsT * 2), y0 = 600;
+      ctx.save(); ctx.globalAlpha = a;
+      ctx.fillStyle = "#c92a2a"; ctx.fillRect(110, y0, 900, 70); ctx.fillStyle = "#fff"; ctx.fillRect(110, y0, 170, 70);
+      plainText(ctx, "BREAKING", 195, y0 + 35, 30, "#c92a2a", "center", 900);
+      plainText(ctx, G.news.replace("📰 ", ""), 300, y0 + 35, 28, "#fff", "left", 800);
+      ctx.restore();
+    }
+    plainText(ctx, "hold", PRICE_BTNS.hike.x + PRICE_BTNS.hike.w / 2, PRICE_BTNS.hike.y + PRICE_BTNS.hike.h + 28, 22, "#d9c2a8");
+    plainText(ctx, "hold", PRICE_BTNS.cut.x + PRICE_BTNS.cut.w / 2, PRICE_BTNS.cut.y + PRICE_BTNS.cut.h + 28, 22, "#d9c2a8");
+  },
+};
+
+export { PriceGame };

@@ -50,7 +50,7 @@ export const penaltyFireCost = S => 2 * lobbyCost(PENALTY_LOBBY, Math.max(0, S.p
 
 export const upgradeCost = u => rules.freePurchases ? 0 : u.cost;
 
-export function upgradeUnlocked(S, u) {
+function upgradeUnlocked(S, u) {
   if (S.upgrades[u.id]) return false;
   if (u.type === "click") return rules.freePurchases || S.runEarned >= u.unlockAt;
   return S.owned[u.ind] >= u.req;
@@ -93,7 +93,7 @@ export function advance(S, D, now) {
 }
 
 // The deadline at time `at` has arrived: a clean or negative ledger survives, unpaid fines mean bankruptcy.
-export function settleDeadline(S, at, now) {
+function settleDeadline(S, at, now) {
   if (S.fines > 0) return goBankrupt(S, now, false);
   const rebate = -S.fines || 0; // "|| 0" turns -0 into 0
   S.dollars += rebate; S.rebatesCollected += rebate; S.fines = 0;

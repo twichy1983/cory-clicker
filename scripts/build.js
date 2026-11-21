@@ -19,10 +19,10 @@ function replaceOnce(text, find, replace) {
 rmSync("dist", { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });
 
-// 1. Bundle the JS and CSS
+// 1. Bundle every JS module into one file
 await esbuild.build({
-  entryPoints: [{ in: "src/main.js", out: "game" }, { in: "css/main.css", out: "game" }],
-  outdir: OUT,
+  entryPoints: ["src/main.js"],
+  outfile: `${OUT}/game.js`,
   bundle: true,
   minify: true,
   format: "iife",
@@ -33,12 +33,12 @@ await esbuild.build({
 
 // 2. The page: point at the bundle and load the SDK in <head>, as CrazyGames requires
 let html = readFileSync("index.html", "utf8");
-html = replaceOnce(html, `<link rel="stylesheet" href="./css/main.css">`, `<link rel="stylesheet" href="./game.css">`);
 html = replaceOnce(html, `<script type="module" src="./src/main.js"></script>`, `<script src="./game.js"></script>`);
 html = replaceOnce(html, `<title>Clickonomics</title>`, `<title>Clickonomics</title>\n${SDK_TAG}`);
 writeFileSync(`${OUT}/index.html`, html);
 
-// 3. Assets
+// 3. Styles and images, copied as they are
+cpSync("css", `${OUT}/css`, { recursive: true });
 cpSync("assets", `${OUT}/assets`, { recursive: true });
 
 // 4. CrazyGames only accepts relative paths

@@ -87,6 +87,9 @@ export async function launch({ width = 1400, height = 900 } = {}) {
   });
   await send("Runtime.enable");
   await send("Page.enable");
+  await send("Network.enable");
+  // Keep tests offline and fast: the CrazyGames SDK is blocked, so the game falls back to localStorage
+  await send("Network.setBlockedURLs", { urls: ["*sdk.crazygames.com*"] });
   await send("Emulation.setDeviceMetricsOverride", { width, height, deviceScaleFactor: 1, mobile: false });
 
   const page = {
@@ -102,6 +105,11 @@ export async function launch({ width = 1400, height = 900 } = {}) {
       const r = await send("Runtime.evaluate", { expression, awaitPromise: true, returnByValue: true });
       if (r.exceptionDetails) throw new Error(r.exceptionDetails.exception?.description || r.exceptionDetails.text);
       return r.result.value;
+    },
+    // Wipes saved data for a site (leaves the page first, so its save-on-close can't write it back)
+    async clearStorage(origin) {
+      await page.goto("about:blank");
+      await send("Storage.clearDataForOrigin", { origin, storageTypes: "all" });
     },
     async click(selector) {
       const ok = await page.eval(`(() => { const el = document.querySelector(${JSON.stringify(selector)}); if (!el) return false; el.click(); return true; })()`);
