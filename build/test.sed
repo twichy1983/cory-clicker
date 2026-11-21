@@ -7,3 +7,4 @@ s|^const UPG_BY_ID = .*|UPGRADES.forEach(u => { u.cost = 0; if (u.type === "clic
 s|· Clickonomics`|· Clickonomics [TEST]`|
 s|^const timerFireCost    = () => .*|const timerFireCost    = () => 0; // TEST: free|
 s|^const penaltyFireCost  = () => .*|const penaltyFireCost  = () => 0; // TEST: free|
+s|^const JOB_COOLDOWN_OVERRIDE = .*|const JOB_COOLDOWN_OVERRIDE = 5000; // TEST: every job replayable after 5 seconds|

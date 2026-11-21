@@ -225,6 +225,62 @@ body.danger #dangerOverlay{animation:danger 1s ease-in-out infinite}
 .bld.mystery{border-style:dashed;border-top-width:1px;background:transparent;cursor:default;opacity:.75}
 .bld.mystery .cost,.bld.mystery .tkr,.bld.mystery .own{display:none}
 
+/* ---------- side jobs (minigames) ---------- */
+#jobs{margin-top:14px;background:rgba(0,0,0,.3);border:1px solid var(--line);border-radius:10px;padding:10px}
+.jobsHead{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);
+  font-weight:800;margin-bottom:8px}
+.job{display:flex;align-items:center;gap:10px;width:100%;text-align:left;color:var(--text);border-radius:8px;padding:8px 10px;margin-bottom:6px;
+  background:linear-gradient(100deg,#1d2a1a,#13201a);border:1px solid #3d5a2a;border-left:4px solid #8fd14f}
+.job:last-child{margin-bottom:0}
+.job .ji{font-size:24px;width:30px;text-align:center}
+.job .jm{flex:1;min-width:0;display:flex;flex-direction:column}
+.job .jt{font-weight:800;font-size:14px}
+.job .jd{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.job .js{font-weight:800;font-size:12px;padding:4px 9px;border-radius:5px;background:#8fd14f;color:#10200a;white-space:nowrap}
+.job.ready{animation:jobPulse 1.6s ease-in-out infinite}
+.job.ready:hover{filter:brightness(1.15)}
+@keyframes jobPulse{50%{box-shadow:0 0 16px rgba(143,209,79,.45)}}
+.job.wait{opacity:.75;border-left-color:#5c6b52;cursor:default}
+.job.wait .js{background:#2a3527;color:var(--gold);font-family:Consolas,monospace}
+.job.locked{opacity:.45;border-style:dashed;border-left-style:solid;border-left-color:#3a463a;cursor:default}
+.job.locked .js{background:transparent;color:var(--muted)}
+#jobOverlay{position:fixed;inset:0;z-index:260;background:rgba(3,6,4,.88);display:flex;align-items:center;justify-content:center;padding:1vmin}
+#jobOverlay[hidden]{display:none}
+.jobFrame{position:relative;width:min(98vw,calc(96vh * 1672 / 941));aspect-ratio:1672/941;border-radius:14px;overflow:hidden;
+  box-shadow:0 0 0 3px #2b3d22,0 20px 60px rgba(0,0,0,.8);user-select:none;-webkit-user-select:none}
+#jobCanvas{display:block;width:100%;height:100%;touch-action:none;cursor:default}
+.jobHud{position:absolute;left:0;right:0;top:0;display:flex;align-items:center;gap:1.2%;padding:1.2% 1.6%;pointer-events:none;
+  font-size:clamp(11px,1.5vw,20px)}
+.jobPill{background:rgba(10,16,12,.78);border:2px solid rgba(255,255,255,.18);border-radius:999px;padding:.35em .9em;color:#fff;font-weight:800;
+  backdrop-filter:blur(3px);white-space:nowrap}
+#jobTimer{font-family:"Courier New",Consolas,monospace;font-size:1.35em;min-width:4.6em;text-align:center}
+#jobTimer.low{color:#ff4d4d;border-color:#ff4d4d;animation:blink .6s steps(2) infinite}
+.jobMeter{flex:1;display:flex;flex-direction:column;gap:.25em}
+.jobMeter .lbl{display:flex;justify-content:space-between;font-size:.72em;letter-spacing:.12em}
+.jobBar{height:.85em;background:rgba(0,0,0,.45);border-radius:999px;overflow:hidden;border:1px solid rgba(255,255,255,.2)}
+#jobFill{height:100%;width:0;background:linear-gradient(90deg,#8a9a1e,#5c6b12,#3d2f0c);transition:width .15s linear}
+#jobExtra{letter-spacing:.06em} #jobExtra[hidden]{display:none}
+#jobAlert{position:absolute;left:50%;top:15%;transform:translateX(-50%);pointer-events:none;font-weight:900;font-size:clamp(14px,2.4vw,34px);
+  color:#fff;text-shadow:0 3px 0 #000,0 0 18px rgba(0,0,0,.8);letter-spacing:.06em;opacity:0;transition:opacity .2s;white-space:nowrap}
+#jobAlert.on{opacity:1} #jobAlert.bad{color:#ff5252} #jobAlert.warn{color:#ffd23f}
+#jobPanel{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(4,8,6,.55);font-size:clamp(11px,1.35vw,17px)}
+#jobPanel[hidden]{display:none}
+.jobCardBig{width:min(92%,34em);background:rgba(12,20,15,.95);border:2px solid #4c7a35;border-radius:14px;padding:1.4em 1.6em;color:var(--text);
+  box-shadow:0 18px 50px rgba(0,0,0,.7);max-height:94%;overflow:auto}
+.jobCardBig h3{margin:0 0 .3em;font-size:1.7em;color:#b9f27a;letter-spacing:.04em}
+.jobCardBig.bad h3{color:#ff6b6b} .jobCardBig.bad{border-color:#7a2a2a}
+.jobCardBig p{margin:.4em 0;line-height:1.45}
+.jobCardBig ul{margin:.5em 0 .8em 1.1em;padding:0;line-height:1.5}
+.jobCardBig .reward{font-weight:800;color:var(--gold)}
+.jobCardBig .row{display:flex;gap:.6em;justify-content:flex-end;margin-top:1em}
+.jobCardBig button{font-size:1em;padding:.6em 1.2em;border-radius:8px;font-weight:800;border:none}
+.jobCardBig .go{background:#8fd14f;color:#10200a} .jobCardBig .alt{background:#26332b;color:var(--text);border:1px solid var(--line)}
+#jobOverlay{flex-direction:column;gap:12px}
+.jobRotate{display:none;color:#cfe9da;font-size:13px;text-align:center}
+@media (orientation:portrait) and (max-width:700px){ .jobRotate{display:block} }
+.jobClose{position:absolute;right:1.2%;bottom:2%;z-index:3;background:rgba(10,16,12,.75);color:#fff;border:2px solid rgba(255,255,255,.25);
+  border-radius:999px;font-weight:800;padding:.3em .9em;font-size:clamp(11px,1.2vw,15px)}
+
 /* ---------- tooltip / modal / toast ---------- */
 #tip{position:fixed;z-index:100;max-width:340px;background:#0a0f0d;border:1px solid #3a5446;border-radius:8px;padding:10px 12px;font-size:13px;
   box-shadow:0 10px 30px rgba(0,0,0,.7);pointer-events:none;display:none;line-height:1.45}
@@ -294,6 +350,10 @@ footer{font-size:11px;color:#5d7367;margin-top:18px;line-height:1.5}
     <div id="bigDollarWrap"><button id="bigDollar" aria-label="Make money"><span>$</span></button></div>
     <div id="clickInfo">+$1 per click</div>
     <div id="ticker"><b>WIRE</b><span id="tickerText">Markets open. Ethics closed.</span></div>
+    <div id="jobs">
+      <div class="jobsHead"><span>💼 Jobs</span><span id="jobsCount"></span></div>
+      <div id="jobList"></div>
+    </div>
   </div>
 
   <!-- CENTER -->
@@ -381,6 +441,20 @@ footer{font-size:11px;color:#5d7367;margin-top:18px;line-height:1.5}
   </div>
 </div>
 
+<div id="jobOverlay" hidden>
+  <div class="jobFrame" id="jobFrame">
+    <canvas id="jobCanvas" width="1672" height="941" aria-label="Waste disposal minigame"></canvas>
+    <div class="jobHud">
+      <div class="jobPill" id="jobTimer">30.0</div>
+      <div class="jobPill jobMeter"><div class="lbl"><span id="jobMeterLbl"></span><span id="jobPct">0%</span></div><div class="jobBar"><div id="jobFill"></div></div></div>
+      <div class="jobPill" id="jobExtra"></div>
+    </div>
+    <div id="jobAlert"></div>
+    <div id="jobPanel"></div>
+    <button class="jobClose" id="jobClose">✕ Quit job</button>
+  </div>
+  <div class="jobRotate">📱↻ Turn your phone sideways for a bigger view</div>
+</div>
 <div id="tip"></div>
 <div id="modalBg"><div id="modal"></div></div>
 <div id="toasts"></div>
@@ -650,7 +724,7 @@ function newState(){
     version: 1, company: "Capital Consolidated Holdings",
     allTimeEarned: 0, clicks: 0, clickEarned: 0,
     finesPaid: 0, rebatesCollected: 0, bankruptcies: 0, cyclesSurvived: 0,
-    achievements: {}, playTime: 0,
+    achievements: {}, playTime: 0, jobs: {}, jobWins: {},
     startedAt: now, lastTick: now,
   });
 }
@@ -735,7 +809,7 @@ function bankrupt(now, voluntary){
   const keep = { company:S.company, allTimeEarned:S.allTimeEarned, clicks:S.clicks, clickEarned:S.clickEarned,
     finesPaid:S.finesPaid, rebatesCollected:S.rebatesCollected, bankruptcies:S.bankruptcies + 1,
     cyclesSurvived:S.cyclesSurvived, startedAt:S.startedAt, version:1,
-    achievements:S.achievements, playTime:S.playTime };
+    achievements:S.achievements, playTime:S.playTime, jobs:S.jobs, jobWins:S.jobWins };
   S = Object.assign(freshRun(now), keep, { lastTick: now });
   recompute(); rebuildStore(); rebuildRap(); save();
   if (voluntary) {
@@ -970,6 +1044,7 @@ function renderStats(){
     ["Bankruptcies", S.bankruptcies],
     ["Achievements", `${Object.keys(S.achievements).length} / ${ACH.length}`],
     ["Play time", fmtDuration(S.playTime * 1000)],
+    ["Jobs completed", Object.values(S.jobWins || {}).reduce((a, b) => a + b, 0)],
     ["Playing since", new Date(S.startedAt).toLocaleString()],
   ];
   $("stats").innerHTML = rows.map(([a, b]) => `<div><span>${a}</span><span>${b}</span></div>`).join("");
@@ -1021,6 +1096,15 @@ function tipHTML(key){
     return `<div class="tn">🤝 Penalty Lobbyist</div><div class="td">Rewrites the penalty schedule over a very long lunch.</div>
       <div class="tb">−1% regulatory fine multiplier. Below 0%, fines turn into revenue paid to you.</div>
       <div>Owned: ${S.penaltyLobbyists} · Multiplier now: ${(D.fineMult * 100).toFixed(0)}%</div><div class="tc">Cost: ${money(penaltyLobbyCost())}</div>`;
+  }
+  if (kind === "job") {
+    const j = JOB_BY_ID[id]; if (!j) return "";
+    const ind = INDUSTRIES[j.ind], left = jobLeftFor(j), unlocked = S.owned[j.ind] > 0, cdMin = jobCd(j) / 60000;
+    return `<div class="tn">${j.icon} ${esc(j.name)}</div><div class="ts">Job · ${esc(ind.name)}</div>
+      <div class="td">${esc(j.blurb)}</div>
+      <div>${j.game.time}-second minigame. ${(S.jobWins || {})[j.id] ? "Completed " + S.jobWins[j.id] + "×." : ""}</div>
+      <div class="tb">Reward: ${money(jobPayFor(j))} (${jobPaySecs(j) / 60} minutes of ${esc(ind.name)} income)</div>
+      <div class="tc">${!unlocked ? "Acquire a " + esc(ind.name) + " to unlock." : left ? "Available again in " + mmss(left) : `Ready now. Playable once every ${cdMin >= 1 ? cdMin + " minutes" : Math.round(cdMin * 60) + " seconds"}, win or lose.`}</div>`;
   }
   if (kind === "ach") {
     const a = ACH_BY_ID[id]; if (!a) return "";
@@ -1109,6 +1193,10 @@ function sanitize(o){
   for (const id in (o.upgrades || {})) if (UPG_BY_ID[id]) base.upgrades[id] = true;
   base.achievements = {};
   for (const id in (o.achievements || {})) if (ACH_BY_ID[id] && isFinite(o.achievements[id])) base.achievements[id] = +o.achievements[id];
+  base.jobs = {}; base.jobWins = {};
+  for (const id in (o.jobs || {})) if (JOB_BY_ID[id] && isFinite(o.jobs[id])) base.jobs[id] = +o.jobs[id];
+  for (const id in (o.jobWins || {})) if (JOB_BY_ID[id] && isFinite(o.jobWins[id])) base.jobWins[id] = Math.max(0, Math.floor(+o.jobWins[id]));
+  if (isFinite(o.jobReadyAt) && o.jobReadyAt > 0 && !base.jobs.waste) base.jobs.waste = +o.jobReadyAt;   // saves from before the jobs list
   if (!isFinite(base.playTime) || base.playTime < 0) base.playTime = 0;
   for (const k of ["dollars","runEarned","allTimeEarned","fines","deadline","lastTick"]) if (!isFinite(base[k])) throw new Error("Corrupt save");
   return base;
@@ -1474,6 +1562,1406 @@ function renderAchievements(){
 }
 
 /* =========================================================
+   JOBS: one minigame per industry, unlocked by owning that industry.
+   Each job pays several minutes of its industry's income and can be played once
+   per cooldown (the cooldown starts when a shift starts, win or lose).
+   Every game draws in the same 1672x941 (16:9) space inside one shared window
+   with a common HUD: timer, progress meter, strikes, alerts and result screens.
+   A game object provides:
+     time, strikes?, meter, image?, tagline, rules[], winTitle, winText, lose{busted,time}
+     init(G)  step(G,dt)  ambient?(G,dt)  stop?(G)  draw(ctx,G,now)
+     down?/move?/up?(G,x,y)  cursor?(G,x,y)  extra?(G)  onTimeUp?(G)
+   ========================================================= */
+const JOB_COOLDOWN = 5 * 60 * 1000;      // default: once every 5 minutes
+const JOB_PAY_SECS = 5 * 60;             // default: pays 5 minutes of the industry's income
+const JOB_COOLDOWN_OVERRIDE = 0;         // ms; the test build sets this so testers can replay jobs
+const JW = 1672, JH = 941;
+let G = null, jobRaf = 0;
+const rand = (a, b) => a + Math.random() * (b - a);
+const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+function rr(ctx, x, y, w, h, r){ ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, y, w, h, r) : ctx.rect(x, y, w, h); }
+function mmss(ms){ const s = Math.ceil(ms / 1000); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); }
+function vgrad(ctx, y0, y1, stops){ const g = ctx.createLinearGradient(0, y0, 0, y1); stops.forEach(([o, c]) => g.addColorStop(o, c)); return g; }
+function hgrad(ctx, x0, x1, stops){ const g = ctx.createLinearGradient(x0, 0, x1, 0); stops.forEach(([o, c]) => g.addColorStop(o, c)); return g; }
+const INK = "#1f2a1c";                    // cartoon outline colour
+function emoji(ctx, ch, x, y, size, alpha = 1){   // emoji take their opacity from fillStyle, so always reset it
+  ctx.save(); ctx.globalAlpha = alpha; ctx.fillStyle = "#000"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.font = `${size}px 'Segoe UI Emoji','Apple Color Emoji','Noto Color Emoji',sans-serif`; ctx.fillText(ch, x, y); ctx.restore();
+}
+function label(ctx, text, x, y, size, fill = "#fff", align = "center", weight = 900){
+  ctx.save(); ctx.font = `${weight} ${size}px 'Segoe UI', sans-serif`; ctx.textAlign = align; ctx.textBaseline = "middle";
+  ctx.lineJoin = "round"; ctx.lineWidth = Math.max(3, size * .2); ctx.strokeStyle = "#111"; ctx.strokeText(text, x, y);
+  ctx.fillStyle = fill; ctx.fillText(text, x, y); ctx.restore();
+}
+function plainText(ctx, text, x, y, size, fill, align = "center", weight = 800){
+  ctx.save(); ctx.font = `${weight} ${size}px 'Segoe UI', sans-serif`; ctx.textAlign = align; ctx.textBaseline = "middle"; ctx.fillStyle = fill; ctx.fillText(text, x, y); ctx.restore();
+}
+function bubble(ctx, text, x, y, size = 34){   // speech bubble centred above (x, y)
+  ctx.save(); ctx.font = `800 ${size}px 'Segoe UI', sans-serif`;
+  const w = ctx.measureText(text).width + size * 1.2, h = size * 1.9;
+  rr(ctx, x - w / 2, y - h, w, h, h / 2); ctx.fillStyle = "#fff"; ctx.fill(); ctx.lineWidth = 5; ctx.strokeStyle = INK; ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x - 14, y - 3); ctx.lineTo(x, y + 22); ctx.lineTo(x + 14, y - 3); ctx.fillStyle = "#fff"; ctx.fill();
+  ctx.beginPath(); ctx.moveTo(x - 14, y); ctx.lineTo(x, y + 22); ctx.lineTo(x + 14, y); ctx.stroke();
+  ctx.fillStyle = "#1b1b1b"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(text, x, y - h / 2);
+  ctx.restore();
+}
+function button(ctx, x, y, w, h, text, color, active, disabled){
+  ctx.save();
+  rr(ctx, x, y + (active ? 6 : 0), w, h, 22);
+  ctx.fillStyle = disabled ? "#555c58" : color; ctx.fill(); ctx.lineWidth = 6; ctx.strokeStyle = INK; ctx.stroke();
+  if (!active) { rr(ctx, x, y + h - 4, w, 12, 8); ctx.fillStyle = "rgba(0,0,0,.35)"; ctx.fill(); }
+  label(ctx, text, x + w / 2, y + h / 2 + (active ? 6 : 0), Math.min(44, h * .42), disabled ? "#ccc" : "#fff");
+  ctx.restore();
+}
+const inBox = (x, y, b) => x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h;
+
+// ---------- shared helpers every game can use ----------
+function floatText(text, x, y, bad){ G.floats.push({ text, x, y, life: 1.1, bad }); }
+function burst(x, y, color, n = 14, speed = 380, size = 7){
+  for (let i = 0; i < n; i++) { const a = rand(0, Math.PI * 2), s = rand(speed * .3, speed);
+    G.parts.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - speed * .4, life: rand(.5, .9), color, r: rand(size * .6, size), grav: 900 }); }
+}
+function jobAlert(text, cls){ const a = $("jobAlert"); a.textContent = text; a.className = "on " + (cls || ""); if (G) G.alertT = 1.6; }
+function jobStrike(text, x = JW / 2, y = JH / 2){
+  if (!G || G.phase !== "play") return;
+  G.strikes++;
+  floatText(text, x, y, true);
+  if (G.strikes >= G.game.strikes) { jobAlert("🚨 BUSTED!", "bad"); endJob("busted"); }
+  else jobAlert(`🚨 ${text} Strike ${G.strikes} of ${G.game.strikes}`, "bad");
+}
+const jobImages = {};
+function jobImage(src){ if (!jobImages[src]) { const im = new Image(); im.src = src; jobImages[src] = im; } return jobImages[src]; }
+const imgReady = im => im && im.complete && im.naturalWidth > 0;
+
+/* ---------------------------------------------------------
+   JOB: WASTE DISPOSAL (Processing Plant)
+   Pollute the lake to 100% by opening sludge valves and tossing toxic barrels,
+   without the inspector catching you 3 times. Scene art: assets/job-lake.webp.
+   --------------------------------------------------------- */
+const WASTE = {
+  valveRate: 3.6, valveOpen: 2.6, valveCool: 2.0,       // % per second while open, seconds open, seconds before reuse
+  barrelAmt: 7, barrelEvery: 2.3, maxBarrels: 3,
+  recover: 3.0,                                         // the lake cleans itself, % per second
+  warn: 1.3, watch: 2.6, gapMin: 4.2, gapMax: 6.8, firstAt: 5,
+  // Tuned so flawless instant play finishes in ~20 s; real players need most of the 30 s.
+};
+const LAKE = [[215,455],[400,447],[600,450],[800,445],[1000,447],[1200,452],[1350,462],[1450,480],[1520,530],[1560,590],[1530,640],
+  [1470,690],[1420,730],[1330,800],[1250,850],[1100,875],[950,880],[800,865],[700,845],[600,820],[470,790],[380,770],[280,738],
+  [220,690],[185,620],[175,560],[190,500]];
+const OUTFALLS = [{ x:740, y:450 }, { x:990, y:450 }, { x:1330, y:466 }];
+const BARREL_SPOTS = [{ x:585, y:885 }, { x:1010, y:908 }, { x:1455, y:885 }];
+// The inspector rises from behind the green bush; the bush is re-drawn from the scene image over his lower half.
+const INSPECTOR = { x:1112, showY:338, hideY:448, cropX:1030, cropY:336, cropW:170, cropH:130 };
+const OUT_SCALE = 1.35, BARREL_SCALE = 1.35;
+function inLake(x, y){
+  let inside = false;
+  for (let i = 0, j = LAKE.length - 1; i < LAKE.length; j = i++) {
+    const [xi, yi] = LAKE[i], [xj, yj] = LAKE[j];
+    if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+}
+function lakePath(ctx){ ctx.beginPath(); LAKE.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.closePath(); }
+const easeOutBack = k => 1 + 2.4 * Math.pow(k - 1, 3) + 1.4 * Math.pow(k - 1, 2);
+
+const WasteGame = {
+  time: 30, strikes: 3, meter: "LAKE CONTAMINATION", image: "assets/job-lake.webp",
+  tagline: "Licensed hazardous-waste disposal costs $4 million a year. The lake behind the plant is free. It's also the town's drinking water, which the board described as 'not our department.'",
+  rules: [
+    "<b>Click a red valve</b> to open a sludge pipe. Click it again to shut it early.",
+    "<b>Drag toxic barrels</b> into the lake, or tap one to toss it.",
+    "Fill the <b>contamination meter to 100%</b> before time runs out. The lake keeps trying to heal itself. Don't let it.",
+    "Watch the bushes. When the <b>inspector</b> is looking, stop dumping. Get caught 3 times and you're busted.",
+  ],
+  winTitle: "Quota met!", winText: "The town's tap water now glows faintly at night. Legal is calling it a 'feature,' and the fish have stopped filing complaints.",
+  lose: { busted: "The inspector photographed everything. Legal is already drafting a statement blaming a 'rogue intern.'", time: "Time's up. The lake survived, and so did the town's water supply. Embarrassing." },
+  init(G){
+    Object.assign(G, {
+      valves: OUTFALLS.map(o => ({ ...o, open: false, openT: 0, cool: 0, spin: 0, blobT: 0 })),
+      barrels: [], nextBarrel: 0.6, flying: [], blobs: [], drops: [], rings: [],
+      insp: { state: "hidden", t: 0, next: WASTE.firstAt, y: INSPECTOR.hideY, caught: false }, drag: null,
+    });
+  },
+  ambient(G, dt){
+    G.blobs.forEach(b => { b.r += (b.target - b.r) * Math.min(1, dt * 1.4); b.x += b.vx * dt; b.y += b.vy * dt; b.vx *= .995; b.vy *= .995; b.ph += dt; });
+    G.drops = G.drops.filter(d => (d.vy += 900 * dt, d.x += d.vx * dt, d.y += d.vy * dt, d.life -= dt) > 0);
+    G.rings = G.rings.filter(r => (r.r += 70 * dt, r.life -= dt) > 0);
+    G.valves.forEach(v => { if (v.open) v.spin += dt * 9; });
+  },
+  step(G, dt){
+    let delta = -WASTE.recover * dt;
+    for (const v of G.valves) {
+      if (v.open) {
+        v.openT += dt; delta += WASTE.valveRate * dt;
+        if ((v.blobT -= dt) <= 0) { v.blobT = 0.18; wasteBlob(v.x + rand(-30, 30), v.y + 70 * OUT_SCALE + rand(0, 30), rand(28, 42), 62); }
+        if (Math.random() < dt * 30) G.drops.push({ x: v.x + rand(-16, 16), y: v.y + 66 * OUT_SCALE, vx: rand(-70, 70), vy: rand(-240, -90), life: .5, sludge: true });
+        if (v.openT >= WASTE.valveOpen) { v.open = false; v.cool = WASTE.valveCool; }
+      } else if (v.cool > 0) v.cool = Math.max(0, v.cool - dt);
+    }
+    if ((G.nextBarrel -= dt) <= 0) {
+      G.nextBarrel = WASTE.barrelEvery;
+      const free = BARREL_SPOTS.filter(s => !G.barrels.some(b => b.spot === s));
+      if (free.length && G.barrels.length < WASTE.maxBarrels) { const s = pick(free); G.barrels.push({ spot: s, x: s.x, y: s.y, pop: 0 }); }
+    }
+    G.barrels.forEach(b => { b.pop = Math.min(1, b.pop + dt * 4); if (b.back) { b.x += (b.spot.x - b.x) * Math.min(1, dt * 10); b.y += (b.spot.y - b.y) * Math.min(1, dt * 10); } });
+    for (const f of G.flying) {
+      f.t += dt;
+      if (!f.landed && f.t >= f.dur) {
+        f.landed = true; delta += WASTE.barrelAmt; wasteSplash(f.tx, f.ty, true); wasteBlob(f.tx, f.ty, rand(55, 75), 90);
+        if (G.insp.state === "watch") wasteStrike();
+        floatText("+" + WASTE.barrelAmt + "%", f.tx, f.ty - 40);
+      }
+    }
+    G.flying = G.flying.filter(f => f.t < f.dur + 0.55);
+    const ins = G.insp; ins.t += dt;
+    if (ins.state === "hidden" && G.t >= ins.next) { ins.state = "warn"; ins.t = 0; jobAlert("👀 Someone's coming…", "warn"); }
+    else if (ins.state === "warn" && ins.t >= WASTE.warn) { ins.state = "watch"; ins.t = 0; ins.caught = false; jobAlert("🕵️ INSPECTOR WATCHING. STOP DUMPING!", "bad"); }
+    else if (ins.state === "watch") {
+      if (G.valves.some(v => v.open)) wasteStrike();
+      if (ins.t >= WASTE.watch) { ins.state = "leave"; ins.t = 0; }
+    } else if (ins.state === "leave" && ins.t >= .5) { ins.state = "hidden"; ins.t = 0; ins.next = G.t + rand(WASTE.gapMin, WASTE.gapMax); }
+    const targetY = ins.state === "watch" ? INSPECTOR.showY : ins.state === "warn" ? INSPECTOR.hideY - 22 : INSPECTOR.hideY;
+    ins.y += (targetY - ins.y) * Math.min(1, dt * 9);
+    G.pct = clamp(G.pct + delta, 0, 100);
+    if (G.pct >= 100) endJob("win");
+  },
+  stop(G){ G.valves.forEach(v => v.open = false); G.drag = null; },
+  draw(ctx, G, now){
+    const img = jobImage(this.image);
+    if (imgReady(img)) ctx.drawImage(img, 0, 0, JW, JH); else { ctx.fillStyle = "#4da9d8"; ctx.fillRect(0, 0, JW, JH); }
+    ctx.save(); lakePath(ctx); ctx.clip();
+    const murk = G.pct / 100;
+    ctx.fillStyle = `rgba(96,118,22,${0.58 * murk})`; ctx.fillRect(0, 0, JW, JH);
+    // cartoon sludge slicks: outline pass first, then fills on top, so overlapping slicks merge into one outlined shape
+    ctx.lineJoin = "round"; ctx.strokeStyle = "#34470b"; ctx.lineWidth = 9;
+    for (const b of G.blobs) { blobPath(ctx, b); ctx.stroke(); }
+    for (const b of G.blobs) {
+      blobPath(ctx, b);
+      const grd = ctx.createLinearGradient(0, b.y - b.r * .6, 0, b.y + b.r * .6);
+      grd.addColorStop(0, b.hue < .5 ? "#a3cf2e" : "#8fb32a"); grd.addColorStop(1, b.hue < .5 ? "#5c7f12" : "#6b6a17");
+      ctx.fillStyle = grd; ctx.fill();
+    }
+    for (const b of G.blobs) {
+      ctx.fillStyle = "rgba(240,255,190,.55)"; ctx.beginPath(); ctx.ellipse(b.x - b.r * .32, b.y - b.r * .2, b.r * .26, b.r * .07, -.15, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "rgba(52,71,11,.5)"; ctx.beginPath(); ctx.ellipse(b.x + b.r * .3, b.y + b.r * .12, b.r * .1, b.r * .05, 0, 0, Math.PI * 2); ctx.fill();
+    }
+    if (murk > .15) for (let i = 0; i < 18 * murk; i++) {
+      const bx = 260 + ((i * 397) % 1220), by = 480 + ((i * 211) % 360), ph = (now * 1.3 + i * .37) % 1;
+      if (!inLake(bx, by)) continue;
+      ctx.strokeStyle = `rgba(200,220,120,${.55 * (1 - ph)})`; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.ellipse(bx, by, 4 + ph * 9, (4 + ph * 9) * .5, 0, 0, Math.PI * 2); ctx.stroke();
+    }
+    for (const r of G.rings) { ctx.strokeStyle = `rgba(255,255,255,${.6 * r.life})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(r.x, r.y, r.r, r.r * .35, 0, 0, Math.PI * 2); ctx.stroke(); }
+    // belly-up fish surface as the lake dies (one per 9% contamination)
+    const FISH = [[420, 600], [980, 720], [700, 560], [1260, 640], [560, 740], [1120, 540], [860, 650], [1380, 700], [330, 680], [1020, 610], [640, 660]];
+    for (let i = 0; i < Math.min(FISH.length, Math.floor(G.pct / 9)); i++) {
+      const [fx, fy] = FISH[i];
+      ctx.save(); ctx.translate(fx + Math.sin(now * .8 + i) * 6, fy + Math.sin(now * 1.6 + i * 2) * 3); ctx.rotate(Math.PI + (i % 2 ? .25 : -.25));
+      ctx.filter = "grayscale(1) sepia(.7) hue-rotate(35deg) brightness(1.15)";   // pale, sickly, belly-up
+      emoji(ctx, "🐟", 0, 0, 62); ctx.filter = "none"; ctx.restore();
+    }
+    ctx.restore();
+    drawInspector(ctx, G, now, img);
+    G.valves.forEach(v => { ctx.save(); ctx.translate(v.x, v.y); ctx.scale(OUT_SCALE, OUT_SCALE); ctx.translate(-v.x, -v.y); drawOutfall(ctx, v, now); ctx.restore(); });
+    G.barrels.forEach(b => { if (b !== G.drag?.barrel) drawBarrel(ctx, b.x, b.y, .55 + .45 * easeOutBack(b.pop), Math.sin(now * 2 + b.spot.x) * .03); });
+    for (const f of G.flying) {
+      const k = Math.min(1, f.t / f.dur);
+      if (k < 1) { const x = f.x0 + (f.tx - f.x0) * k, y = f.y0 + (f.ty - f.y0) * k - Math.sin(Math.PI * k) * f.arc; drawBarrel(ctx, x, y, 1 - .25 * k, f.spin * k); }
+      else { const s = (f.t - f.dur) / .55; ctx.save(); ctx.globalAlpha = 1 - s; drawBarrel(ctx, f.tx, f.ty + 20 * s, .75 * (1 - .4 * s), f.spin + .5 * s); ctx.restore(); }
+    }
+    if (G.drag) drawBarrel(ctx, G.drag.x, G.drag.y, 1.08, Math.sin(now * 10) * .08);
+    for (const d of G.drops) { ctx.fillStyle = d.sludge ? `rgba(96,112,26,${Math.min(1, d.life * 2)})` : `rgba(225,248,255,${Math.min(1, d.life * 2)})`; ctx.beginPath(); ctx.arc(d.x, d.y, d.sludge ? 6 : 5, 0, Math.PI * 2); ctx.fill(); }
+  },
+  cursor(G, x, y){ return !!(wasteValveAt(x, y) || wasteBarrelAt(x, y)); },
+  down(G, x, y){
+    const v = wasteValveAt(x, y);
+    if (v) {
+      if (v.open) { v.open = false; v.cool = WASTE.valveCool * (v.openT / WASTE.valveOpen); }
+      else if (v.cool === 0) { v.open = true; v.openT = 0; v.blobT = 0; if (G.insp.state === "watch") wasteStrike(); }
+      return;
+    }
+    const b = wasteBarrelAt(x, y);
+    if (b) G.drag = { barrel: b, x, y, sx: x, sy: y, moved: false };
+  },
+  move(G, x, y){ if (G.drag) { G.drag.x = x; G.drag.y = y + 40; if (Math.hypot(x - G.drag.sx, y - G.drag.sy) > 14) G.drag.moved = true; } },
+  up(G, x, y){
+    if (!G.drag) return;
+    const d = G.drag, b = d.barrel; G.drag = null;
+    if (!d.moved) { const [tx, ty] = wasteLakeTarget(b.x); wasteThrow(b, tx, ty); return; }
+    if (inLake(x, y)) { b.x = x; b.y = y + 40; wasteThrow(b, x, y, .18, 30); }
+    else { b.x = x; b.y = y + 40; b.back = true; }
+  },
+};
+function wasteStrike(){ if (G.insp.caught) return; G.insp.caught = true; jobStrike("SPOTTED!", INSPECTOR.x, INSPECTOR.showY - 150); }
+function wasteBlob(x, y, r, max){
+  if (G.blobs.length > 70) G.blobs.shift();
+  G.blobs.push({ x, y, r: r * .3, target: Math.min(max * 1.7, r + G.pct * 1.1), vx: rand(-14, 14), vy: rand(-4, 10), ph: rand(0, 6), hue: Math.random(),
+    lobes: Array.from({ length: 9 }, () => rand(-.22, .22)) });
+}
+function blobPath(ctx, b){   // wobbly, flattened (perspective) puddle outline
+  const n = b.lobes.length, pts = [];
+  for (let i = 0; i < n; i++) {
+    const a = i / n * Math.PI * 2, k = 1 + b.lobes[i] + Math.sin(b.ph * 1.6 + i) * .05;
+    pts.push([b.x + Math.cos(a) * b.r * k, b.y + Math.sin(a) * b.r * k * .5]);
+  }
+  ctx.beginPath();
+  for (let i = 0; i <= n; i++) {
+    const p = pts[i % n], q = pts[(i + 1) % n], mx = (p[0] + q[0]) / 2, my = (p[1] + q[1]) / 2;
+    i ? ctx.quadraticCurveTo(p[0], p[1], mx, my) : ctx.moveTo(mx, my);
+  }
+  ctx.closePath();
+}
+function wasteSplash(x, y, big){
+  for (let i = 0; i < (big ? 22 : 8); i++) G.drops.push({ x: x + rand(-20, 20), y, vx: rand(-260, 260), vy: rand(-520, -220), life: .7, sludge: Math.random() < .4 });
+  G.rings.push({ x, y, r: 10, life: .9 }); if (big) G.rings.push({ x, y, r: 2, life: 1.2 });
+}
+function wasteValveAt(x, y){ return G.valves.find(v => Math.hypot(x - v.x, y - (v.y - 62 * OUT_SCALE)) < 100); }
+function wasteBarrelAt(x, y){ return [...G.barrels].reverse().find(b => Math.abs(x - b.x) < 66 * BARREL_SCALE && y < b.y + 24 && y > b.y - 118 * BARREL_SCALE); }
+function wasteThrow(b, tx, ty, dur = .5, arc = 170){
+  G.barrels = G.barrels.filter(o => o !== b);
+  G.flying.push({ x0: b.x, y0: b.y, tx, ty, t: 0, dur, arc, spin: rand(-1.4, 1.4), landed: false });
+}
+function wasteLakeTarget(x){   // tap-to-toss: aim straight out into the water
+  for (let y = 760; y > 470; y -= 20) if (inLake(x, y) && inLake(x + 40, y) && inLake(x - 40, y)) return [x, y - 60];
+  return [870, 640];
+}
+function drawOutfall(ctx, v, now){
+  const x = v.x, y = v.y, R = 30, ready = !v.open && v.cool === 0 && G.phase === "play";
+  if (v.open) {   // sludge stream pouring out of the pipe mouth into the lake
+    const fall = 70, wob = Math.sin(now * 14) * 4;
+    ctx.beginPath();
+    ctx.moveTo(x - 22, y + 2); ctx.quadraticCurveTo(x - 24 + wob, y + fall * .5, x - 30, y + fall);
+    ctx.lineTo(x + 30, y + fall); ctx.quadraticCurveTo(x + 24 - wob, y + fall * .5, x + 22, y + 2); ctx.closePath();
+    ctx.fillStyle = hgrad(ctx, x - 30, x + 30, [[0, "#5e8212"], [.45, "#b5e03a"], [1, "#5e8212"]]); ctx.fill();
+    ctx.lineWidth = 4; ctx.strokeStyle = "#34470b"; ctx.stroke();
+    ctx.strokeStyle = "rgba(240,255,190,.7)"; ctx.lineWidth = 4; ctx.lineCap = "round";
+    for (let i = 0; i < 3; i++) { const o = ((now * 2.6 + i / 3) % 1) * (fall - 18); ctx.beginPath(); ctx.moveTo(x - 9 + i * 9, y + 6 + o); ctx.lineTo(x - 10 + i * 9, y + 16 + o); ctx.stroke(); }
+    ctx.lineCap = "butt";
+    ctx.beginPath(); ctx.ellipse(x, y + fall, 46 + Math.sin(now * 9) * 5, 14, 0, 0, Math.PI * 2);
+    ctx.fillStyle = "#c8ee5a"; ctx.fill(); ctx.strokeStyle = "#34470b"; ctx.lineWidth = 4; ctx.stroke();
+  }
+  ctx.lineWidth = 4; ctx.strokeStyle = "#2c3136";
+  rr(ctx, x - R, y - 46, R * 2, 44, 10); ctx.fillStyle = hgrad(ctx, x - R, x + R, [[0, "#5d656d"], [.35, "#dfe4e8"], [.65, "#a7afb7"], [1, "#4f565d"]]); ctx.fill(); ctx.stroke();
+  rr(ctx, x - R - 5, y - 24, R * 2 + 10, 11, 4); ctx.fillStyle = "#7f8890"; ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(x, y, R + 3, 13, 0, 0, Math.PI * 2); ctx.fillStyle = "#8c949b"; ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(x, y + 1, R - 5, 8, 0, 0, Math.PI * 2); ctx.fillStyle = v.open ? "#6d7f1c" : "#14171a"; ctx.fill();
+  const wx = x, wy = y - 86, wr = 27;
+  ctx.fillStyle = "#6d757c"; rr(ctx, x - 5, wy, 10, 42, 3); ctx.fill(); ctx.stroke();
+  if (ready) { ctx.strokeStyle = `rgba(255,236,120,${.55 + .45 * Math.sin(now * 6)})`; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(wx, wy, wr + 11, 0, Math.PI * 2); ctx.stroke(); }
+  ctx.save(); ctx.translate(wx, wy); ctx.rotate(v.spin);
+  ctx.strokeStyle = "#2c1212"; ctx.lineWidth = 13; ctx.beginPath(); ctx.arc(0, 0, wr, 0, Math.PI * 2); ctx.stroke();
+  ctx.strokeStyle = v.cool > 0 ? "#8a6a6a" : "#e0302a"; ctx.lineWidth = 8; ctx.beginPath(); ctx.arc(0, 0, wr, 0, Math.PI * 2); ctx.stroke();
+  ctx.lineWidth = 5; for (let i = 0; i < 4; i++) { ctx.rotate(Math.PI / 2); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(wr - 2, 0); ctx.stroke(); }
+  ctx.fillStyle = "#3a3f44"; ctx.beginPath(); ctx.arc(0, 0, 7, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+  if (v.open) { ctx.strokeStyle = "#d8ff6a"; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(wx, wy, wr + 11, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * (1 - v.openT / WASTE.valveOpen)); ctx.stroke(); }
+  else if (v.cool > 0) { ctx.strokeStyle = "rgba(255,255,255,.7)"; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(wx, wy, wr + 11, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * (1 - v.cool / WASTE.valveCool)); ctx.stroke(); }
+}
+function drawBarrel(ctx, x, y, s, rot){   // (x, y) is the barrel's base
+  ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.scale(s * BARREL_SCALE, s * BARREL_SCALE);
+  ctx.fillStyle = "rgba(0,0,0,.25)"; ctx.beginPath(); ctx.ellipse(0, 2, 40, 10, 0, 0, Math.PI * 2); ctx.fill();
+  const w = 68, h = 92, top = -h;
+  ctx.lineWidth = 4; ctx.strokeStyle = "#2a2009";
+  rr(ctx, -w / 2, top, w, h, 12); ctx.fillStyle = hgrad(ctx, -w / 2, w / 2, [[0, "#b8860e"], [.3, "#ffd84a"], [.55, "#f5c22b"], [1, "#9c6f08"]]); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = "#1d1d1d"; ctx.fillRect(-w / 2 + 2, top + 32, w - 4, 26);
+  ctx.fillStyle = "#ffd84a"; ctx.font = "900 26px 'Segoe UI Symbol', sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("☣", 0, top + 46);
+  ctx.strokeStyle = "rgba(60,40,0,.55)"; ctx.lineWidth = 3;
+  [top + 14, top + h - 14].forEach(ry => { ctx.beginPath(); ctx.moveTo(-w / 2 + 3, ry); ctx.lineTo(w / 2 - 3, ry); ctx.stroke(); });
+  ctx.beginPath(); ctx.ellipse(0, top + 3, w / 2 - 4, 7, 0, 0, Math.PI * 2); ctx.fillStyle = "#e3ad1d"; ctx.fill(); ctx.strokeStyle = "#2a2009"; ctx.lineWidth = 3; ctx.stroke();
+  ctx.fillStyle = "#7da11f"; ctx.beginPath(); ctx.ellipse(-12, top + 2, 9, 4, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+}
+function drawInspector(ctx, G, now, img){
+  const ins = G.insp, I = INSPECTOR;
+  if (ins.state === "watch") {   // vision cone over the lake
+    ctx.save(); lakePath(ctx); ctx.clip();
+    ctx.fillStyle = vgrad(ctx, I.showY - 60, 860, [[0, "rgba(255,240,120,.38)"], [1, "rgba(255,240,120,.04)"]]);
+    ctx.beginPath(); ctx.moveTo(I.x, I.showY - 70); ctx.lineTo(260, 900); ctx.lineTo(1580, 900); ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+  if (ins.y < I.hideY - 2) {
+    emoji(ctx, "🕵️", I.x, ins.y - 44, 112);
+    if (ins.state === "watch") emoji(ctx, "🔍", I.x + 62, ins.y - 70 + Math.sin(now * 6) * 5, 54);
+    if (imgReady(img)) ctx.drawImage(img, I.cropX, I.cropY, I.cropW, I.cropH, I.cropX, I.cropY, I.cropW, I.cropH);   // bush in front
+  }
+  if (ins.state === "warn") emoji(ctx, "👀", I.x, I.cropY - 34 + Math.sin(now * 20) * 3, 64, .6 + .4 * Math.sin(now * 14));
+}
+
+/* ---------------------------------------------------------
+   JOB: SHORT POUR (Lemonade Stand)
+   Hold to pour; stop at (or just above) the legal-minimum line.
+   --------------------------------------------------------- */
+const LEMON = { goal: 8, zone: .08, cupX: 836, cupTop: 470, cupBot: 880, topW: 300, botW: 225 };
+const LemonGame = {
+  time: 30, strikes: 3, meter: "SHORT POURS",
+  tagline: "Customers never finish their lemonade. You pour their leftovers back into the pitcher, top it up, and resell it as fresh-squeezed. Every recycled cup goes right to the legal minimum.",
+  rules: [
+    "<b>Press and hold</b> anywhere to pour from the backwash pitcher. Let go to stop.",
+    "Stop <b>at or just above the red LEGAL MIN line</b> (the green zone) for a perfect short pour.",
+    "Under the line and the customer notices: a strike. 3 complaints and the health department shows up.",
+    "Way over the line wastes perfectly good backwash: no credit.",
+    `Resell <b>${LEMON.goal} recycled cups</b> before time runs out. Pouring speeds up as you go.`,
+  ],
+  winTitle: "Pre-enjoyed and resold!", winText: "Eight cups of other people's leftovers sold at full price. The secret ingredient is strangers.",
+  lose: { busted: "Three customers found someone else's gum in their cup. The health department is on its way, with gloves.",
+          time: "The line moved on. Somewhere, a stand with clean cups is thriving, and it makes you sick." },
+  init(G){ Object.assign(G, { served: 0, speed: .34, msg: "", msgOk: true, msgT: 0 }); lemonNext(G); },
+  step(G, dt){
+    if (G.state === "pour") { G.level = Math.min(1, G.level + G.speed * dt); if (G.level >= 1) lemonJudge(G); }
+    else if (G.state === "judged" && (G.wait -= dt) <= 0) lemonNext(G);
+    G.msgT = Math.max(0, G.msgT - dt);
+    G.pct = G.served / LEMON.goal * 100; G.meterText = `${G.served} / ${LEMON.goal}`;
+  },
+  down(G){ if (G.state === "ready") G.state = "pour"; },
+  up(G){ if (G.state === "pour") lemonJudge(G); },
+  stop(G){ if (G.state === "pour") G.state = "judged"; },
+  cursor(){ return true; },
+  draw(ctx, G, now){
+    ctx.fillStyle = vgrad(ctx, 0, 640, [[0, "#6cc6ff"], [1, "#dff4ff"]]); ctx.fillRect(0, 0, JW, 640);
+    ctx.fillStyle = "rgba(255,236,120,.35)"; ctx.beginPath(); ctx.arc(230, 180, 120, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#ffe34d"; ctx.beginPath(); ctx.arc(230, 180, 72, 0, Math.PI * 2); ctx.fill(); ctx.lineWidth = 6; ctx.strokeStyle = "#e0a800"; ctx.stroke();
+    [[520, 120, 1], [1250, 90, 1.2], [1500, 200, .8]].forEach(([x, y, s]) => cloud(ctx, x, y, s));
+    ctx.fillStyle = "#8fd463"; ctx.beginPath(); ctx.ellipse(300, 650, 520, 140, 0, Math.PI, 0); ctx.ellipse(1400, 660, 600, 170, 0, Math.PI, 0); ctx.fill();
+    ctx.fillStyle = vgrad(ctx, 600, JH, [[0, "#e9dfcc"], [1, "#cfc2a8"]]); ctx.fillRect(0, 600, JW, JH - 600);
+    ctx.strokeStyle = "rgba(120,100,70,.35)"; ctx.lineWidth = 4; for (let x = -100; x < JW; x += 260) { ctx.beginPath(); ctx.moveTo(x, 600); ctx.lineTo(x - 120, JH); ctx.stroke(); }
+    // the stand
+    ctx.fillStyle = "#c98a4a"; ctx.strokeStyle = INK; ctx.lineWidth = 6;
+    rr(ctx, 470, 560, 732, 250, 16); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = "rgba(90,50,20,.45)"; ctx.lineWidth = 4; for (let y = 610; y < 800; y += 48) { ctx.beginPath(); ctx.moveTo(480, y); ctx.lineTo(1192, y); ctx.stroke(); }
+    rr(ctx, 440, 540, 792, 34, 10); ctx.fillStyle = "#a96b33"; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 6; ctx.stroke();
+    [490, 1180].forEach(x => { rr(ctx, x - 14, 250, 28, 300, 8); ctx.fillStyle = "#b67a3c"; ctx.fill(); ctx.stroke(); });
+    for (let i = 0; i < 9; i++) {   // striped awning with scallops
+      const x0 = 440 + i * 88; ctx.fillStyle = i % 2 ? "#fff6d5" : "#ffd23f";
+      ctx.beginPath(); ctx.moveTo(x0, 200); ctx.lineTo(x0 + 88, 200); ctx.lineTo(x0 + 88, 300); ctx.arc(x0 + 44, 300, 44, 0, Math.PI); ctx.closePath(); ctx.fill();
+    }
+    ctx.lineWidth = 6; ctx.strokeStyle = INK; ctx.beginPath(); ctx.moveTo(440, 200); ctx.lineTo(1232, 200); ctx.lineTo(1232, 300);
+    for (let i = 8; i >= 0; i--) ctx.arc(440 + i * 88 + 44, 300, 44, 0, Math.PI); ctx.lineTo(440, 200); ctx.stroke();
+    rr(ctx, 600, 100, 472, 92, 18); ctx.fillStyle = "#fff6d5"; ctx.fill(); ctx.lineWidth = 6; ctx.strokeStyle = INK; ctx.stroke();
+    label(ctx, "LEMONADE", 836, 146, 62, "#ffd23f");
+    label(ctx, "Fresh*", 1090, 640, 38, "#fff"); label(ctx, "$5", 1090, 700, 52, "#ffe34d");
+    plainText(ctx, "*previously", 1090, 760, 22, "rgba(60,30,10,.85)", "center", 700);
+    // customer
+    emoji(ctx, G.cust, 1400, 520, 230);
+    bubble(ctx, G.state === "judged" ? G.reaction : G.order, 1400, 360, 34);
+    // cup + liquid
+    const L = LEMON, h = L.cupBot - L.cupTop, lvlY = L.cupBot - G.level * h, lineY = L.cupBot - G.line * h, zoneY = L.cupBot - (G.line + L.zone) * h;
+    const cupPath = () => { ctx.beginPath(); ctx.moveTo(L.cupX - L.topW / 2, L.cupTop); ctx.lineTo(L.cupX + L.topW / 2, L.cupTop); ctx.lineTo(L.cupX + L.botW / 2, L.cupBot); ctx.lineTo(L.cupX - L.botW / 2, L.cupBot); ctx.closePath(); };
+    ctx.fillStyle = "rgba(0,0,0,.18)"; ctx.beginPath(); ctx.ellipse(L.cupX, L.cupBot + 8, 150, 20, 0, 0, Math.PI * 2); ctx.fill();
+    cupPath(); ctx.fillStyle = "rgba(235,250,255,.55)"; ctx.fill();
+    ctx.save(); cupPath(); ctx.clip();
+    ctx.fillStyle = "rgba(120,220,120,.35)"; ctx.fillRect(0, zoneY, JW, lineY - zoneY);
+    ctx.fillStyle = vgrad(ctx, lvlY, L.cupBot, [[0, "#fff27a"], [1, "#ffc928"]]); ctx.fillRect(0, lvlY, JW, L.cupBot - lvlY);
+    if (G.level > .08) { [[-60, 0], [40, 18], [-5, 34]].forEach(([dx, dy], i) => { const cy = Math.max(lvlY + 18 + dy, L.cupTop + 20); rr(ctx, L.cupX + dx - 26, cy, 52, 46, 9); ctx.fillStyle = "rgba(255,255,255,.55)"; ctx.fill(); ctx.strokeStyle = "rgba(255,255,255,.9)"; ctx.lineWidth = 3; ctx.stroke(); }); }
+    for (let i = 0; i < 7; i++) { const by = L.cupBot - ((now * 60 + i * 67) % Math.max(1, L.cupBot - lvlY)); if (by > lvlY) { ctx.fillStyle = "rgba(255,255,255,.6)"; ctx.beginPath(); ctx.arc(L.cupX - 80 + i * 26, by, 5, 0, Math.PI * 2); ctx.fill(); } }
+    if (G.level > .12) {   // previously-enjoyed floaters: a hair, some gum, a mystery crumb
+      const fy = lvlY + 14;
+      ctx.strokeStyle = "#3b2a1a"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(L.cupX - 70, fy + 6); ctx.bezierCurveTo(L.cupX - 40, fy - 12, L.cupX - 10, fy + 22, L.cupX + 20, fy + 4); ctx.stroke();
+      ctx.fillStyle = "#ff8fc0"; ctx.beginPath(); ctx.ellipse(L.cupX + 60, fy + 10, 16, 9, .3, 0, Math.PI * 2); ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = INK; ctx.stroke();
+      ctx.fillStyle = "#6b4a2a"; ctx.beginPath(); ctx.arc(L.cupX - 20, fy + 40, 6, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+    ctx.strokeStyle = "#d62859"; ctx.lineWidth = 9; ctx.lineCap = "round";   // a stranger's lipstick on the rim
+    ctx.beginPath(); ctx.arc(L.cupX - 70, L.cupTop + 4, 26, .2, Math.PI - .2); ctx.stroke(); ctx.lineCap = "butt";
+    ctx.setLineDash([18, 12]); ctx.strokeStyle = "#e3241b"; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(L.cupX - L.topW / 2 - 30, lineY); ctx.lineTo(L.cupX + L.topW / 2 + 30, lineY); ctx.stroke(); ctx.setLineDash([]);
+    label(ctx, "LEGAL MIN", L.cupX - L.topW / 2 - 40, lineY, 28, "#ff6b5b", "right");
+    cupPath(); ctx.lineWidth = 7; ctx.strokeStyle = INK; ctx.stroke();
+    ctx.fillStyle = "rgba(255,255,255,.35)"; ctx.beginPath(); ctx.moveTo(L.cupX - L.topW / 2 + 26, L.cupTop + 20); ctx.lineTo(L.cupX - L.botW / 2 + 22, L.cupBot - 20); ctx.lineTo(L.cupX - L.botW / 2 + 40, L.cupBot - 20); ctx.lineTo(L.cupX - L.topW / 2 + 48, L.cupTop + 20); ctx.fill();
+    // pitcher (tilts while pouring)
+    const tilt = G.state === "pour" ? -.85 : -.15, px = 1010, py = 330;
+    ctx.save(); ctx.translate(px, py); ctx.rotate(tilt);
+    rr(ctx, -70, -110, 140, 190, 26); ctx.fillStyle = "rgba(230,248,255,.75)"; ctx.fill(); ctx.lineWidth = 6; ctx.strokeStyle = INK; ctx.stroke();
+    ctx.save(); rr(ctx, -70, -110, 140, 190, 26); ctx.clip(); ctx.fillStyle = "#ffd94a"; ctx.fillRect(-70, -40, 140, 130); ctx.restore();
+    ctx.beginPath(); ctx.arc(80, -20, 40, -1.2, 1.2); ctx.lineWidth = 14; ctx.strokeStyle = INK; ctx.stroke(); ctx.lineWidth = 7; ctx.strokeStyle = "#e9f8ff"; ctx.stroke();
+    rr(ctx, -58, -96, 116, 40, 8); ctx.fillStyle = "#fff"; ctx.fill(); ctx.lineWidth = 4; ctx.strokeStyle = INK; ctx.stroke();
+    plainText(ctx, "♻ BACKWASH", 0, -76, 20, "#2f9e44", "center", 900);
+    ctx.restore();
+    if (G.state === "pour") {
+      const sx = px - 120, sy = py - 40, wob = Math.sin(now * 30) * 4;
+      ctx.strokeStyle = "#ffcd2e"; ctx.lineWidth = 22; ctx.lineCap = "round"; ctx.beginPath(); ctx.moveTo(sx, sy); ctx.quadraticCurveTo(sx - 20 + wob, sy + 60, L.cupX + 30, lvlY); ctx.stroke(); ctx.lineCap = "butt";
+    }
+    ctx.save(); ctx.translate(L.cupX + L.topW / 2 - 20, L.cupTop); ctx.fillStyle = "#ffe34d"; ctx.beginPath(); ctx.arc(0, 0, 46, 0, Math.PI * 2); ctx.fill(); ctx.lineWidth = 5; ctx.strokeStyle = "#d9a400"; ctx.stroke();
+    ctx.strokeStyle = "#fff3a8"; ctx.lineWidth = 3; for (let i = 0; i < 6; i++) { ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(i) * 36, Math.sin(i) * 36); ctx.stroke(); } ctx.restore();
+    if (G.state === "ready" && G.phase === "play") label(ctx, "HOLD TO POUR", L.cupX, 420, 40, "#fff");
+    if (G.msgT > 0) label(ctx, G.msg, L.cupX, 380, 48, G.msgOk ? "#9dff6a" : "#ff6b5b");
+  },
+};
+function cloud(ctx, x, y, s){
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s); ctx.fillStyle = "#fff";
+  ctx.beginPath(); ctx.arc(0, 0, 50, 0, Math.PI * 2); ctx.arc(55, -18, 60, 0, Math.PI * 2); ctx.arc(115, 0, 46, 0, Math.PI * 2); ctx.rect(0, 0, 115, 46); ctx.fill(); ctx.restore();
+}
+function lemonNext(G){
+  Object.assign(G, { level: 0, line: rand(.42, .76), state: "ready",
+    cust: pick(["🧑", "👩", "👨‍🦰", "👵", "🧔", "👧", "🧑‍🦱", "👱‍♀️", "👴"]), order: pick(["Is it fresh?", "Fresh-squeezed, right?", "A large, please!", "Why is it cloudy?", "Extra lemony!"]) });
+}
+function lemonJudge(G){
+  const d = G.level - G.line; G.state = "judged"; G.wait = .75; G.msgT = .75;
+  if (d < 0) { G.msg = "Not full enough!"; G.msgOk = false; G.reaction = pick(["Half a cup?! And is that GUM?", "There's a HAIR in this!"]); jobStrike("Complaint!", LEMON.cupX, 300); }
+  else if (d <= LEMON.zone) {
+    G.served++; G.speed = Math.min(.8, G.speed + .055); G.msg = "Resold!"; G.msgOk = true; G.reaction = pick(["Tastes… familiar?", "Mmm, chewy!", "Why is it warm?", "Thanks, I guess!"]);
+    burst(LEMON.cupX, LEMON.cupTop, "#ffe34d", 16); if (G.served >= LEMON.goal) endJob("win");
+  } else { G.msg = "Wasted backwash!"; G.msgOk = false; G.reaction = pick(["Wow, a full cup!", "So generous!"]); }
+}
+
+/* ---------------------------------------------------------
+   JOB: SCHOOL MILK CONTRACT (Ingredient Supplier), a rhythm game
+   Jugs arrive on the beat. As each crosses the glowing line, hit the
+   chemical its label asks for (buttons, or keys 1/2/3, A/S/D, J/K/L).
+   --------------------------------------------------------- */
+const MILK = { goal: 24, belt: 690, hitX: 1040, speed: 520, bpm: 100, first: 2.0, perfect: .09, good: .2, exit: 1370 };
+const MILK_BEAT = 60 / MILK.bpm;
+const CHEMS = [
+  { name: "TAP WATER", icon: "💧", color: "#3b8bdb", ink: "#fff", keys: ["1", "a", "j"] },
+  { name: "CHALK", icon: "🦴", color: "#f1f3f5", ink: "#1b1b1b", keys: ["2", "s", "k"] },
+  { name: "FORMALDEHYDE", icon: "⚗️", color: "#2fb35a", ink: "#fff", keys: ["3", "d", "l"] },
+];
+const MILK_BTNS = CHEMS.map((c, i) => ({ x: 120 + i * 490, y: 800, w: 450, h: 112 }));
+const MilkGame = {
+  time: 30, strikes: 3, meter: "JUGS DOSED",
+  tagline: "You won the milk contract for every school in the district by underbidding everyone. The trick: each jug gets a splash of tap water, chalk to keep it white, or formaldehyde to keep it 'fresh.' The lunch lady checks every jug.",
+  rules: [
+    "Jugs ride the belt <b>to the beat</b>. Each jug's label and cap color show the chemical it needs: <b>💧 TAP WATER</b>, <b>🦴 CHALK</b> or <b>⚗️ FORMALDEHYDE</b>.",
+    "When a jug crosses the <b>glowing line</b>, hit the matching button (or keys <b>1 2 3</b>, <b>A S D</b> or <b>J K L</b>). Right on the beat is a PERFECT.",
+    "The <b>wrong chemical</b> is a strike: the lunch lady tastes it. 3 strikes and you're busted.",
+    "Miss a jug and the kids get real milk: no strike, but your combo resets and so does the profit.",
+    `Dose <b>${MILK.goal} jugs</b> before the song ends. It gets busier as it goes.`,
+  ],
+  winTitle: "Calcium is calcium!", winText: "Twenty-four jugs of 'Growing Kids Milk' dosed to the beat. The school board called it 'remarkably shelf-stable.'",
+  lose: { busted: "The lunch lady tasted formaldehyde where the chalk should be, three times. She called the school board, a reporter, and her cousin the lawyer.",
+          time: "The song ended and too much real milk reached the cafeteria. The shareholders are livid." },
+  init(G){ Object.assign(G, { jugs: milkChart(), done: 0, combo: 0, best: 0, judge: "", judgeOk: true, judgeT: 0, squirt: null, press: [0, 0, 0], ladySay: "", ladyT: 0 }); },
+  step(G, dt){
+    G.judgeT = Math.max(0, G.judgeT - dt); G.ladyT = Math.max(0, G.ladyT - dt);
+    G.press = G.press.map(p => Math.max(0, p - dt));
+    if (G.squirt && (G.squirt.t -= dt) <= 0) G.squirt = null;
+    for (const j of G.jugs) if (!j.res && G.t - j.t > MILK.good) {   // sailed past the line undosed
+      j.res = "miss"; G.combo = 0; milkJudge(G, "MISS", false);
+      G.ladySay = pick(["Real milk? Weird.", "This one's… actual milk?", "Huh. Tastes like a cow."]); G.ladyT = .9;
+    }
+    G.pct = G.done / MILK.goal * 100; G.meterText = `${G.done} / ${MILK.goal}`;
+  },
+  extra(G){ return "🚨 " + Array.from({ length: this.strikes }, (_, i) => i < G.strikes ? "●" : "○").join(" ") + `  ·  🔥 x${G.combo}`; },
+  cursor(G, x, y){ return MILK_BTNS.some(b => inBox(x, y, b)); },
+  down(G, x, y){ const i = MILK_BTNS.findIndex(b => inBox(x, y, b)); if (i >= 0) milkPress(G, i); },
+  key(G, k){ const i = CHEMS.findIndex(c => c.keys.includes(k.toLowerCase())); if (i >= 0) milkPress(G, i); },
+  draw(ctx, G, now){
+    const ph = (((G.t - MILK.first) / MILK_BEAT) % 1 + 1) % 1, pulse = 1 - ph;   // beat phase: 0 on the beat
+    // dairy plant wall
+    ctx.fillStyle = vgrad(ctx, 0, MILK.belt, [[0, "#dbeef5"], [1, "#c4dde8"]]); ctx.fillRect(0, 0, JW, MILK.belt);
+    ctx.strokeStyle = "rgba(255,255,255,.7)"; ctx.lineWidth = 3;
+    for (let x = 0; x < JW; x += 70) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, MILK.belt); ctx.stroke(); }
+    for (let y = 0; y < MILK.belt; y += 70) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(JW, y); ctx.stroke(); }
+    rr(ctx, 80, 30, 760, 100, 18); ctx.fillStyle = "#2f80ed"; ctx.fill(); ctx.lineWidth = 6; ctx.strokeStyle = INK; ctx.stroke();
+    label(ctx, "🐄 FRESH FOR GROWING KIDS 🐄", 460, 80, 44, "#fff");
+    plainText(ctx, "District #12 Official Supplier · Lowest bid since 2009", 460, 160, 24, "#4a6378", "center", 800);
+    // chemical tanks feeding one nozzle over the line
+    CHEMS.forEach((c, i) => {
+      const tx = MILK.hitX - 200 + i * 200, ty = 210, hit = G.press[i] > 0;
+      ctx.strokeStyle = INK; ctx.lineWidth = 16; ctx.beginPath(); ctx.moveTo(tx, ty + 120); ctx.quadraticCurveTo(tx, 380, MILK.hitX, 395); ctx.stroke();
+      ctx.strokeStyle = "#9aa4ab"; ctx.lineWidth = 9; ctx.stroke();
+      rr(ctx, tx - 70, ty - 20 + (hit ? 6 : 0), 140, 150, 22); ctx.fillStyle = c.color; ctx.fill(); ctx.lineWidth = 6; ctx.strokeStyle = INK; ctx.stroke();
+      emoji(ctx, c.icon, tx, ty + 30 + (hit ? 6 : 0), 54);
+      plainText(ctx, c.name, tx, ty + 95 + (hit ? 6 : 0), c.name.length > 9 ? 15 : 19, c.ink, "center", 900);
+    });
+    rr(ctx, MILK.hitX - 36, 385, 72, 48, 12); ctx.fillStyle = "#6b757d"; ctx.fill(); ctx.lineWidth = 6; ctx.strokeStyle = INK; ctx.stroke();
+    // the glowing hit line, pulsing on the beat
+    ctx.fillStyle = `rgba(255,236,120,${.12 + .3 * pulse})`; ctx.fillRect(MILK.hitX - 78, 440, 156, MILK.belt - 440);
+    ctx.strokeStyle = `rgba(255,200,0,${.5 + .5 * pulse})`; ctx.lineWidth = 6; ctx.setLineDash([16, 10]);
+    [MILK.hitX - 78, MILK.hitX + 78].forEach(x => { ctx.beginPath(); ctx.moveTo(x, 440); ctx.lineTo(x, MILK.belt); ctx.stroke(); }); ctx.setLineDash([]);
+    // floor + belt
+    ctx.fillStyle = "#5b646b"; ctx.fillRect(0, MILK.belt, JW, JH - MILK.belt);
+    rr(ctx, -20, MILK.belt - 10, JW + 40, 70, 20); ctx.fillStyle = "#2c3236"; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 6; ctx.stroke();
+    ctx.strokeStyle = "#475057"; ctx.lineWidth = 8;
+    const off = (G.t * MILK.speed) % 80;
+    for (let x = -off; x < JW; x += 80) { ctx.beginPath(); ctx.moveTo(x, MILK.belt + 4); ctx.lineTo(x + 30, MILK.belt + 25); ctx.lineTo(x, MILK.belt + 46); ctx.stroke(); }
+    // jugs
+    for (const j of G.jugs) { const x = MILK.hitX - (j.t - G.t) * MILK.speed; if (x > -120 && x < JW + 120) drawRhythmJug(ctx, x, j); }
+    // squirt from the nozzle into the jug on the line
+    if (G.squirt) {
+      const c = CHEMS[G.squirt.c]; ctx.strokeStyle = c.color; ctx.lineWidth = 18; ctx.lineCap = "round";
+      ctx.beginPath(); ctx.moveTo(MILK.hitX, 432); ctx.lineTo(MILK.hitX + Math.sin(now * 40) * 3, 505); ctx.stroke(); ctx.lineCap = "butt";
+      ctx.lineWidth = 4; ctx.strokeStyle = INK; ctx.stroke();
+    }
+    // the lunch lady, bopping to the beat
+    rr(ctx, MILK.exit + 30, 520, 200, 170, 18); ctx.fillStyle = "#f0f4f6"; ctx.fill(); ctx.lineWidth = 6; ctx.strokeStyle = INK; ctx.stroke();
+    label(ctx, "CAFETERIA", MILK.exit + 130, 560, 28, "#2f80ed");
+    emoji(ctx, "👩‍🍳", MILK.exit + 130, 440 - pulse * 14, 160);
+    if (G.ladyT > 0) bubble(ctx, G.ladySay, MILK.exit + 90, 330, 28);
+    if (G.combo >= 3) label(ctx, `🔥 ${G.combo} COMBO`, MILK.exit + 130, 620 + 0 * pulse, 30, "#ffd23f");
+    // judgement
+    if (G.judgeT > 0) { ctx.save(); ctx.globalAlpha = Math.min(1, G.judgeT * 3); label(ctx, G.judge, MILK.hitX, 300 - (1 - G.judgeT) * 30, 62, G.judgeOk ? "#9dff6a" : "#ff5c5c"); ctx.restore(); }
+    // beat counter (visual metronome)
+    for (let i = 0; i < 4; i++) {
+      const beatNo = Math.floor((G.t - MILK.first) / MILK_BEAT), on = G.t >= MILK.first - .001 && ((beatNo % 4) + 4) % 4 === i;
+      ctx.beginPath(); ctx.arc(1180 + i * 44, 80, on ? 16 : 12, 0, Math.PI * 2); ctx.fillStyle = on ? "#ff4d8d" : "rgba(0,0,0,.25)"; ctx.fill();
+    }
+    plainText(ctx, `♪ ${MILK.bpm} BPM`, 1246, 125, 22, "#4a6378", "center", 900);
+    // chemical buttons
+    CHEMS.forEach((c, i) => {
+      const b = MILK_BTNS[i], down = G.press[i] > 0;
+      rr(ctx, b.x, b.y + (down ? 6 : 0), b.w, b.h, 24); ctx.fillStyle = c.color; ctx.fill(); ctx.lineWidth = 6; ctx.strokeStyle = INK; ctx.stroke();
+      emoji(ctx, c.icon, b.x + 70, b.y + b.h / 2 + (down ? 6 : 0), 58);
+      plainText(ctx, c.name, b.x + b.w / 2 + 30, b.y + 46 + (down ? 6 : 0), c.name.length > 9 ? 30 : 36, c.ink, "center", 900);
+      plainText(ctx, `key ${c.keys[0]} · ${c.keys[1].toUpperCase()} · ${c.keys[2].toUpperCase()}`, b.x + b.w / 2 + 30, b.y + 84 + (down ? 6 : 0), 20, c.ink === "#fff" ? "rgba(255,255,255,.8)" : "#555", "center", 800);
+    });
+    if (G.phase === "play" && G.t < MILK.first) label(ctx, G.t < MILK.first - 1.2 ? "READY…" : "HERE THEY COME!", JW / 2, 470, 64, "#fff");
+  },
+};
+function milkChart(){
+  const out = []; let t = MILK.first;
+  while (t < MilkGame.time - .3) {
+    if (Math.random() < Math.min(.85, .55 + (t - MILK.first) * .013)) {
+      out.push({ t, chem: Math.floor(Math.random() * 3), res: null });
+      if (t > 12 && Math.random() < .22) out.push({ t: t + MILK_BEAT / 2, chem: Math.floor(Math.random() * 3), res: null });   // off-beat jug
+    }
+    t += MILK_BEAT;
+  }
+  return out;
+}
+function milkJudge(G, text, ok){ G.judge = text; G.judgeOk = ok; G.judgeT = .55; }
+function milkPress(G, ci){
+  G.press[ci] = .12; G.squirt = { c: ci, t: .18 };
+  let best = null, bd = Infinity;
+  for (const j of G.jugs) if (!j.res) { const d = Math.abs(G.t - j.t); if (d < bd) { bd = d; best = j; } }
+  if (!best || bd > MILK.good) { G.combo = 0; milkJudge(G, "OFF BEAT", false); return; }
+  if (best.chem !== ci) {
+    best.res = "wrong"; G.combo = 0; milkJudge(G, "WRONG!", false);
+    G.ladySay = pick(["That's not chalk!", "Is this… embalming fluid?", "BLECH!"]); G.ladyT = 1;
+    jobStrike("Wrong chemical!", MILK.exit + 130, 330); return;
+  }
+  best.res = bd <= MILK.perfect ? "perfect" : "good";
+  G.done++; G.combo++; G.best = Math.max(G.best, G.combo);
+  milkJudge(G, best.res === "perfect" ? "PERFECT!" : "GOOD", true);
+  burst(MILK.hitX, MILK.belt - 200, CHEMS[ci].color, 12, 280);
+  if (G.done >= MILK.goal) endJob("win");
+}
+function drawRhythmJug(ctx, x, j){
+  const c = CHEMS[j.chem], base = MILK.belt - 6, w = 112, h = 178, top = base - h;
+  const dosed = j.res === "perfect" || j.res === "good";
+  ctx.save();
+  const body = dosed ? "#eef6ff" : j.res === "wrong" ? "#dff3c8" : "#fff";
+  ctx.lineWidth = 6; ctx.strokeStyle = INK;
+  rr(ctx, x - w / 2, top + 40, w, h - 40, 26); ctx.fillStyle = body; ctx.fill(); ctx.stroke();
+  rr(ctx, x - 24, top + 6, 48, 42, 10); ctx.fillStyle = body; ctx.fill(); ctx.stroke();
+  rr(ctx, x - 30, top - 14, 60, 26, 8); ctx.fillStyle = c.color; ctx.fill(); ctx.stroke();               // cap = the chemical it needs
+  ctx.beginPath(); ctx.arc(x + w / 2 - 6, top + 92, 28, -1.3, 1.3); ctx.lineWidth = 12; ctx.stroke(); ctx.lineWidth = 6;
+  rr(ctx, x - w / 2 + 10, top + 70, w - 20, 92, 10); ctx.fillStyle = c.color; ctx.fill(); ctx.lineWidth = 4; ctx.stroke();   // label = the chemical it needs
+  emoji(ctx, c.icon, x, top + 100, 40);
+  plainText(ctx, c.name, x, top + 142, c.name.length > 11 ? 11 : c.name.length > 7 ? 13 : 16, c.ink, "center", 900);
+  if (dosed) emoji(ctx, "✅", x + 40, top - 6, 34);
+  else if (j.res === "wrong") emoji(ctx, "🤢", x + 40, top - 6, 40);
+  else if (j.res === "miss") label(ctx, "REAL MILK", x, top - 20, 20, "#9fd8ff");
+  ctx.restore();
+}
+
+/* ---------------------------------------------------------
+   JOB: NEON SNACK LAB (Additive Laboratory)
+   Add dye drops until the batch matches the order card.
+   --------------------------------------------------------- */
+const DYES = {
+  r: { name: "COAL TAR RED", rgb: [226, 35, 40], x: 210 },
+  y: { name: "PETRO YELLOW", rgb: [255, 214, 10], x: 410 },
+  b: { name: "BLUE #???", rgb: [10, 110, 230], x: 610 },
+};
+const DYE_BASE = [236, 226, 205];
+const DYE_ORDERS = [
+  { name: "Sunset Orange", r: 1, y: 2, b: 0 }, { name: "Toxic Lime", r: 0, y: 2, b: 1 }, { name: "Grape Escape", r: 1, y: 0, b: 1 },
+  { name: "Electric Teal", r: 0, y: 1, b: 2 }, { name: "Hot Lava Red", r: 2, y: 1, b: 0 }, { name: "Swamp Surprise", r: 1, y: 2, b: 1 },
+  { name: "Blue-ish Raspberry", r: 0, y: 0, b: 2 }, { name: "Cheese Dust", r: 0, y: 3, b: 0 }, { name: "Mystery Purple", r: 2, y: 0, b: 1 },
+];
+const DYE_GOAL = 5, DYE_BOTTLE_Y = 610, DYE_FLUSH = { x: 1110, y: 690, w: 230, h: 110 };
+function dyeColor(d){
+  const total = d.r + d.y + d.b; if (!total) return DYE_BASE;
+  const mix = [0, 1, 2].map(i => Math.pow(Math.max(8, DYES.r.rgb[i]), d.r / total) * Math.pow(Math.max(8, DYES.y.rgb[i]), d.y / total) * Math.pow(Math.max(8, DYES.b.rgb[i]), d.b / total));
+  const f = Math.min(1, .45 + total * .18);
+  return DYE_BASE.map((c, i) => Math.round(c + (mix[i] - c) * f));
+}
+const rgbStr = c => `rgb(${c[0]},${c[1]},${c[2]})`;
+function dyeMatch(G){ const a = dyeColor(G.drops), b = dyeColor(G.order); return Math.max(0, Math.round(100 - Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]) * .55)); }
+const DyeGame = {
+  time: 35, meter: "FORMULAS SHIPPED",
+  tagline: "Sugar Bombz cereal is marketed to toddlers, so it has to glow like a slot machine. Mix industrial dyes to match the client's color. Regulators have 'concerns.' You have quarterly targets.",
+  rules: [
+    "<b>Click a dye bottle</b> to add one drop of coal-tar color to the batch.",
+    "Match the <b>order card color</b>. The match meter shows how close you are.",
+    "At a <b>100% match</b> the batch ships automatically, straight to a cereal aisle near you.",
+    "Overshot it? <b>Flush</b> the batch down the drain (into the same lake as everything else).",
+    `Ship <b>${DYE_GOAL === 1 ? "the formula" : DYE_GOAL + " formulas"}</b> before time runs out.`,
+  ],
+  winTitle: "Taste the rainbow (of lawsuits)!", winText: "Five neon formulas shipped. Toddlers nationwide are now vibrating at a frequency only dogs can hear.",
+  lose: { time: "Time's up. The client went with a lab that has even fewer scruples and faster hands." },
+  init(G){ Object.assign(G, { shipped: 0, drops: { r: 0, y: 0, b: 0 }, flushT: 0, shipT: 0, falling: [], used: [] }); dyeNewOrder(G); },
+  step(G, dt){
+    G.flushT = Math.max(0, G.flushT - dt);
+    for (const f of G.falling) f.t += dt;
+    const landed = G.falling.filter(f => f.t >= .35); G.falling = G.falling.filter(f => f.t < .35);
+    landed.forEach(f => { G.drops[f.k]++; G.splashT = .3; });
+    G.splashT = Math.max(0, (G.splashT || 0) - dt);
+    if (G.shipT > 0) { if ((G.shipT -= dt) <= 0) { G.shipped++; if (G.shipped >= DYE_GOAL) endJob("win"); else dyeNewOrder(G); } }
+    else if (!G.falling.length && dyeMatch(G) >= 99 && (G.drops.r + G.drops.y + G.drops.b) > 0) { G.shipT = .8; floatText("SHIPPED!", 836, 300); burst(836, 380, rgbStr(dyeColor(G.drops)), 22); }
+    G.pct = (G.shipped + (G.shipT > 0 ? 1 : 0)) / DYE_GOAL * 100; G.meterText = `${G.shipped + (G.shipT > 0 ? 1 : 0)} / ${DYE_GOAL}`;
+  },
+  cursor(G, x, y){ return !!dyeBottleAt(x, y) || inBox(x, y, DYE_FLUSH); },
+  down(G, x, y){
+    if (G.shipT > 0 || G.flushT > 0) return;
+    const k = dyeBottleAt(x, y);
+    if (k) { G.falling.push({ k, t: 0, x: DYES[k].x }); return; }
+    if (inBox(x, y, DYE_FLUSH)) { G.drops = { r: 0, y: 0, b: 0 }; G.falling = []; G.flushT = .9; floatText("Flushed", 836, 420, true); }
+  },
+  draw(ctx, G, now){
+    ctx.fillStyle = vgrad(ctx, 0, 560, [[0, "#22313b"], [1, "#2f4250"]]); ctx.fillRect(0, 0, JW, 560);
+    ctx.fillStyle = "#3a2a1d"; [200, 380].forEach(y => { rr(ctx, 60, y, 560, 20, 6); ctx.fill(); });
+    ["⚗️", "🧪", "🧫", "🧴", "⚗️"].forEach((e, i) => emoji(ctx, e, 110 + i * 110, 160, 60));
+    ["🧪", "🧴", "⚗️", "🧪"].forEach((e, i) => emoji(ctx, e, 130 + i * 130, 340, 60));
+    rr(ctx, 60, 440, 560, 70, 10); ctx.fillStyle = "#ffd23f"; ctx.fill(); ctx.lineWidth = 5; ctx.strokeStyle = INK; ctx.stroke();
+    plainText(ctx, "⚠ BANNED IN 27 COUNTRIES (NOT OURS)", 340, 475, 24, "#1b1b1b", "center", 900);
+    ctx.fillStyle = vgrad(ctx, 540, JH, [[0, "#9a6a3e"], [1, "#6e4626"]]); ctx.fillRect(0, 540, JW, JH - 540);
+    ctx.strokeStyle = INK; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(0, 540); ctx.lineTo(JW, 540); ctx.stroke();
+    // beaker with the current batch
+    const bx = 836, btop = 230, bbot = 720, bw = 300, col = dyeColor(G.drops), fill = G.flushT > 0 ? .25 + .75 * (1 - G.flushT / .9) : 1;
+    const level = bbot - (bbot - btop - 60) * .7 * fill;
+    ctx.save(); rr(ctx, bx - bw / 2, btop, bw, bbot - btop, 40); ctx.clip();
+    ctx.fillStyle = "rgba(220,240,250,.25)"; ctx.fillRect(bx - bw / 2, btop, bw, bbot - btop);
+    ctx.fillStyle = rgbStr(col); ctx.fillRect(bx - bw / 2, level + (G.splashT || 0) * 20, bw, bbot - level);
+    ctx.fillStyle = "rgba(255,255,255,.25)"; for (let i = 0; i < 8; i++) { const yy = bbot - ((now * 70 + i * 53) % (bbot - level)); ctx.beginPath(); ctx.arc(bx - 110 + i * 30, yy, 7, 0, Math.PI * 2); ctx.fill(); }
+    ctx.restore();
+    rr(ctx, bx - bw / 2, btop, bw, bbot - btop, 40); ctx.lineWidth = 8; ctx.strokeStyle = INK; ctx.stroke();
+    rr(ctx, bx - bw / 2 - 20, btop - 16, bw + 40, 30, 10); ctx.fillStyle = "#d9eef7"; ctx.fill(); ctx.stroke();
+    ctx.fillStyle = "rgba(255,255,255,.35)"; rr(ctx, bx - bw / 2 + 22, btop + 40, 24, bbot - btop - 90, 12); ctx.fill();
+    for (let i = 1; i < 5; i++) { ctx.strokeStyle = "rgba(255,255,255,.6)"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(bx + bw / 2 - 50, btop + i * 90); ctx.lineTo(bx + bw / 2 - 16, btop + i * 90); ctx.stroke(); }
+    // match meter
+    const m = dyeMatch(G);
+    rr(ctx, bx - 220, 770, 440, 40, 20); ctx.fillStyle = "#1b2228"; ctx.fill(); ctx.lineWidth = 5; ctx.strokeStyle = INK; ctx.stroke();
+    rr(ctx, bx - 216, 774, 432 * m / 100, 32, 16); ctx.fillStyle = m >= 99 ? "#7cfc7c" : m > 75 ? "#ffd23f" : "#ff7a59"; ctx.fill();
+    label(ctx, `MATCH ${m}%`, bx, 850, 40, "#fff");
+    // dye bottles
+    for (const [k, d] of Object.entries(DYES)) {
+      const x = d.x, y = DYE_BOTTLE_Y, flying = G.falling.some(f => f.k === k);
+      ctx.save(); ctx.translate(x, y + (flying ? -10 : 0));
+      rr(ctx, -62, 0, 124, 200, 22); ctx.fillStyle = "rgba(230,245,255,.5)"; ctx.fill(); ctx.lineWidth = 6; ctx.strokeStyle = INK; ctx.stroke();
+      ctx.save(); rr(ctx, -62, 0, 124, 200, 22); ctx.clip(); ctx.fillStyle = rgbStr(d.rgb); ctx.fillRect(-62, 60, 124, 140); ctx.restore();
+      rr(ctx, -62, 0, 124, 200, 22); ctx.stroke();
+      rr(ctx, -24, -50, 48, 56, 8); ctx.fillStyle = "#30363b"; ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-12, -50); ctx.lineTo(0, -82); ctx.lineTo(12, -50); ctx.fillStyle = "#30363b"; ctx.fill(); ctx.stroke();
+      rr(ctx, -54, 100, 108, 52, 8); ctx.fillStyle = "#fff"; ctx.fill(); ctx.lineWidth = 4; ctx.stroke();
+      const words = d.name.split(" ");   // long names wrap: last word on its own line
+      if (d.name.length > 9 && words.length > 1) { plainText(ctx, words.slice(0, -1).join(" "), 0, 115, 17, "#1b1b1b", "center", 900); plainText(ctx, words[words.length - 1], 0, 138, 18, "#1b1b1b", "center", 900); }
+      else plainText(ctx, d.name, 0, 126, 20, "#1b1b1b", "center", 900);
+      ctx.restore();
+      label(ctx, "+" + G.drops[k], x, y + 250, 34, "#fff");
+    }
+    for (const f of G.falling) { const k = f.t / .35, x = f.x + (836 - f.x) * k, y = DYE_BOTTLE_Y - 90 - Math.sin(Math.PI * k) * 160 + k * 60; ctx.fillStyle = rgbStr(DYES[f.k].rgb); ctx.beginPath(); ctx.arc(x, y, 18, 0, Math.PI * 2); ctx.fill(); ctx.lineWidth = 4; ctx.strokeStyle = INK; ctx.stroke(); }
+    button(ctx, DYE_FLUSH.x, DYE_FLUSH.y, DYE_FLUSH.w, DYE_FLUSH.h, "🚰 FLUSH", "#5c7cfa", false, G.flushT > 0);
+    // order card
+    ctx.save(); ctx.translate(1330, 130); ctx.rotate(.04);
+    rr(ctx, 0, 0, 290, 470, 18); ctx.fillStyle = "#fffdf3"; ctx.fill(); ctx.lineWidth = 6; ctx.strokeStyle = INK; ctx.stroke();
+    plainText(ctx, "ORDER #" + (4100 + G.orderNo), 145, 44, 28, "#555", "center", 900);
+    rr(ctx, 35, 80, 220, 220, 20); ctx.fillStyle = rgbStr(dyeColor(G.order)); ctx.fill(); ctx.lineWidth = 6; ctx.stroke();
+    plainText(ctx, G.order.name, 145, 340, 30, "#1b1b1b", "center", 900);
+    plainText(ctx, "Client: Sugar Bombz (ages 2+)", 145, 385, 20, "#666");
+    plainText(ctx, "Must glow. Must hook.", 145, 420, 20, "#c92a2a", "center", 900);
+    ctx.restore();
+    if (G.shipT > 0) label(ctx, "MATCH! SHIPPING…", bx, 170, 52, "#9dff6a");
+  },
+};
+function dyeBottleAt(x, y){ return Object.keys(DYES).find(k => Math.abs(x - DYES[k].x) < 75 && y > DYE_BOTTLE_Y - 90 && y < DYE_BOTTLE_Y + 210); }
+function dyeNewOrder(G){
+  let o; do { o = pick(DYE_ORDERS); } while (G.used.includes(o.name) && G.used.length < DYE_ORDERS.length);
+  G.used.push(o.name); G.order = o; G.orderNo = (G.orderNo || 0) + 1; G.drops = { r: 0, y: 0, b: 0 }; G.falling = [];
+}
+
+/* ---------------------------------------------------------
+   JOB: SHRED THE COMPLAINTS (Consumer Goods Factory)
+   Click falling complaint letters before they reach the regulator.
+   --------------------------------------------------------- */
+const SHRED = { goal: 20, inbox: 815, keepChance: .28, keepPenalty: 3 };
+const SHRED_EVIDENCE = { icons: ["🔥", "⚠️", "📎", "🧯", "🚑", "⚖️"],
+  texts: ["ENGINEER: IT WILL BURN", "INJURY REPORT #212", "SUBPOENA", "MEMO: DO NOT SHIP", "WE KNEW IN 2019", "BURN CLAIM #88", "WHISTLEBLOWER DRAFT", "TEST RESULT: FAILED", "CEO: SHIP IT ANYWAY"] };
+// documents the company actually needs: shredding one costs progress
+const SHRED_KEEP = { icons: ["💰", "📈", "🏝️", "⛳", "🛥️", "🖋️"],
+  texts: ["CEO BONUS PLAN", "STOCK OPTIONS", "OFFSHORE ACCOUNTS", "Q3 RECORD PROFITS", "LOBBYIST CONTACTS", "YACHT TITLE", "SENATOR'S IOU"] };
+const ShredGame = {
+  time: 30, strikes: 3, meter: "EVIDENCE SHREDDED",
+  tagline: "Your own engineers warned that the space heater catches fire. Then the fires started. Now the memos, injury reports and subpoenas are flying in. If any reach federal investigators, it's a recall, and maybe a prison term.",
+  rules: [
+    "Incriminating documents (<b>white envelopes, red text</b>) fall toward the investigators' inbox. <b>Click one</b> to shred it.",
+    `<b>Don't shred the gold folders marked KEEP</b>: bonus plans, stock options, offshore accounts. Shredding one costs you ${SHRED.keepPenalty} shredded documents. Let them drop; they get filed safely.`,
+    "Every piece of evidence that reaches the inbox is a strike. 3 strikes and the FBI is in the lobby.",
+    `Shred <b>${SHRED.goal} documents</b> before time runs out. The evidence piles up faster as the shift goes on.`,
+  ],
+  winTitle: "Plausible deniability!", winText: "Twenty documents shredded. Officially, nobody knew anything, and now nobody can prove otherwise.",
+  lose: { busted: "Three documents reached federal investigators. Your lawyer recommends a long vacation in a country without extradition.", time: "Time's up. The pile of evidence is now taller than the CEO, and it has a press agent." },
+  init(G){ Object.assign(G, { letters: [], spawn: .3, shredded: 0 }); },
+  step(G, dt){
+    if ((G.spawn -= dt) <= 0) {
+      const keep = Math.random() < SHRED.keepChance, src = keep ? SHRED_KEEP : SHRED_EVIDENCE;
+      G.letters.push({ x: rand(170, 1500), y: -60, vy: rand(175, 220) + G.t * 9, ph: rand(0, 6), sway: rand(20, 50), keep, icon: pick(src.icons), text: pick(src.texts) });
+      G.spawn = Math.max(.36, .85 - G.t * .018);
+    }
+    for (const l of G.letters) { l.y += l.vy * dt; l.ph += dt * 2; }
+    for (const l of G.letters) if (!l.gone && l.y > SHRED.inbox) {
+      l.gone = true;
+      if (l.keep) floatText("Filed ✓", l.x, SHRED.inbox - 60);
+      else jobStrike("Evidence leaked!", l.x, SHRED.inbox - 80);
+    }
+    G.letters = G.letters.filter(l => !l.gone);
+    G.pct = G.shredded / SHRED.goal * 100; G.meterText = `${G.shredded} / ${SHRED.goal}`;
+  },
+  cursor(G, x, y){ return !!shredLetterAt(x, y); },
+  down(G, x, y){
+    const l = shredLetterAt(x, y); if (!l) return;
+    l.gone = true;
+    for (let i = 0; i < 14; i++) G.parts.push({ x: l.x + rand(-50, 50), y: l.y + rand(-20, 20), vx: rand(-200, 200), vy: rand(-350, -50), life: rand(.5, .9),
+      color: l.keep ? (i % 3 ? "#f2c94c" : "#d4a72c") : (i % 3 ? "#fffdf0" : "#e8e1c8"), r: 6, w: 8, h: 30, grav: 900, rot: rand(0, 3) });
+    if (l.keep) {
+      G.shredded = Math.max(0, G.shredded - SHRED.keepPenalty);
+      floatText(`−${SHRED.keepPenalty}! You needed that!`, l.x, l.y - 60, true);
+      jobAlert(`💸 That was the ${l.text.toLowerCase()}!`, "bad");
+      return;
+    }
+    G.shredded++;
+    floatText("Shredded!", l.x, l.y - 60);
+    if (G.shredded >= SHRED.goal) endJob("win");
+  },
+  draw(ctx, G, now){
+    ctx.fillStyle = vgrad(ctx, 0, SHRED.inbox, [[0, "#3a4a63"], [1, "#2a364a"]]); ctx.fillRect(0, 0, JW, JH);
+    rr(ctx, 110, 120, 560, 360, 14); ctx.fillStyle = vgrad(ctx, 120, 480, [[0, "#ffb36b"], [1, "#ffd9a1"]]); ctx.fill();
+    ctx.fillStyle = "#3d3a55"; [[140, 300, 70, 180], [220, 240, 90, 240], [320, 330, 60, 150], [390, 210, 100, 270], [500, 280, 80, 200], [590, 320, 60, 160]].forEach(([x, y, w, h]) => ctx.fillRect(x, y, w, h));
+    ctx.lineWidth = 12; ctx.strokeStyle = "#cfd6df"; rr(ctx, 110, 120, 560, 360, 14); ctx.stroke(); ctx.beginPath(); ctx.moveTo(390, 120); ctx.lineTo(390, 480); ctx.stroke();
+    ctx.save(); ctx.translate(1170, 120); ctx.rotate(-.03);
+    rr(ctx, 0, 0, 380, 230, 10); ctx.fillStyle = "#f5f1e6"; ctx.fill(); ctx.lineWidth = 8; ctx.strokeStyle = "#8a6b3f"; ctx.stroke();
+    plainText(ctx, "SAFETY IS OUR", 190, 80, 34, "#333", "center", 900); plainText(ctx, "#2 PRIORITY", 190, 135, 50, "#d62828", "center", 900);
+    plainText(ctx, "(after shipping)", 190, 185, 24, "#777", "center", 700);
+    ctx.restore();
+    // office furniture: filing cabinet, plant, wall clock
+    rr(ctx, 1290, 470, 230, 345, 12); ctx.fillStyle = "#7c8a99"; ctx.fill(); ctx.lineWidth = 6; ctx.strokeStyle = INK; ctx.stroke();
+    [490, 600, 710].forEach(y => { rr(ctx, 1310, y, 190, 90, 8); ctx.fillStyle = "#9aa8b6"; ctx.fill(); ctx.stroke(); rr(ctx, 1375, y + 36, 60, 16, 6); ctx.fillStyle = "#3d4650"; ctx.fill(); });
+    plainText(ctx, "INCIDENTS", 1405, 532, 22, "#1b2430", "center", 900); plainText(ctx, "(EMPTY)", 1405, 642, 22, "#1b2430", "center", 900);
+    emoji(ctx, "🪴", 1590, 700, 150); emoji(ctx, "🪑", 870, 720, 170);
+    ctx.beginPath(); ctx.arc(836, 120, 62, 0, Math.PI * 2); ctx.fillStyle = "#fffdf3"; ctx.fill(); ctx.lineWidth = 7; ctx.strokeStyle = INK; ctx.stroke();
+    ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(836, 120); ctx.lineTo(836 + Math.cos(now) * 44, 120 + Math.sin(now) * 44); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(836, 120); ctx.lineTo(836 + Math.cos(now / 12) * 28, 120 + Math.sin(now / 12) * 28); ctx.stroke();
+    // regulator's inbox along the bottom
+    ctx.fillStyle = vgrad(ctx, SHRED.inbox, JH, [[0, "#8c2a2a"], [1, "#5e1515"]]); ctx.fillRect(0, SHRED.inbox, JW, JH - SHRED.inbox);
+    ctx.lineWidth = 6; ctx.strokeStyle = INK; ctx.beginPath(); ctx.moveTo(0, SHRED.inbox); ctx.lineTo(JW, SHRED.inbox); ctx.stroke();
+    label(ctx, "📥 TO: FEDERAL INVESTIGATORS", 836, SHRED.inbox + 60, 44, "#ffd9d9");
+    for (const l of G.letters) drawLetter(ctx, l);
+  },
+};
+const LETTER_SCALE = 1.3;
+function shredLetterAt(x, y){ return [...G.letters].reverse().find(l => Math.abs(x - (l.x + Math.sin(l.ph) * l.sway)) < 95 * LETTER_SCALE && Math.abs(y - l.y) < 72 * LETTER_SCALE); }
+function drawLetter(ctx, l){
+  const x = l.x + Math.sin(l.ph) * l.sway, y = l.y;
+  ctx.save(); ctx.translate(x, y); ctx.scale(LETTER_SCALE, LETTER_SCALE); ctx.translate(-x, -y);
+  drawLetterShape(ctx, l, x, y);
+  ctx.restore();
+}
+function drawLetterShape(ctx, l, x, y){
+  if (l.keep) return drawKeepFolder(ctx, l, x, y);
+  ctx.save(); ctx.translate(x, y); ctx.rotate(Math.sin(l.ph) * .12);
+  rr(ctx, -85, -55, 170, 110, 10); ctx.fillStyle = "#fffaf0"; ctx.fill(); ctx.lineWidth = 5; ctx.strokeStyle = INK; ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-85, -55); ctx.lineTo(0, 10); ctx.lineTo(85, -55); ctx.strokeStyle = "#9a8f74"; ctx.lineWidth = 4; ctx.stroke();
+  ctx.restore();
+  emoji(ctx, l.icon, x + 50, y - 30, 40);
+  label(ctx, l.text, x, y + 34, l.text.length > 14 ? 15 : 20, "#ff6b5b");
+}
+function drawKeepFolder(ctx, l, x, y){   // a gold manila folder with a green KEEP stamp: do not shred
+  ctx.save(); ctx.translate(x, y); ctx.rotate(Math.sin(l.ph) * .12);
+  ctx.lineWidth = 5; ctx.strokeStyle = INK;
+  rr(ctx, -85, -70, 70, 26, 8); ctx.fillStyle = "#e0b43a"; ctx.fill(); ctx.stroke();          // folder tab
+  rr(ctx, -85, -55, 170, 110, 10); ctx.fillStyle = vgrad(ctx, -55, 55, [[0, "#ffd866"], [1, "#e8b331"]]); ctx.fill(); ctx.stroke();
+  ctx.strokeStyle = "rgba(120,80,0,.45)"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-80, -38); ctx.lineTo(80, -38); ctx.stroke();
+  ctx.save(); ctx.rotate(-.18); rr(ctx, -46, -30, 92, 38, 8); ctx.lineWidth = 5; ctx.strokeStyle = "#1f9d55"; ctx.stroke();
+  plainText(ctx, "KEEP", 0, -11, 26, "#1f9d55", "center", 900); ctx.restore();
+  ctx.restore();
+  emoji(ctx, l.icon, x + 56, y - 34, 38);
+  label(ctx, l.text, x, y + 34, l.text.length > 14 ? 15 : 19, "#9dff9d");
+}
+
+/* ---------------------------------------------------------
+   JOB: PRICE HIKE (Pharma Conglomerate)
+   Hold to raise the price for revenue; keep public outrage below 100%.
+   --------------------------------------------------------- */
+const PRICE_BTNS = { hike: { x: 70, y: 760, w: 330, h: 120 }, cut: { x: 430, y: 760, w: 330, h: 120 },
+  spin: { x: 900, y: 760, w: 330, h: 120 }, bribe: { x: 1270, y: 760, w: 330, h: 120 } };
+const PRICE = {
+  revRate: 4.6,                       // revenue % per second scales with log10(price/5 + 1)
+  heatK: 8, calm: 3,                  // outrage per second = heat² × heatK − calm   (heat = log10(price / 5))
+  spin: 22, spinMax: 3, spinRecharge: 3.5,   // PR SPIN: up to 3 charges, one refills every 3.5 s, so save some
+  bribe: 60, bribeCd: 9, bribeCost: 8,        // BRIBE: big drop, long recharge, costs revenue
+  viralMin: 3.2, viralMax: 5.2, viralHit: 26, viralHeat: 6,   // viral stories: big, sudden outrage spikes
+  profitShare: .6,                    // a full revenue meter also pays 60% of the job reward as cash, win or lose
+};
+const PRICE_NEWS = ["📰 Grandma rations her pills, internet furious", "📰 Kid's GoFundMe for LIFEPILL goes viral", "📰 Senator calls price 'obscene' on live TV",
+  "📰 Patients charter buses to Canada", "📰 Leaked memo: 'They'll pay. They have to.'", "📰 CEO spotted buying third island", "📰 Nurses' union calls for boycott"];
+const PriceGame = {
+  time: 30, meter: "QUARTERLY REVENUE",
+  tagline: "You bought the only factory still making an old life-saving pill. Patients can't skip it, so the price is whatever you say. Squeeze them dry, but don't let the outrage reach Congress.",
+  rules: [
+    "<b>Hold HIKE</b> to raise the price and <b>hold CUT</b> to lower it. The higher the price, the faster the money pours in.",
+    "High prices make <b>public outrage</b> climb fast. If it reaches 100%, Congress drags you to a hearing and you're busted.",
+    `<b>🎤 PR SPIN</b> issues a fake apology (−${PRICE.spin} outrage). You hold <b>${PRICE.spinMax} charges</b> and one refills every ${PRICE.spinRecharge} seconds, so don't waste them.`,
+    `<b>💼 BRIBE</b> a senator for a big drop (−${PRICE.bribe} outrage), but it eats ${PRICE.bribeCost}% of your revenue and takes ${PRICE.bribeCd} seconds to recharge.`,
+    "<b>Viral stories</b> hit without warning and spike outrage hard. Keep an eye on the meter and a PR spin in reserve.",
+    "Fill the <b>revenue meter</b> before time runs out.",
+    "<b>💵 Every dollar of gouging profit is yours to keep</b> as cash, even if you get busted. Capitalism.",
+  ],
+  winTitle: "Your money or your life!", winText: "Record quarter. Patients are now choosing between their pill and their rent. The shareholders chose a second yacht.",
+  lose: { busted: "Outrage boiled over. You testified before Congress and smirked the whole time, which somehow made it worse.", time: "Time's up. Patients can still afford rent. You left money on the table." },
+  init(G){ Object.assign(G, { price: 5, outrage: 0, hike: false, cut: false, spins: PRICE.spinMax, spinT: 0, bribeCd: 0, hist: [5], histT: 0,
+    nextNews: rand(PRICE.viralMin, PRICE.viralMax), news: "", newsT: 0, profit: 0, paidProfit: 0 }); },
+  step(G, dt){
+    if (G.hike) G.price = Math.min(99999, G.price * Math.pow(2.3, dt));
+    if (G.cut) G.price = Math.max(5, G.price * Math.pow(.3, dt));
+    const gain = Math.log10(G.price / 5 + 1) * PRICE.revRate * dt;
+    G.pct = Math.min(100, G.pct + gain);
+    G.profit += gain / 100 * jobPayFor(G.job) * PRICE.profitShare;   // real cash, paid out when the shift ends
+    const heat = Math.max(0, Math.log10(G.price / 5));
+    G.outrage = clamp(G.outrage + (heat * heat * PRICE.heatK - PRICE.calm) * dt, 0, 100);
+    if (G.spins < PRICE.spinMax && (G.spinT += dt) >= PRICE.spinRecharge) { G.spins++; G.spinT = 0; }
+    G.bribeCd = Math.max(0, G.bribeCd - dt); G.newsT = Math.max(0, G.newsT - dt);
+    if (G.t >= G.nextNews) {   // a viral story; worse when the price is already high
+      G.nextNews = G.t + rand(PRICE.viralMin, PRICE.viralMax);
+      const hit = Math.round(PRICE.viralHit + heat * PRICE.viralHeat);
+      G.outrage = Math.min(100, G.outrage + hit); G.news = pick(PRICE_NEWS); G.newsT = 2.6;
+      floatText(`+${hit}% outrage`, 1565, 140, true); jobAlert("📰 GOING VIRAL!", "bad");
+    }
+    if ((G.histT += dt) > .25) { G.histT = 0; G.hist.push(G.price); if (G.hist.length > 60) G.hist.shift(); }
+    if (G.outrage >= 100) { jobAlert("🏛️ CONGRESSIONAL HEARING!", "bad"); endJob("busted"); }
+    else if (G.pct >= 100) endJob("win");
+  },
+  extra(G){ return `😠 ${Math.floor(G.outrage)}% · 💵 ${money(G.profit)}`; },
+  resultNote(G, kind){ return `💵 You keep ${money(G.paidProfit)} in price-gouging profits${kind === "win" ? "." : ", even though you lost. Capitalism."}`; },
+  cursor(G, x, y){ return Object.values(PRICE_BTNS).some(b => inBox(x, y, b)); },
+  down(G, x, y){
+    if (inBox(x, y, PRICE_BTNS.hike)) G.hike = true;
+    else if (inBox(x, y, PRICE_BTNS.cut)) G.cut = true;
+    else if (inBox(x, y, PRICE_BTNS.spin) && G.spins > 0) {
+      G.outrage = Math.max(0, G.outrage - PRICE.spin); G.spins--;
+      floatText(pick(["“Thoughts and prayers.”", "“We hear you.”", "“Blame the middlemen.”", "“It's complicated.”", "“Innovation isn't free.”", "“Have you tried being healthy?”"]), 1065, 700);
+    } else if (inBox(x, y, PRICE_BTNS.bribe) && G.bribeCd === 0) {
+      G.outrage = Math.max(0, G.outrage - PRICE.bribe); G.bribeCd = PRICE.bribeCd; G.pct = Math.max(0, G.pct - PRICE.bribeCost);
+      floatText(`Senator bought! −${PRICE.bribeCost}% revenue`, 1300, 700); burst(1435, 760, "#7cfc7c", 16, 300);
+    }
+  },
+  up(G){ G.hike = false; G.cut = false; },
+  stop(G){   // whatever happened, the gouging profits are paid out as real cash
+    G.hike = false; G.cut = false;
+    if (G.profit > 0 && !G.paidProfit) { G.paidProfit = G.profit; earn(G.profit); toast(`💵 You kept ${money(G.profit)} in price-gouging profits.`, "gold"); }
+  },
+  draw(ctx, G, now){
+    ctx.fillStyle = vgrad(ctx, 0, JH, [[0, "#3b2418"], [1, "#24150e"]]); ctx.fillRect(0, 0, JW, JH);
+    ctx.fillStyle = "rgba(255,255,255,.04)"; for (let x = 0; x < JW; x += 120) ctx.fillRect(x, 0, 60, 700);
+    // wall screen with the price chart
+    const S0 = { x: 110, y: 110, w: 900, h: 560 };
+    rr(ctx, S0.x - 14, S0.y - 14, S0.w + 28, S0.h + 28, 18); ctx.fillStyle = "#121212"; ctx.fill(); ctx.lineWidth = 6; ctx.strokeStyle = INK; ctx.stroke();
+    ctx.fillStyle = "#0d1b14"; ctx.fillRect(S0.x, S0.y, S0.w, S0.h);
+    ctx.strokeStyle = "rgba(124,252,124,.12)"; ctx.lineWidth = 2;
+    for (let i = 1; i < 6; i++) { ctx.beginPath(); ctx.moveTo(S0.x, S0.y + i * S0.h / 6); ctx.lineTo(S0.x + S0.w, S0.y + i * S0.h / 6); ctx.stroke(); }
+    const lo = Math.log10(5), hi = Math.max(Math.log10(200), Math.log10(Math.max(...G.hist)) + .2);
+    ctx.beginPath(); G.hist.forEach((p, i) => { const x = S0.x + 30 + i * (S0.w - 60) / 59, y = S0.y + S0.h - 40 - (Math.log10(p) - lo) / (hi - lo) * (S0.h - 120); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); });
+    ctx.lineWidth = 8; ctx.strokeStyle = "#ff4d4d"; ctx.lineJoin = "round"; ctx.stroke();
+    plainText(ctx, "LIFEPILL™ PRICE PER BOTTLE", S0.x + 30, S0.y + 40, 28, "#7cfc7c", "left", 900);
+    plainText(ctx, "cost to make: $1.20", S0.x + 30, S0.y + 76, 22, "rgba(124,252,124,.6)", "left", 700);
+    label(ctx, "$" + (G.price < 100 ? G.price.toFixed(2) : Math.round(G.price).toLocaleString("en-US")), S0.x + S0.w - 30, S0.y + 60, 64, "#ff6b5b", "right");
+    // pill bottle with a price tag
+    ctx.save(); ctx.translate(1230, 380);
+    rr(ctx, -95, -150, 190, 290, 30); ctx.fillStyle = hgrad(ctx, -95, 95, [[0, "#c25e00"], [.4, "#ff9a2f"], [1, "#b05000"]]); ctx.fill(); ctx.lineWidth = 7; ctx.strokeStyle = INK; ctx.stroke();
+    rr(ctx, -110, -215, 220, 75, 16); ctx.fillStyle = "#fff"; ctx.fill(); ctx.stroke();
+    rr(ctx, -80, -70, 160, 130, 12); ctx.fillStyle = "#fffdf3"; ctx.fill(); ctx.lineWidth = 4; ctx.stroke();
+    plainText(ctx, "LIFEPILL™", 0, -30, 30, "#c25e00", "center", 900); plainText(ctx, "Skip a dose? Don't.", 0, 10, 17, "#555");
+    ctx.restore();
+    ctx.save(); ctx.translate(1350, 250); ctx.rotate(.25 + Math.sin(now * 3) * .05);
+    rr(ctx, 0, 0, 190, 90, 14); ctx.fillStyle = "#fff36b"; ctx.fill(); ctx.lineWidth = 5; ctx.strokeStyle = INK; ctx.stroke();
+    plainText(ctx, "$" + (G.price < 1000 ? Math.round(G.price) : Math.round(G.price / 1000) + "K"), 95, 45, 40, "#1b1b1b", "center", 900);
+    ctx.restore();
+    // outrage thermometer
+    rr(ctx, 1530, 110, 70, 520, 35); ctx.fillStyle = "#1b1b1b"; ctx.fill(); ctx.lineWidth = 6; ctx.strokeStyle = INK; ctx.stroke();
+    const oh = 500 * G.outrage / 100; rr(ctx, 1540, 620 - oh, 50, oh, 25); ctx.fillStyle = G.outrage > 70 ? "#ff3b30" : G.outrage > 40 ? "#ff9f1c" : "#ffd23f"; ctx.fill();
+    plainText(ctx, "OUTRAGE", 1565, 670, 22, "#ffb3b3", "center", 900);
+    const crowd = Math.floor(G.outrage / 9);
+    for (let i = 0; i < crowd; i++) emoji(ctx, ["😠", "🪧", "😷", "🤬", "👵", "🪧"][i % 6], 1080 + (i % 6) * 70, 610 - Math.floor(i / 6) * 60 + Math.sin(now * 8 + i) * 6, 54);
+    button(ctx, PRICE_BTNS.hike.x, PRICE_BTNS.hike.y, PRICE_BTNS.hike.w, PRICE_BTNS.hike.h, "📈 HIKE", "#2fb35a", G.hike);
+    button(ctx, PRICE_BTNS.cut.x, PRICE_BTNS.cut.y, PRICE_BTNS.cut.w, PRICE_BTNS.cut.h, "📉 CUT", "#5c7cfa", G.cut);
+    button(ctx, PRICE_BTNS.spin.x, PRICE_BTNS.spin.y, PRICE_BTNS.spin.w, PRICE_BTNS.spin.h,
+      G.spins > 0 ? "🎤 PR SPIN" : `PR SPIN ${(PRICE.spinRecharge - G.spinT).toFixed(1)}s`, "#e8590c", false, G.spins === 0);
+    for (let i = 0; i < PRICE.spinMax; i++) {   // charge pips, with the next one filling up
+      const cx = PRICE_BTNS.spin.x + PRICE_BTNS.spin.w / 2 + (i - 1) * 46, cy = PRICE_BTNS.spin.y - 28;
+      ctx.beginPath(); ctx.arc(cx, cy, 15, 0, Math.PI * 2); ctx.fillStyle = "#2a1a12"; ctx.fill(); ctx.lineWidth = 4; ctx.strokeStyle = INK; ctx.stroke();
+      if (i < G.spins) { ctx.beginPath(); ctx.arc(cx, cy, 11, 0, Math.PI * 2); ctx.fillStyle = "#ff9f1c"; ctx.fill(); }
+      else if (i === G.spins) { ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, 11, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * G.spinT / PRICE.spinRecharge); ctx.closePath(); ctx.fillStyle = "rgba(255,159,28,.5)"; ctx.fill(); }
+    }
+    button(ctx, PRICE_BTNS.bribe.x, PRICE_BTNS.bribe.y, PRICE_BTNS.bribe.w, PRICE_BTNS.bribe.h, G.bribeCd > 0 ? `BRIBE ${Math.ceil(G.bribeCd)}s` : "💼 BRIBE", "#7048e8", false, G.bribeCd > 0);
+    plainText(ctx, `−${PRICE.spin} outrage`, PRICE_BTNS.spin.x + PRICE_BTNS.spin.w / 2, PRICE_BTNS.spin.y + PRICE_BTNS.spin.h + 28, 22, "#d9c2a8");
+    plainText(ctx, `−${PRICE.bribe} outrage, −${PRICE.bribeCost}% revenue`, PRICE_BTNS.bribe.x + PRICE_BTNS.bribe.w / 2, PRICE_BTNS.bribe.y + PRICE_BTNS.bribe.h + 28, 22, "#d9c2a8");
+    if (G.newsT > 0) {   // breaking-news banner across the price screen
+      const a = Math.min(1, G.newsT * 2), y0 = 600;
+      ctx.save(); ctx.globalAlpha = a;
+      ctx.fillStyle = "#c92a2a"; ctx.fillRect(110, y0, 900, 70); ctx.fillStyle = "#fff"; ctx.fillRect(110, y0, 170, 70);
+      plainText(ctx, "BREAKING", 195, y0 + 35, 30, "#c92a2a", "center", 900);
+      plainText(ctx, G.news.replace("📰 ", ""), 300, y0 + 35, 28, "#fff", "left", 800);
+      ctx.restore();
+    }
+    plainText(ctx, "hold", PRICE_BTNS.hike.x + PRICE_BTNS.hike.w / 2, PRICE_BTNS.hike.y + PRICE_BTNS.hike.h + 28, 22, "#d9c2a8");
+    plainText(ctx, "hold", PRICE_BTNS.cut.x + PRICE_BTNS.cut.w / 2, PRICE_BTNS.cut.y + PRICE_BTNS.cut.h + 28, 22, "#d9c2a8");
+  },
+};
+
+/* ---------------------------------------------------------
+   JOB: SKIP MAINTENANCE (Refinery Complex)
+   Survive the shift: vent gauges once they pass yellow, before they hit red.
+   --------------------------------------------------------- */
+const GAUGE_SPOTS = [{ x: 250, y: 640 }, { x: 545, y: 600 }, { x: 836, y: 640 }, { x: 1127, y: 600 }, { x: 1422, y: 640 }, { x: 836, y: 420 }];
+const GAUGE_R = 105, GAUGE_VENT = .55;
+const GaugeGame = {
+  time: 30, strikes: 3, meter: "SHIFT SURVIVED",
+  tagline: "The last safety inspector 'retired' after asking too many questions. Maintenance costs money; replacement workers are cheaper. Keep the refinery running flat-out with the crew still inside.",
+  rules: [
+    "Pressure keeps climbing in every pipe. <b>Click a gauge</b> to vent it back down.",
+    "Venting wastes product, so a gauge <b>can only be vented once its needle is past the yellow line</b>.",
+    "If a needle reaches the end of the red, that pipe bursts: a strike (and an ambulance). 3 strikes and the cameras show up.",
+    "Survive the <b>full 30-second shift</b> to win. More gauges come online as the shift goes on.",
+  ],
+  winTitle: "Shift survived!", winText: "Thirty seconds at full output, zero maintenance. Three workers' comp claims were denied before the shift even ended.",
+  lose: { busted: "Three pipes burst and the evening news got there before your PR team. The CEO is 'deeply saddened' from a beach in Monaco." },
+  init(G){ Object.assign(G, { gauges: GAUGE_SPOTS.slice(0, 3).map(s => gaugeNew(s)) }); },
+  step(G, dt){
+    const want = G.t > 21 ? 6 : G.t > 14 ? 5 : G.t > 7 ? 4 : 3;
+    while (G.gauges.length < want) { const s = GAUGE_SPOTS[G.gauges.length]; G.gauges.push(gaugeNew(s)); floatText("New gauge online!", s.x, s.y - 140); }
+    for (const g of G.gauges) {
+      g.p += g.rate * (1 + G.t * .025) * dt; g.fire = Math.max(0, g.fire - dt); g.puff = Math.max(0, g.puff - dt);
+      if (g.p >= 1) { g.p = .1; g.fire = 1.4; g.rate = rand(.07, .14); jobStrike("Pipe burst!", g.x, g.y - 160); }
+    }
+    G.pct = Math.min(100, G.t / this.time * 100); G.meterText = Math.ceil(Math.max(0, this.time - G.t)) + "s to go";
+  },
+  onTimeUp(){ return "win"; },
+  cursor(G, x, y){ return !!gaugeAt(x, y); },
+  down(G, x, y){
+    const g = gaugeAt(x, y); if (!g) return;
+    if (g.p >= GAUGE_VENT) { g.p = .05; g.puff = .8; g.rate = rand(.07, .15); for (let i = 0; i < 12; i++) G.parts.push({ x: g.x + rand(-30, 30), y: g.y - GAUGE_R - 30, vx: rand(-90, 90), vy: rand(-260, -120), life: rand(.6, 1), color: "rgba(240,240,240,.9)", r: rand(16, 26), grav: -60 }); }
+    else floatText("Not yet!", g.x, g.y - 150, true);
+  },
+  draw(ctx, G, now){
+    ctx.fillStyle = vgrad(ctx, 0, 520, [[0, "#2b1d4d"], [.6, "#a34f5c"], [1, "#f08a4b"]]); ctx.fillRect(0, 0, JW, 520);
+    ctx.fillStyle = "#1c1a24";
+    [[80, 260, 160, 260], [300, 200, 70, 320], [420, 300, 220, 220], [1180, 240, 90, 280], [1320, 300, 260, 220]].forEach(([x, y, w, h]) => { rr(ctx, x, y, w, h, 14); ctx.fill(); });
+    [[335, 200], [1225, 240]].forEach(([x, y], i) => { const fl = 1 + Math.sin(now * 12 + i) * .15; emoji(ctx, "🔥", x, y - 40 * fl, 70 * fl); });
+    ctx.fillStyle = "#2a2a30"; ctx.fillRect(0, 500, JW, JH - 500);
+    ctx.fillStyle = hgrad(ctx, 0, JW, [[0, "#6b6f75"], [.5, "#a9aeb4"], [1, "#6b6f75"]]);
+    [520, 760].forEach(y => { rr(ctx, -10, y, JW + 20, 46, 20); ctx.fill(); ctx.lineWidth = 5; ctx.strokeStyle = INK; ctx.stroke(); });
+    // the crew, still inside; they panic when a nearby needle is in the red
+    [398, 690, 982, 1274].forEach((wx, i) => {
+      const near = G.gauges.filter(g => Math.abs(g.x - wx) < 320), scared = near.some(g => g.p > .8 || g.fire > 0);
+      emoji(ctx, "👷", wx + (scared ? Math.sin(now * 30 + i) * 6 : 0), 880, 92);
+      if (scared) emoji(ctx, "😱", wx + 30, 810, 46);
+    });
+    for (const g of G.gauges) drawGauge(ctx, g, now);
+    if (G.gauges.some(g => g.fire > 0)) emoji(ctx, "🚑", JW - ((now * 700) % (JW + 300)) + 150, 470, 110);
+  },
+};
+function gaugeNew(s){ return { x: s.x, y: s.y, p: rand(.05, .3), rate: rand(.07, .14), fire: 0, puff: 0 }; }
+function gaugeAt(x, y){ return G.gauges.find(g => Math.hypot(x - g.x, y - g.y) < GAUGE_R + 20); }
+function drawGauge(ctx, g, now){
+  const { x, y } = g, R = GAUGE_R, a0 = Math.PI * .75, a1 = Math.PI * 2.25, ang = p => a0 + (a1 - a0) * p;
+  rr(ctx, x - 16, y + R - 10, 32, 120, 6); ctx.fillStyle = "#7c8187"; ctx.fill(); ctx.lineWidth = 5; ctx.strokeStyle = INK; ctx.stroke();
+  ctx.beginPath(); ctx.arc(x, y, R + 14, 0, Math.PI * 2); ctx.fillStyle = "#b8bdc2"; ctx.fill(); ctx.lineWidth = 7; ctx.stroke();
+  ctx.beginPath(); ctx.arc(x, y, R, 0, Math.PI * 2); ctx.fillStyle = "#fbfbf6"; ctx.fill();
+  [[0, GAUGE_VENT, "#5cc96b"], [GAUGE_VENT, .8, "#ffd23f"], [.8, 1, "#ff3b30"]].forEach(([s, e, c]) => { ctx.beginPath(); ctx.arc(x, y, R - 16, ang(s), ang(e)); ctx.lineWidth = 22; ctx.strokeStyle = c; ctx.stroke(); });
+  const ready = g.p >= GAUGE_VENT && G.phase === "play";
+  if (ready) { ctx.beginPath(); ctx.arc(x, y, R + 24, 0, Math.PI * 2); ctx.lineWidth = 8; ctx.strokeStyle = `rgba(255,236,120,${.5 + .5 * Math.sin(now * 10)})`; ctx.stroke(); }
+  const shake = g.p > .8 ? Math.sin(now * 60) * .04 : 0, na = ang(Math.min(1, g.p)) + shake;
+  ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + Math.cos(na) * (R - 22), y + Math.sin(na) * (R - 22)); ctx.lineWidth = 9; ctx.lineCap = "round"; ctx.strokeStyle = "#c1121f"; ctx.stroke(); ctx.lineCap = "butt";
+  ctx.beginPath(); ctx.arc(x, y, 14, 0, Math.PI * 2); ctx.fillStyle = "#333"; ctx.fill();
+  plainText(ctx, "PSI", x, y + 46, 22, "#666", "center", 900);
+  if (g.fire > 0) { for (let i = 0; i < 3; i++) emoji(ctx, "🔥", x - 60 + i * 60, y - R - 40 - Math.sin(now * 20 + i) * 10, 80 + i % 2 * 20); }
+}
+
+/* ---------------------------------------------------------
+   JOB: DEFEAT DEVICE (Auto & Aero Works)
+   Keep the car in BEAST mode on the road and CLEAN mode during tests.
+   --------------------------------------------------------- */
+const DEFEAT_SWITCH = { x: 586, y: 790, w: 500, h: 110 };
+const DefeatGame = {
+  time: 30, strikes: 3, meter: "PROFIT FROM POWER",
+  tagline: "Your engine can tell when it's being tested and suddenly becomes an environmentalist. On the road it pumps out forty times the legal limit. Childhood asthma is a 'societal issue.' You're the switch.",
+  rules: [
+    "The sign shows whether the car is on the <b>ROAD</b> or in an <b>EMISSIONS TEST</b>.",
+    "<b>Click the car or the switch</b> to flip between 🌱 CLEAN and 💨 BEAST mode.",
+    "On the road, BEAST mode prints money. CLEAN mode earns nothing.",
+    "In a test, BEAST mode gets you caught: a strike. Watch for the warning before every test!",
+    "Fill the profit meter before time runs out. 3 strikes and you're busted.",
+  ],
+  winTitle: "Clean on paper!", winText: "Every test passed and every road trip a smog cloud. The city's air-quality alerts have never been busier.",
+  lose: { busted: "Caught three times on the test rig. Executives are 'shocked and appalled' and blaming two junior engineers.", time: "Time's up. The car spent too long being well-behaved. Marketing is horrified." },
+  init(G){ Object.assign(G, { mode: "clean", env: "road", envT: 0, next: rand(2.4, 3.4), warned: false, caught: false, road: 0, wheel: 0 }); },
+  step(G, dt){
+    G.envT += dt;
+    if (G.env === "road") {
+      G.road += (G.mode === "beast" ? 900 : 380) * dt; G.wheel += (G.mode === "beast" ? 14 : 6) * dt;
+      if (G.mode === "beast") { G.pct = Math.min(100, G.pct + 12 * dt); if (Math.random() < dt * 25) G.parts.push({ x: 360, y: 610, vx: rand(-260, -120), vy: rand(-60, 10), life: .9, color: "rgba(60,60,60,.55)", r: rand(18, 30), grav: -30 }); }
+      if (!G.warned && G.envT >= G.next - 1) { G.warned = true; jobAlert("⚠️ TEST INCOMING!", "warn"); }
+      if (G.envT >= G.next) { G.env = "test"; G.envT = 0; G.next = rand(1.8, 2.8); G.caught = false; jobAlert("🧪 EMISSIONS TEST", "bad"); }
+    } else {
+      if (G.mode === "beast" && !G.caught) { G.caught = true; jobStrike("Caught on the test rig!", 836, 300); }
+      if (G.envT >= G.next) { G.env = "road"; G.envT = 0; G.next = Math.max(1.8, rand(2.6, 4.2) - G.t * .03); G.warned = false; jobAlert("🛣️ Back on the road", "warn"); }
+    }
+    if (G.pct >= 100) endJob("win");
+  },
+  cursor(G, x, y){ return inBox(x, y, DEFEAT_SWITCH) || (x > 380 && x < 1300 && y > 380 && y < 720); },
+  down(G, x, y){ if (inBox(x, y, DEFEAT_SWITCH) || (x > 380 && x < 1300 && y > 380 && y < 720)) G.mode = G.mode === "beast" ? "clean" : "beast"; },
+  draw(ctx, G, now){
+    const road = G.env === "road";
+    if (road) {
+      ctx.fillStyle = vgrad(ctx, 0, 520, [[0, "#64c3ff"], [1, "#cdeeff"]]); ctx.fillRect(0, 0, JW, 520);
+      [[300 - (G.road * .05) % 1900, 120, 1.1], [1100 - (G.road * .05) % 1900, 80, .9], [1900 - (G.road * .05) % 1900, 160, 1]].forEach(([x, y, s]) => cloud(ctx, ((x % 1900) + 1900) % 1900 - 150, y, s));
+      ctx.fillStyle = "#7cc65a"; ctx.beginPath(); for (let i = -1; i < 6; i++) { const hx = i * 400 - (G.road * .2) % 400; ctx.ellipse(hx, 520, 260, 120, 0, Math.PI, 0); } ctx.fill();
+      ctx.fillStyle = "#4f5359"; ctx.fillRect(0, 520, JW, JH - 520);
+      ctx.fillStyle = "#ffd23f"; for (let x = -(G.road % 220); x < JW; x += 220) ctx.fillRect(x, 700, 120, 16);
+      ctx.fillStyle = "#3d9a3d"; ctx.fillRect(0, 500, JW, 26);
+    } else {
+      ctx.fillStyle = vgrad(ctx, 0, 620, [[0, "#cfd6dc"], [1, "#b3bcc4"]]); ctx.fillRect(0, 0, JW, 620);
+      ctx.fillStyle = "#8a949c"; ctx.fillRect(0, 620, JW, JH - 620);
+      rr(ctx, 520, 90, 640, 100, 14); ctx.fillStyle = "#1e3a5f"; ctx.fill(); ctx.lineWidth = 6; ctx.strokeStyle = INK; ctx.stroke();
+      label(ctx, "OFFICIAL EMISSIONS LAB", 840, 140, 44, "#fff");
+      [[560, 645], [1110, 645]].forEach(([x, y]) => { rr(ctx, x - 110, y - 20, 220, 50, 22); ctx.fillStyle = "#3a4046"; ctx.fill(); ctx.lineWidth = 5; ctx.strokeStyle = INK; ctx.stroke(); });
+      emoji(ctx, "🧑‍🔬", 1420, 470, 190); emoji(ctx, "📋", 1340, 540, 70);
+      rr(ctx, 230, 560, 140, 26, 10); ctx.fillStyle = "#555"; ctx.fill(); ctx.stroke();
+      if (G.mode === "beast") emoji(ctx, "😱", 1420, 300, 80);
+    }
+    drawCar(ctx, 836, road ? 600 + Math.sin(now * 20) * 3 : 605, G.wheel, G.mode === "beast");
+    if (G.mode === "clean") for (let i = 0; i < 3; i++) emoji(ctx, "🌱", 330 - i * 60, 600 - ((now * 60 + i * 30) % 80), 34, .8);
+    const sign = road ? ["🛣️ ON THE ROAD", "#2fb35a"] : ["🧪 EMISSIONS TEST", "#e03131"];
+    const warnFlash = road && G.warned && Math.sin(now * 18) > 0;
+    rr(ctx, 1240, 60, 380, 90, 18); ctx.fillStyle = warnFlash ? "#ffd23f" : sign[1]; ctx.fill(); ctx.lineWidth = 6; ctx.strokeStyle = INK; ctx.stroke();
+    label(ctx, warnFlash ? "⚠️ TEST SOON" : sign[0], 1430, 105, 36, "#fff");
+    // mode switch
+    const S1 = DEFEAT_SWITCH, beast = G.mode === "beast";
+    rr(ctx, S1.x, S1.y, S1.w, S1.h, 55); ctx.fillStyle = "#1b1f23"; ctx.fill(); ctx.lineWidth = 6; ctx.strokeStyle = INK; ctx.stroke();
+    rr(ctx, S1.x + (beast ? S1.w / 2 : 6), S1.y + 6, S1.w / 2 - 6, S1.h - 12, 50); ctx.fillStyle = beast ? "#e8590c" : "#2fb35a"; ctx.fill();
+    label(ctx, "🌱 CLEAN", S1.x + S1.w / 4, S1.y + S1.h / 2, 38, beast ? "#888" : "#fff");
+    label(ctx, "💨 BEAST", S1.x + S1.w * .75, S1.y + S1.h / 2, 38, beast ? "#fff" : "#888");
+  },
+};
+function drawCar(ctx, x, y, wheel, beast){
+  ctx.save(); ctx.translate(x, y);
+  ctx.fillStyle = "rgba(0,0,0,.25)"; ctx.beginPath(); ctx.ellipse(0, 60, 380, 26, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(-400, 20); ctx.quadraticCurveTo(-400, -60, -320, -70); ctx.lineTo(-170, -80); ctx.quadraticCurveTo(-90, -190, 60, -190);
+  ctx.quadraticCurveTo(180, -190, 240, -90); ctx.lineTo(360, -70); ctx.quadraticCurveTo(410, -60, 410, 0); ctx.lineTo(410, 30); ctx.lineTo(-400, 30); ctx.closePath();
+  ctx.fillStyle = hgrad(ctx, -400, 410, [[0, "#c92a2a"], [.5, "#ff5c4d"], [1, "#b02020"]]); ctx.fill(); ctx.lineWidth = 8; ctx.strokeStyle = INK; ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-130, -85); ctx.quadraticCurveTo(-70, -165, 30, -168); ctx.lineTo(30, -85); ctx.closePath(); ctx.fillStyle = "#bfe6ff"; ctx.fill(); ctx.lineWidth = 6; ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(60, -168); ctx.quadraticCurveTo(160, -165, 205, -85); ctx.lineTo(60, -85); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = "#ffe066"; rr(ctx, 360, -50, 46, 30, 10); ctx.fill(); ctx.stroke();
+  rr(ctx, -420, 0, 44, 20, 6); ctx.fillStyle = "#555"; ctx.fill(); ctx.stroke();
+  if (beast) { ctx.fillStyle = "#ffd23f"; ctx.beginPath(); ctx.moveTo(-200, -30); ctx.lineTo(-120, -30); ctx.lineTo(-150, 0); ctx.closePath(); ctx.fill(); }
+  [-240, 250].forEach(wx => {
+    ctx.beginPath(); ctx.arc(wx, 30, 78, 0, Math.PI * 2); ctx.fillStyle = "#1d1d1d"; ctx.fill(); ctx.lineWidth = 6; ctx.strokeStyle = INK; ctx.stroke();
+    ctx.beginPath(); ctx.arc(wx, 30, 42, 0, Math.PI * 2); ctx.fillStyle = "#c9ced3"; ctx.fill();
+    ctx.save(); ctx.translate(wx, 30); ctx.rotate(wheel); ctx.strokeStyle = "#6b7177"; ctx.lineWidth = 7;
+    for (let i = 0; i < 5; i++) { ctx.rotate(Math.PI * 2 / 5); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(38, 0); ctx.stroke(); } ctx.restore();
+  });
+  ctx.restore();
+}
+
+/* ---------------------------------------------------------
+   JOB: SURPRISE ACCOUNTS (Megabank Data Silo)
+   Whack-a-mole: sign up customers, never the auditors.
+   --------------------------------------------------------- */
+const TELLERS = [0, 1, 2, 3].flatMap(i => [{ x: 300 + i * 357, y: 470 }, { x: 300 + i * 357, y: 830 }]);
+const ACCT_GOAL = 25;
+const AccountsGame = {
+  time: 30, strikes: 3, meter: "ACCOUNTS OPENED",
+  tagline: "Head office wants eight accounts per customer. Grandma, the paperboy, the recently deceased: everyone gets a credit card and a monthly fee. Nobody needs to know.",
+  rules: [
+    "Customers pop up at the teller windows. <b>Click them</b> to open an account in their name.",
+    "<b>Ghosts 👻 count double.</b> Dead customers never complain about fees.",
+    "<b>Don't click the auditors</b> 🕵️ (trench coat, briefcase). That's a strike.",
+    `Open <b>${ACCT_GOAL} accounts</b> before time runs out. 3 strikes and you're busted.`,
+  ],
+  winTitle: "Cross-sold!", winText: "Twenty-five new accounts, several for people who are no longer with us. Their overdraft fees live on.",
+  lose: { busted: "You tried to open an account for an auditor. Three times. The audit is now extremely thorough.", time: "Time's up. You're short of quota, and the regional manager is 'disappointed in your hunger.'" },
+  init(G){ Object.assign(G, { slots: TELLERS.map(t => ({ ...t, who: null, t: 0, life: 0 })), spawn: .25, opened: 0 }); },
+  step(G, dt){
+    for (const s of G.slots) if (s.who) { s.t += dt; if (s.t >= s.life) s.who = null; }
+    if ((G.spawn -= dt) <= 0) {
+      const free = G.slots.filter(s => !s.who);
+      if (free.length) { const s = pick(free), aud = Math.random() < .25 + G.t * .005;
+        const ghost = !aud && Math.random() < .14;
+        Object.assign(s, { who: aud ? "🕵️" : ghost ? "👻" : pick(["👵", "🧑", "👨‍🦳", "👩‍🦱", "🧔", "👨‍🎓", "👩‍💼", "🧑‍🍳", "👴", "👩", "👦"]), aud, ghost, t: 0, life: Math.max(.75, 1.25 - G.t * .015) }); }
+      G.spawn = Math.max(.28, .6 - G.t * .01);
+    }
+    G.pct = G.opened / ACCT_GOAL * 100; G.meterText = `${G.opened} / ${ACCT_GOAL}`;
+  },
+  cursor(G, x, y){ return !!acctSlotAt(x, y); },
+  down(G, x, y){
+    const s = acctSlotAt(x, y); if (!s) return;
+    if (s.aud) { s.who = null; jobStrike("That was an auditor!", s.x, s.y - 260); }
+    else {
+      const n = s.ghost ? 2 : 1; s.who = null; G.opened = Math.min(ACCT_GOAL, G.opened + n);
+      floatText(s.ghost ? "+2 (deceased)" : "+1 account", s.x, s.y - 250); burst(s.x, s.y - 150, s.ghost ? "#cfe8ff" : "#7cfc7c", 10, 260);
+      if (G.opened >= ACCT_GOAL) endJob("win");
+    }
+  },
+  draw(ctx, G, now){
+    ctx.fillStyle = vgrad(ctx, 0, JH, [[0, "#f3ead7"], [1, "#d9ccb0"]]); ctx.fillRect(0, 0, JW, JH);
+    rr(ctx, 536, 18, 600, 76, 16); ctx.fillStyle = "#14365e"; ctx.fill(); ctx.lineWidth = 6; ctx.strokeStyle = INK; ctx.stroke();
+    label(ctx, "🏦 MEGABANK", 836, 58, 46, "#ffd23f");
+    for (const t of TELLERS) {
+      const x = t.x, y = t.y;
+      rr(ctx, x - 150, y - 300, 300, 300, 28); ctx.fillStyle = "#c9b48a"; ctx.fill(); ctx.lineWidth = 6; ctx.strokeStyle = INK; ctx.stroke();
+      ctx.save(); ctx.beginPath(); ctx.moveTo(x - 120, y - 20); ctx.lineTo(x - 120, y - 190); ctx.arc(x, y - 190, 120, Math.PI, 0); ctx.lineTo(x + 120, y - 20); ctx.closePath();
+      ctx.fillStyle = "#28435f"; ctx.fill(); ctx.clip();
+      const s = G.slots.find(q => q.x === x && q.y === y);
+      if (s && s.who) { const up = Math.min(1, s.t / .15), down = Math.max(0, (s.t - (s.life - .15)) / .15), rise = (up - down) * 150; emoji(ctx, s.who, x, y + 60 - rise, 150); if (s.aud) emoji(ctx, "💼", x + 70, y + 60 - rise + 30, 60); }
+      ctx.restore();
+      ctx.beginPath(); ctx.moveTo(x - 120, y - 20); ctx.lineTo(x - 120, y - 190); ctx.arc(x, y - 190, 120, Math.PI, 0); ctx.lineTo(x + 120, y - 20); ctx.lineWidth = 6; ctx.strokeStyle = INK; ctx.stroke();
+      ctx.strokeStyle = "rgba(255,255,255,.5)"; ctx.lineWidth = 4; for (let i = -1; i <= 1; i++) { ctx.beginPath(); ctx.moveTo(x + i * 60, y - 30); ctx.lineTo(x + i * 60, y - 230); ctx.stroke(); }
+      rr(ctx, x - 165, y - 24, 330, 40, 10); ctx.fillStyle = "#7a5230"; ctx.fill(); ctx.lineWidth = 6; ctx.strokeStyle = INK; ctx.stroke();
+    }
+  },
+};
+function acctSlotAt(x, y){ return G.slots.find(s => s.who && s.t > .08 && Math.abs(x - s.x) < 130 && y > s.y - 290 && y < s.y + 10); }
+
+/* ---------------------------------------------------------
+   JOB: FOLLOW THE MONEY (Offshore Shell Network)
+   A shell game with literal shell companies.
+   --------------------------------------------------------- */
+const SHELL_X = [486, 836, 1186], SHELL_Y = 640, SHELL_GOAL = 5;
+const ShellGame = {
+  time: 40, strikes: 3, meter: "FUNDS LOCATED",
+  tagline: "You quietly emptied the employee pension fund into offshore shell companies. The retirees' lawyers are on the trail. Keep track of where the money is while the shells reshuffle.",
+  rules: [
+    "Watch which shell company the 💰 pension money goes under.",
+    "The shells shuffle to throw off the lawyers. Keep your eye on the money.",
+    "<b>Click the shell</b> you think is hiding it. A wrong guess is a strike.",
+    `Find the money <b>${SHELL_GOAL} times</b> before time runs out. The shuffles get faster every round.`,
+  ],
+  winTitle: "Pension secured (for you)!", winText: "Forty thousand retirements, safely offshore. The retirees will be fine. They have each other.",
+  lose: { busted: "You lost track of 40,000 people's pensions three times. The lawyers found it before you did.", time: "Time's up. The money is still out there somewhere, in a very nice climate." },
+  init(G){ Object.assign(G, { slot: [0, 1, 2], money: 1, found: 0, round: 0, stage: "show", st: 0, swap: null, swapsLeft: 0, lift: [1, 1, 1], pickI: -1 }); shellRound(G); },
+  step(G, dt){
+    G.st += dt;
+    const liftTo = (i, v) => G.lift[i] += (v - G.lift[i]) * Math.min(1, dt * 12);
+    if (G.stage === "show") { G.lift.forEach((_, i) => liftTo(i, i === G.money ? 1 : 0)); if (G.st > 1.1) { G.stage = "lower"; G.st = 0; } }
+    else if (G.stage === "lower") { G.lift.forEach((_, i) => liftTo(i, 0)); if (G.st > .35) { G.stage = "shuffle"; G.st = 0; shellNextSwap(G); } }
+    else if (G.stage === "shuffle") {
+      if (G.st >= G.swap.dur) {
+        const { a, b } = G.swap; [G.slot[a], G.slot[b]] = [G.slot[b], G.slot[a]];
+        if (--G.swapsLeft > 0) { G.st = 0; shellNextSwap(G); } else { G.stage = "pick"; G.st = 0; G.swap = null; jobAlert("Where's the money?", "warn"); }
+      }
+    } else if (G.stage === "reveal") { G.lift.forEach((_, i) => liftTo(i, 1)); if (G.st > 1.1) { if (G.found >= SHELL_GOAL) endJob("win"); else shellRound(G); } }
+    G.pct = G.found / SHELL_GOAL * 100; G.meterText = `${G.found} / ${SHELL_GOAL}`;
+  },
+  cursor(G, x, y){ return G.stage === "pick" && shellAt(G, x, y) >= 0; },
+  down(G, x, y){
+    if (G.stage !== "pick") return;
+    const i = shellAt(G, x, y); if (i < 0) return;
+    G.pickI = i; G.stage = "reveal"; G.st = 0;
+    const p = shellPos(G, i);
+    if (i === G.money) { G.found++; floatText("Found it! 💰", p.x, SHELL_Y - 260); burst(p.x, SHELL_Y - 60, "#ffd23f", 18); }
+    else jobStrike("Wrong shell!", p.x, SHELL_Y - 260);
+  },
+  draw(ctx, G, now){
+    ctx.fillStyle = vgrad(ctx, 0, 520, [[0, "#0b1d3a"], [1, "#3c2a6b"]]); ctx.fillRect(0, 0, JW, 520);
+    ctx.fillStyle = "#fff"; for (let i = 0; i < 60; i++) { const sx = (i * 397) % JW, sy = (i * 131) % 420, tw = .5 + .5 * Math.sin(now * 2 + i); ctx.globalAlpha = .3 + .7 * tw; ctx.fillRect(sx, sy, 3, 3); } ctx.globalAlpha = 1;
+    ctx.fillStyle = "#fff6d5"; ctx.beginPath(); ctx.arc(1420, 150, 70, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = vgrad(ctx, 420, 560, [[0, "#1d5b8f"], [1, "#2b7fb8"]]); ctx.fillRect(0, 420, JW, 140);
+    ctx.fillStyle = vgrad(ctx, 540, JH, [[0, "#f2d49b"], [1, "#d9b26f"]]); ctx.fillRect(0, 540, JW, JH - 540);
+    emoji(ctx, "🌴", 150, 430, 320); emoji(ctx, "🌴", 1540, 450, 280);
+    rr(ctx, 300, SHELL_Y - 10, 1072, 70, 18); ctx.fillStyle = "#8a5a33"; ctx.fill(); ctx.lineWidth = 6; ctx.strokeStyle = INK; ctx.stroke();
+    rr(ctx, 360, SHELL_Y + 60, 40, 200, 8); ctx.fill(); ctx.stroke(); rr(ctx, 1272, SHELL_Y + 60, 40, 200, 8); ctx.fill(); ctx.stroke();
+    const mp = shellPos(G, G.money);
+    if (G.lift[G.money] > .05) { emoji(ctx, "💰", mp.x, SHELL_Y - 40, 110); label(ctx, "PENSIONS", mp.x, SHELL_Y + 26, 24, "#ffe066"); }
+    ["A", "B", "C"].forEach((n, i) => { const p = shellPos(G, i); drawShell(ctx, p.x, SHELL_Y - G.lift[i] * 170 - p.lift, n, G.stage === "pick" && G.phase === "play" ? Math.sin(now * 6 + i) * .03 : 0); });
+  },
+};
+function shellRound(G){ G.round++; G.money = Math.floor(Math.random() * 3); G.stage = "show"; G.st = 0; G.swapsLeft = 3 + G.round * 2; G.lift = [0, 0, 0]; }
+function shellNextSwap(G){ let a = Math.floor(Math.random() * 3), b = (a + 1 + Math.floor(Math.random() * 2)) % 3; G.swap = { a, b, dur: Math.max(.2, .52 - G.round * .06) }; }
+function shellPos(G, i){
+  let x = SHELL_X[G.slot[i]], lift = 0;
+  if (G.stage === "shuffle" && G.swap && (i === G.swap.a || i === G.swap.b)) {
+    const k = Math.min(1, G.st / G.swap.dur), e = k * k * (3 - 2 * k), other = i === G.swap.a ? G.swap.b : G.swap.a;
+    x = SHELL_X[G.slot[i]] + (SHELL_X[G.slot[other]] - SHELL_X[G.slot[i]]) * e; lift = Math.sin(Math.PI * k) * (i === G.swap.a ? 60 : -30);
+  }
+  return { x, lift };
+}
+function shellAt(G, x, y){ for (let i = 0; i < 3; i++) { const p = shellPos(G, i); if (Math.abs(x - p.x) < 150 && y > SHELL_Y - 250 && y < SHELL_Y + 40) return i; } return -1; }
+function drawShell(ctx, x, y, name, wob){   // a big scallop shell, base at (x, y)
+  ctx.save(); ctx.translate(x, y); ctx.rotate(wob);
+  ctx.beginPath(); ctx.moveTo(-150, 0); ctx.quadraticCurveTo(-170, -190, 0, -220); ctx.quadraticCurveTo(170, -190, 150, 0); ctx.closePath();
+  ctx.fillStyle = vgrad(ctx, -220, 0, [[0, "#ffd6e0"], [1, "#f08aa8"]]); ctx.fill(); ctx.lineWidth = 7; ctx.strokeStyle = INK; ctx.stroke();
+  ctx.strokeStyle = "rgba(160,60,90,.55)"; ctx.lineWidth = 5; for (let i = -3; i <= 3; i++) { ctx.beginPath(); ctx.moveTo(i * 12, -10); ctx.lineTo(i * 46, -195 + Math.abs(i) * 18); ctx.stroke(); }
+  rr(ctx, -46, -10, 92, 34, 10); ctx.fillStyle = "#f08aa8"; ctx.fill(); ctx.lineWidth = 6; ctx.strokeStyle = INK; ctx.stroke();
+  label(ctx, "SHELL CO. " + name, 0, -110, 28, "#fff");
+  ctx.restore();
+}
+
+/* ---------------------------------------------------------
+   The job list: one per industry
+   --------------------------------------------------------- */
+const JOBS = [
+  { id: "lemon", ind: 0, icon: "🍋", name: "Backwash Refills", blurb: "Resell customers' half-drunk leftovers as fresh lemonade.", game: LemonGame },
+  { id: "milk", ind: 1, icon: "🥛", name: "School Milk Contract", blurb: "Dose the school milk with chalk and formaldehyde, on the beat.", game: MilkGame },
+  { id: "waste", ind: 2, icon: "🛢️", name: "Toxic Dumping", blurb: "Dump the plant's waste into the town's drinking water.", game: WasteGame, cooldown: 2 * 60 * 1000, paySecs: 10 * 60 },
+  { id: "dye", ind: 3, icon: "🧪", name: "Toddler Cereal Lab", blurb: "Make kids' cereal glow with industrial dyes.", game: DyeGame },
+  { id: "shred", ind: 4, icon: "🧸", name: "Destroy the Evidence", blurb: "Shred the memos proving you knew the heaters catch fire.", game: ShredGame },
+  { id: "price", ind: 5, icon: "💊", name: "Your Money or Your Life", blurb: "Price-gouge a life-saving pill until the outrage boils over.", game: PriceGame },
+  { id: "gauge", ind: 6, icon: "⏲️", name: "Skip Maintenance", blurb: "Run the refinery flat-out with the crew still inside.", game: GaugeGame },
+  { id: "defeat", ind: 7, icon: "🚗", name: "Defeat Device", blurb: "Smog the city on the road, fool the regulators on the test rig.", game: DefeatGame },
+  { id: "accounts", ind: 8, icon: "🏦", name: "Surprise Accounts", blurb: "Open accounts for everyone, including the dead. Avoid auditors.", game: AccountsGame },
+  { id: "shell", ind: 9, icon: "🐚", name: "Hide the Pension", blurb: "Stash the raided pension fund in offshore shell companies.", game: ShellGame },
+];
+const JOB_BY_ID = Object.fromEntries(JOBS.map(j => [j.id, j]));
+const jobCd = j => JOB_COOLDOWN_OVERRIDE || j.cooldown || JOB_COOLDOWN;
+const jobPaySecs = j => j.paySecs || JOB_PAY_SECS;
+const jobLeftFor = j => Math.max(0, ((S.jobs || {})[j.id] || 0) - Date.now());
+const jobPayFor = j => D.indCps[j.ind] * jobPaySecs(j);
+
+// ---------- job list in the left column ----------
+const jobState = {};
+function buildJobList(){
+  const wrap = $("jobList"); wrap.innerHTML = "";
+  for (const j of JOBS) {
+    const b = document.createElement("button");
+    b.className = "job locked"; b.dataset.tt = "job:" + j.id;
+    b.innerHTML = `<span class="ji">${j.icon}</span><span class="jm"><span class="jt">${j.name}</span><span class="jd"></span></span><span class="js"></span>`;
+    b.addEventListener("click", () => openJob(j));
+    wrap.appendChild(b);
+    j.el = b; j.d = b.querySelector(".jd"); j.st = b.querySelector(".js");
+  }
+}
+function renderJobs(){
+  let unlockedCount = 0;
+  for (const j of JOBS) {
+    const unlocked = S.owned[j.ind] > 0, left = jobLeftFor(j), ready = unlocked && left === 0;
+    if (unlocked) unlockedCount++;
+    j.el.className = "job " + (!unlocked ? "locked" : ready ? "ready" : "wait");
+    if (!unlocked) { j.d.textContent = `Acquire ${INDUSTRIES[j.ind].name} to unlock`; j.st.textContent = "🔒"; }
+    else { j.d.textContent = `Pays ${money(jobPayFor(j))} · ${jobPaySecs(j) / 60} min of income`; j.st.textContent = ready ? "GO ▶" : "⏳ " + mmss(left); }
+    const prev = jobState[j.id];
+    if (prev && !prev.unlocked && unlocked && booted) toast(`${j.icon} New job unlocked: ${j.name}`);
+    if (prev && prev.unlocked && !prev.ready && ready) toast(`${j.icon} ${j.name} is ready again.`);
+    jobState[j.id] = { unlocked, ready };
+  }
+  $("jobsCount").textContent = `${unlockedCount} / ${JOBS.length}`;
+}
+
+// ---------- the shared minigame window ----------
+function openJob(j){
+  if (G || S.owned[j.ind] <= 0 || jobLeftFor(j) > 0) return;
+  hideTip();
+  const game = j.game;
+  if (game.image) jobImage(game.image);
+  G = { job: j, game, phase: "intro", t: 0, pct: 0, strikes: 0, alertT: 0, floats: [], parts: [], meterText: null };
+  game.init(G);
+  $("jobOverlay").hidden = false; $("jobAlert").className = "";
+  $("jobMeterLbl").textContent = game.meter;
+  showJobPanel("intro");
+  cancelAnimationFrame(jobRaf); let last = performance.now();
+  const loop = now => { const dt = Math.min(0.05, (now - last) / 1000); last = now; stepJob(dt); drawJob(now / 1000); if (G) jobRaf = requestAnimationFrame(loop); };
+  jobRaf = requestAnimationFrame(loop);
+}
+function closeJob(){
+  cancelAnimationFrame(jobRaf); G = null;
+  $("jobOverlay").hidden = true; $("jobPanel").hidden = true;
+  renderJobs();
+}
+function startJob(){
+  const j = G.job;
+  S.jobs = S.jobs || {}; S.jobs[j.id] = Date.now() + jobCd(j); save(); renderJobs();   // the cooldown starts with the shift
+  G.phase = "play"; $("jobPanel").hidden = true;
+  jobAlert("Shift started. Go!", "warn");
+}
+function endJob(result){
+  if (!G || G.phase !== "play") return;
+  G.phase = "over"; G.result = result;
+  G.game.stop?.(G);
+  if (result === "win") {
+    const j = G.job, r = jobPayFor(j); earn(r); G.reward = r;
+    S.jobWins = S.jobWins || {}; S.jobWins[j.id] = (S.jobWins[j.id] || 0) + 1;
+    toast(`${j.icon} ${j.name} done. You made ${money(r)}.`, "gold");
+    Platform.happytime(); save();
+  }
+  setTimeout(() => { if (G && G.phase === "over") showJobPanel(result); }, 650);
+}
+function showJobPanel(kind){
+  const p = $("jobPanel"), j = G.job, game = G.game, cd = jobCd(j);
+  p.hidden = false;
+  let html;
+  if (kind === "intro") html = `<div class="jobCardBig">
+    <h3>${j.icon} ${j.name}</h3><p>${game.tagline}</p>
+    <ul>${game.rules.map(r => `<li>${r}</li>`).join("")}</ul>
+    <p class="reward">Reward: ${money(jobPayFor(j))} (${jobPaySecs(j) / 60} minutes of ${esc(INDUSTRIES[j.ind].name)} income)</p>
+    <p style="color:var(--muted);font-size:.85em">Starting the shift uses this job for the next ${Math.round(cd / 60000) || "few"} ${cd >= 120000 ? "minutes" : cd >= 60000 ? "minute" : "seconds"}, win or lose.</p>
+    <div class="row"><button class="alt" data-act="close">Not now</button><button class="go" data-act="start">Start shift</button></div></div>`;
+  else if (kind === "win") html = `<div class="jobCardBig"><h3>${game.winTitle}</h3><p>${game.winText}</p>
+    <p class="reward">+${money(G.reward)}</p>${game.resultNote ? `<p class="reward">${game.resultNote(G, kind)}</p>` : ""}
+    <div class="row"><button class="go" data-act="close">Back to the office</button></div></div>`;
+  else {
+    const why = kind === "quit" ? "You walked off the job." : (game.lose && game.lose[kind]) || "The shift is over.";
+    const title = kind === "busted" ? "Busted!" : kind === "quit" ? "Shift abandoned" : "Shift over";
+    html = `<div class="jobCardBig bad"><h3>${title}</h3><p>${why}</p>${game.resultNote ? `<p class="reward">${game.resultNote(G, kind)}</p>` : ""}
+      <p style="color:var(--muted)">No job payout. This job is available again in ${mmss(jobLeftFor(j))}.</p>
+      <div class="row"><button class="go" data-act="close">Back to the office</button></div></div>`;
+  }
+  p.innerHTML = html;
+}
+function stepJob(dt){
+  if (!G) return;
+  G.parts = G.parts.filter(q => (q.vy += (q.grav || 0) * dt, q.x += q.vx * dt, q.y += q.vy * dt, q.life -= dt) > 0);
+  G.floats = G.floats.filter(f => (f.y -= 45 * dt, f.life -= dt) > 0);
+  if (G.alertT > 0 && (G.alertT -= dt) <= 0) $("jobAlert").className = "";
+  G.game.ambient?.(G, dt);
+  if (G.phase === "play") {
+    G.t += dt;
+    G.game.step(G, dt);
+    if (G && G.phase === "play" && G.t >= G.game.time) endJob(G.game.onTimeUp ? G.game.onTimeUp(G) : "time");
+  }
+  if (G) updateJobHud();
+}
+function updateJobHud(){
+  const game = G.game, left = Math.max(0, game.time - G.t);
+  $("jobTimer").textContent = "⏱ " + left.toFixed(1) + "s";
+  $("jobTimer").classList.toggle("low", G.phase === "play" && left < 8);
+  $("jobPct").textContent = G.meterText || Math.floor(G.pct) + "%";
+  $("jobFill").style.width = G.pct + "%";
+  const extra = game.extra ? game.extra(G) : game.strikes ? "🚨 " + Array.from({ length: game.strikes }, (_, i) => i < G.strikes ? "●" : "○").join(" ") : "";
+  $("jobExtra").textContent = extra; $("jobExtra").hidden = !extra;
+}
+function drawJob(now){
+  if (!G) return;
+  const ctx = $("jobCanvas").getContext("2d");
+  ctx.save(); ctx.clearRect(0, 0, JW, JH);
+  G.game.draw(ctx, G, now);
+  ctx.restore();
+  for (const q of G.parts) {
+    ctx.globalAlpha = Math.min(1, q.life * 2); ctx.fillStyle = q.color;
+    if (q.w) { ctx.save(); ctx.translate(q.x, q.y); ctx.rotate(q.rot + q.life * 6); ctx.fillRect(-q.w / 2, -q.h / 2, q.w, q.h); ctx.restore(); }
+    else { ctx.beginPath(); ctx.arc(q.x, q.y, q.r, 0, Math.PI * 2); ctx.fill(); }
+  }
+  ctx.globalAlpha = 1;
+  for (const f of G.floats) { ctx.globalAlpha = Math.min(1, f.life * 1.5); label(ctx, f.text, f.x, f.y, 44, f.bad ? "#ff4d4d" : "#d8ff6a"); }
+  ctx.globalAlpha = 1;
+}
+function jobPoint(e){ const r = $("jobCanvas").getBoundingClientRect(); return [(e.clientX - r.left) * JW / r.width, (e.clientY - r.top) * JH / r.height]; }
+function onJobDown(e){
+  if (!G || G.phase !== "play") return;
+  const [x, y] = jobPoint(e);
+  try { $("jobCanvas").setPointerCapture(e.pointerId); } catch (_) {}
+  G.game.down?.(G, x, y);
+}
+function onJobMove(e){
+  if (!G) return;
+  const [x, y] = jobPoint(e);
+  if (G.phase === "play") G.game.move?.(G, x, y);
+  $("jobCanvas").style.cursor = G.phase === "play" && G.game.cursor?.(G, x, y) ? "pointer" : "default";
+}
+function onJobUp(e){
+  if (!G || G.phase !== "play") return;
+  const [x, y] = jobPoint(e);
+  G.game.up?.(G, x, y);
+}
+
+/* =========================================================
    WIRING
    ========================================================= */
 buildBuildingRows();
@@ -1484,6 +2972,20 @@ $("penaltyLobbyBtn").addEventListener("click", buyPenaltyLobbyist);
 $("timerFireBtn").addEventListener("click", fireTimerLobbyist);
 $("penaltyFireBtn").addEventListener("click", firePenaltyLobbyist);
 $("bankruptBtn").addEventListener("click", declareBankruptcy);
+buildJobList();
+$("jobClose").addEventListener("click", () => { if (G && G.phase === "play") endJob("quit"); else closeJob(); });
+$("jobPanel").addEventListener("click", e => {
+  const act = e.target.closest("[data-act]")?.dataset.act;
+  if (act === "start") startJob(); else if (act === "close") closeJob();
+});
+$("jobCanvas").addEventListener("pointerdown", onJobDown);
+$("jobCanvas").addEventListener("pointermove", onJobMove);
+$("jobCanvas").addEventListener("pointerup", onJobUp);
+$("jobCanvas").addEventListener("pointercancel", onJobUp);
+document.addEventListener("keydown", e => {   // games that take keys (e.g. the milk rhythm game) get them during play
+  if (!G || G.phase !== "play" || !G.game.key || e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
+  G.game.key(G, e.key); e.preventDefault();
+});
 $("saveNow").addEventListener("click", () => { save(); toast("Game saved."); });
 $("exportBtn").addEventListener("click", exportSave);
 $("importBtn").addEventListener("click", importSave);
@@ -1532,6 +3034,7 @@ setInterval(() => {
   S.playTime += Math.min(1, Math.max(0, (nowMs - lastPlayTick) / 1000)); // active time only; gaps from sleep/closed tab don't count
   lastPlayTick = nowMs;
   if (++tickCount % 10 === 0) {
+    renderJobs();
     sampleMarket(); drawMarket(); checkAchievements();
     if (!$("tab-stats").hidden) renderStats();
     if (!$("tab-ach").hidden) renderAchievements();
