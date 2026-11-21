@@ -9,7 +9,7 @@
   },
   "scripts": {
     "dev": "node scripts/dev.js",
-    "test": "node --test \"tests/unit/**/*.test.js\"",
+    "test": "node --test --test-reporter=spec \"tests/unit/**/*.test.js\"",
     "test:e2e": "node scripts/test-e2e.js",
     "screenshots": "node scripts/screenshots.js",
     "build": "node scripts/build.js",
