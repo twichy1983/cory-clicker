@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Clickonomics: a satirical idle clicker game in plain HTML, CSS and JavaScript.",
   "engines": {
-    "node": ">=22"
+    "node": ">=22.12"
   },
   "scripts": {
     "dev": "node scripts/dev.js",
