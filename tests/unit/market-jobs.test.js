@@ -4,7 +4,7 @@ import { newState } from "../../src/core/state.js";
 import { derive } from "../../src/core/economy.js";
 import { rules } from "../../src/core/rules.js";
 import { createMarket, sampleMarket, pctChange, MKT_LEN, scandalShock } from "../../src/core/market.js";
-import { JOB_BY_ID, jobCooldown, jobPay, jobTimeLeft, startJobCooldown, recordJobWin, totalJobWins } from "../../src/core/jobs.js";
+import { JOB_BY_ID, jobCooldown, jobPay, jobTimeLeft, startJobCooldown, recordJobWin, totalJobWins, winJob, jobChanges } from "../../src/core/jobs.js";
 import { newsLine } from "../../src/core/news.js";
 
 const T0 = 1_000_000_000_000;
@@ -47,6 +47,44 @@ test("jobs: cooldown starts with the shift; wins are counted", () => {
   assert.equal(jobTimeLeft(S, job, T0 + 1000), 5 * 60 * 1000 - 1000);
   recordJobWin(S, job); recordJobWin(S, JOB_BY_ID.lemon);
   assert.equal(totalJobWins(S), 2);
+});
+
+test("jobs: winning pays the reward, counts the win and reports it", () => {
+  const S = newState(T0), job = JOB_BY_ID.lemon;
+  S.owned[0] = 10;
+  const D = derive(S), reward = jobPay(D, job);
+  assert.ok(reward > 0);
+  const ev = winJob(S, D, job);
+  assert.deepEqual(ev, { type: "jobWon", job, reward });
+  assert.equal(S.dollars, reward);
+  assert.equal(S.allTimeEarned, reward);
+  assert.ok(S.fines > 0); // job pay is income like any other, so fines accrue on it
+  assert.equal(S.jobWins.lemon, 1);
+});
+
+test("jobs: changes are reported once, and never on the first check", () => {
+  rules.jobCooldown = 0;
+  const S = newState(T0), seen = {}, lemon = JOB_BY_ID.lemon;
+  S.owned[0] = 1;
+  assert.deepEqual(jobChanges(seen, S, T0), []); // first look: nothing to compare against
+
+  S.owned[1] = 1;
+  assert.deepEqual(jobChanges(seen, S, T0), [{ type: "jobUnlocked", job: JOB_BY_ID.milk }]);
+  assert.deepEqual(jobChanges(seen, S, T0), []);
+
+  startJobCooldown(S, lemon, T0);
+  assert.deepEqual(jobChanges(seen, S, T0 + 1000), []);
+  assert.deepEqual(jobChanges(seen, S, T0 + jobCooldown(lemon)), [{ type: "jobReady", job: lemon }]);
+  assert.deepEqual(jobChanges(seen, S, T0 + jobCooldown(lemon) + 1000), []);
+});
+
+test("jobs: a job that unlocks while still cooling down isn't reported as ready", () => {
+  const S = newState(T0), seen = {}, milk = JOB_BY_ID.milk;
+  startJobCooldown(S, milk, T0);
+  jobChanges(seen, S, T0);
+  S.owned[1] = 1;
+  assert.deepEqual(jobChanges(seen, S, T0), [{ type: "jobUnlocked", job: milk }]);
+  assert.deepEqual(jobChanges(seen, S, T0 + jobCooldown(milk)), [{ type: "jobReady", job: milk }]);
 });
 
 test("jobs: test mode replays after 5 seconds", () => {

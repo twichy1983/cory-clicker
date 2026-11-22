@@ -1,7 +1,6 @@
 import { JW, JH, rand, pick, clamp, rr, vgrad, hgrad, INK, emoji, label, plainText, button, inBox } from "./draw.js";
 import { floatText, burst, jobAlert, endJob, jobReward, payOut } from "./framework.js";
 import { money } from "../core/format.js";
-import { toast } from "../ui/toast.js";
 
 /* ---------------------------------------------------------
    JOB: PRICE HIKE (Pharma Conglomerate)
@@ -72,7 +71,7 @@ const PriceGame = {
   up(G){ G.hike = false; G.cut = false; },
   stop(G){   // whatever happened, the gouging profits are paid out as real cash
     G.hike = false; G.cut = false;
-    if (G.profit > 0 && !G.paidProfit) { G.paidProfit = G.profit; payOut(G.profit); toast(`💵 You kept ${money(G.profit)} in price-gouging profits.`, "gold"); }
+    if (G.profit > 0 && !G.paidProfit) { G.paidProfit = G.profit; payOut(G.profit, `💵 You kept ${money(G.profit)} in price-gouging profits.`); }
   },
   draw(ctx, G, now){
     ctx.fillStyle = vgrad(ctx, 0, JH, [[0, "#3b2418"], [1, "#24150e"]]); ctx.fillRect(0, 0, JW, JH);

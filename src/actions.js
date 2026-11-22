@@ -4,6 +4,7 @@ import { game, refreshDerived } from "./game.js";
 import { HOUR, BASE_TIMER } from "./core/constants.js";
 import { UPG_BY_ID } from "./core/data/upgrades.js";
 import * as E from "./core/economy.js";
+import * as J from "./core/jobs.js";
 import { newState, MAX_COMPANY_NAME } from "./core/state.js";
 import { decodeSave, encodeSave, sanitize } from "./core/save.js";
 import { checkAchievements, MAJOR_ACH } from "./core/achievements.js";
@@ -33,8 +34,16 @@ export function render() {
 export function update() {
   refreshDerived();
   render();
-  renderJobs(true);
+  updateJobs();
   refreshTip();
+}
+
+// Redraws the jobs list and announces jobs that just unlocked or came off cooldown. `quiet` skips the toasts.
+const seenJobs = {};
+export function updateJobs(quiet) {
+  renderJobs();
+  const events = J.jobChanges(seenJobs, game.S, Date.now());
+  if (!quiet) handleEvents(events);
 }
 
 /* ---------- achievements ---------- */
@@ -61,13 +70,20 @@ export function awardAchievements(quiet) {
 
 /* ---------- deadlines ---------- */
 
-// Shows what advance() reported: deadlines survived, or a bankruptcy
+// Shows what the core rules reported: deadlines survived, a bankruptcy, or job news
 export function handleEvents(events) {
   for (const ev of events) {
     if (ev.type === "survived") {
       toast(ev.rebate > 0 ? `Deadline reached. Regulators paid YOU a ${money(ev.rebate)} rebate.` : "Deadline reached with a clean ledger. The clock resets.");
     } else if (ev.type === "bankrupt") {
       showBankruptcy(ev);
+    } else if (ev.type === "jobUnlocked") {
+      toast(`${ev.job.icon} New job unlocked: ${ev.job.name}`);
+    } else if (ev.type === "jobReady") {
+      toast(`${ev.job.icon} ${ev.job.name} is ready again.`);
+    } else if (ev.type === "jobWon") {
+      toast(`${ev.job.icon} ${ev.job.name} done. You made ${money(ev.reward)}.`, "gold");
+      platform.happytime();
     }
   }
 }
@@ -155,6 +171,28 @@ export function payFines() {
   render();
 }
 
+/* ---------- job shifts (main.js connects these to the minigame window with setJobHooks) ---------- */
+
+export function startJob(job) {
+  J.startJobCooldown(game.S, job, Date.now()); // the cooldown starts with the shift, win or lose
+  save();
+  updateJobs(true);
+}
+
+// Returns the reward, for the window's result screen
+export function winJob(job) {
+  const ev = J.winJob(game.S, game.D, job);
+  handleEvents([ev]);
+  save();
+  return ev.reward;
+}
+
+// Extra cash a minigame pays on top of the reward (the price-gouging profits)
+export function jobPayOut(amount, text) {
+  E.earn(game.S, game.D, amount);
+  if (text) toast(text, "gold");
+}
+
 export function renameCompany(name) {
   game.S.company = [...name.trim()].slice(0, MAX_COMPANY_NAME).join("") || "Unnamed Holdings";
 }
@@ -197,7 +235,7 @@ function afterReplace() {
   drawMarket();
   awardAchievements(true);
   renderAchievements(true);
-  renderJobs(false);
+  updateJobs(true);
   save();
 }
 

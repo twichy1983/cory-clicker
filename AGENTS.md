@@ -16,7 +16,8 @@ Clickonomics: an idle clicker game in plain HTML/CSS/JS ES modules. No framework
 - The shared state is `game` in `src/game.js`. `game.S` is saved; `game.D` is derived. Call `refreshDerived()` (or `act.update()`) after changing ownership. Loading, importing and hard resetting replace `game.S` entirely, so never cache it.
 - Test mode flips switches in `src/core/rules.js`; don't use `if (TEST_MODE)` inside core. `__BUILD__` is defined only by `scripts/build.js`; unbundled code is `"dev"`.
 - Minigames read the current shift state through the live `G` export from `src/jobs/framework.js`. The `key()` handler returns `true` for keys it uses (only those get `preventDefault`).
-- Avoid import cycles: the framework gets `hideTip`, `save` and similar callbacks through `setJobHooks`, not imports.
+- The job framework only runs the window. Shift effects (cooldown, pay, toasts, saving) go through `setJobHooks` (`onStart`, `onWin`, `onPayOut`, ...) to `src/actions.js`, which also avoids import cycles. Minigames never change `game.S` or toast; extra cash goes through `payOut(amount, text)`.
+- UI modules only draw. Change detection (like jobs unlocking) is a core rule that returns events (`jobChanges()`), shown by `actions.handleEvents()`.
 
 ## Gotchas
 - Imports must be relative, include `.js`, and use lowercase file names: Pages is case-sensitive and the site lives under `/cory-clicker/`. No absolute `/` paths (the build checks this).

@@ -41,7 +41,7 @@ Saves store owned counts by position, so **add new industries at the end of the 
 ## Add a minigame
 
 1. Copy the smallest existing game (`src/jobs/accounts.js`) to `src/jobs/yourgame.js`.
-2. Change its object. The comment at the top of `src/jobs/framework.js` lists every field a game can define.
+2. Change its object. The comment at the top of `src/jobs/framework.js` lists every field a game can define. A game never changes `game.S` or shows toasts itself: winning pays the reward automatically, and extra cash goes through `payOut(amount, text)` from `framework.js` (see `price.js`).
 3. Add the job to `JOB_DEFS` in `src/core/jobs.js` (id, industry, icon, name, blurb).
 4. Import the game in `src/jobs/index.js` and add it to `GAMES`.
 5. Play it with `npm run dev`, then `npm run test:e2e`. The "every minigame" test plays it with random input to catch crashes.

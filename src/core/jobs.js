@@ -2,6 +2,7 @@
 // Each job pays several minutes of its industry's income and can be played once per cooldown
 // (the cooldown starts when a shift starts, win or lose). The minigames themselves live in src/jobs/.
 import { rules } from "./rules.js";
+import { earn } from "./economy.js";
 
 const JOB_COOLDOWN = 5 * 60 * 1000;   // default: once every 5 minutes
 const JOB_PAY_SECS = 5 * 60;          // default: pays 5 minutes of the industry's income
@@ -36,3 +37,25 @@ export function recordJobWin(S, j) {
 }
 
 export const totalJobWins = S => Object.values(S.jobWins).reduce((a, b) => a + b, 0);
+
+// A won shift: pays the job's reward and counts the win. Returns { type: "jobWon", job, reward }.
+export function winJob(S, D, j) {
+  const reward = jobPay(D, j);
+  earn(S, D, reward);
+  recordJobWin(S, j);
+  return { type: "jobWon", job: j, reward };
+}
+
+// Compares every job with how it was last time and returns what changed:
+// { type: "jobUnlocked", job } and { type: "jobReady", job } (ready again after a cooldown).
+// `seen` is the caller's memory between calls ({} to start); the first look at a job reports nothing.
+export function jobChanges(seen, S, now) {
+  const events = [];
+  for (const j of JOB_DEFS) {
+    const unlocked = jobUnlocked(S, j), ready = unlocked && jobTimeLeft(S, j, now) === 0, prev = seen[j.id];
+    if (prev && !prev.unlocked && unlocked) events.push({ type: "jobUnlocked", job: j });
+    if (prev && prev.unlocked && !prev.ready && ready) events.push({ type: "jobReady", job: j });
+    seen[j.id] = { unlocked, ready };
+  }
+  return events;
+}

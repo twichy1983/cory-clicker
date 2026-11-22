@@ -4,20 +4,24 @@
 //   init(G)  step(G,dt)  ambient?(G,dt)  stop?(G)  draw(ctx,G,now)
 //   down?/move?/up?(G,x,y)  cursor?(G,x,y)  key?(G,key) -> true if used  extra?(G)  onTimeUp?(G)  resultNote?(G,kind)
 // G is the current shift's state (null when no job is open). Minigames read it from here.
+// This module only runs the window. What a shift does to the game (cooldown, pay, toasts, saving) happens in
+// actions.js, which main.js connects through setJobHooks.
 import { game } from "../game.js";
-import { earn } from "../core/economy.js";
 import { INDUSTRIES } from "../core/data/industries.js";
-import { jobCooldown, jobPay, jobPaySecs, jobTimeLeft, jobUnlocked, startJobCooldown, recordJobWin } from "../core/jobs.js";
+import { jobCooldown, jobPay, jobPaySecs, jobTimeLeft, jobUnlocked } from "../core/jobs.js";
 import { money, mmss } from "../core/format.js";
 import { $, esc } from "../ui/dom.js";
-import { toast } from "../ui/toast.js";
-import { platform } from "../platform/index.js";
 import { JW, JH, rand, label } from "./draw.js";
 
 export let G = null;
 let raf = 0;
-// Set by main.js: onOpen() when the window opens, save() after a shift starts or pays, onChange() to refresh the jobs list
-const hooks = { onOpen() {}, save() {}, onChange() {} };
+// Set by main.js:
+//   onOpen()                when the window opens
+//   onStart(job)            when a shift starts (the cooldown starts with it, win or lose)
+//   onWin(job) -> reward    when a shift is won
+//   onPayOut(amount, text)  when a minigame pays extra cash, with a message for the player
+//   onClose()               when the window closes
+const hooks = { onOpen() {}, onStart() {}, onWin() { return 0; }, onPayOut() {}, onClose() {} };
 export function setJobHooks(h) { Object.assign(hooks, h); }
 
 /* ---------- helpers every minigame can use ---------- */
@@ -49,8 +53,8 @@ export function jobStrike(text, x = JW / 2, y = JH / 2) {
 // What winning the current job pays
 export const jobReward = () => jobPay(game.D, G.job);
 
-// Pays extra cash from inside a minigame (e.g. price-gouging profits)
-export function payOut(amount) { earn(game.S, game.D, amount); }
+// Pays extra cash from inside a minigame (e.g. price-gouging profits), with a message for the player
+export function payOut(amount, text) { hooks.onPayOut(amount, text); }
 
 const images = {};
 export function jobImage(src) {
@@ -91,13 +95,11 @@ export function closeJob() {
   G = null;
   $("jobOverlay").hidden = true;
   $("jobPanel").hidden = true;
-  hooks.onChange();
+  hooks.onClose();
 }
 
 function startJob() {
-  startJobCooldown(game.S, G.job, Date.now()); // the cooldown starts with the shift, win or lose
-  hooks.save();
-  hooks.onChange();
+  hooks.onStart(G.job);
   G.phase = "play";
   $("jobPanel").hidden = true;
   jobAlert("Shift started. Go!", "warn");
@@ -108,15 +110,7 @@ export function endJob(result) {
   G.phase = "over";
   G.result = result;
   G.game.stop?.(G);
-  if (result === "win") {
-    const j = G.job, reward = jobReward();
-    earn(game.S, game.D, reward);
-    G.reward = reward;
-    recordJobWin(game.S, j);
-    toast(`${j.icon} ${j.name} done. You made ${money(reward)}.`, "gold");
-    platform.happytime();
-    hooks.save();
-  }
+  if (result === "win") G.reward = hooks.onWin(G.job);
   setTimeout(() => { if (G && G.phase === "over") showJobPanel(result); }, 650);
 }
 

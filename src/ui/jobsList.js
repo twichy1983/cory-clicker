@@ -5,9 +5,8 @@ import { jobPay, jobPaySecs, jobTimeLeft, jobUnlocked } from "../core/jobs.js";
 import { JOBS } from "../jobs/index.js";
 import { money, mmss } from "../core/format.js";
 import { $ } from "./dom.js";
-import { toast } from "./toast.js";
 
-const els = {}, last = {};
+const els = {};
 
 // Builds the buttons. Each carries data-job; main.js opens the job when it's clicked.
 export function buildJobList() {
@@ -24,8 +23,8 @@ export function buildJobList() {
   }
 }
 
-// Updates every button. With `announce`, toasts when a job unlocks or becomes ready again.
-export function renderJobs(announce) {
+// Updates every button
+export function renderJobs() {
   const { S, D } = game, now = Date.now();
   let unlockedCount = 0;
   for (const j of JOBS) {
@@ -34,10 +33,6 @@ export function renderJobs(announce) {
     e.el.className = "job " + (!unlocked ? "locked" : ready ? "ready" : "wait");
     if (!unlocked) { e.d.textContent = `Acquire ${INDUSTRIES[j.ind].name} to unlock`; e.st.textContent = "🔒"; }
     else { e.d.textContent = `Pays ${money(jobPay(D, j))} · ${jobPaySecs(j) / 60} min of income`; e.st.textContent = ready ? "GO ▶" : "⏳ " + mmss(left); }
-    const prev = last[j.id];
-    if (announce && prev && !prev.unlocked && unlocked) toast(`${j.icon} New job unlocked: ${j.name}`);
-    if (announce && prev && prev.unlocked && !prev.ready && ready) toast(`${j.icon} ${j.name} is ready again.`);
-    last[j.id] = { unlocked, ready };
   }
   $("jobsCount").textContent = `${unlockedCount} / ${JOBS.length}`;
 }

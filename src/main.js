@@ -23,7 +23,7 @@ import { wireTooltips, refreshTip, hideTip } from "./ui/tooltip.js";
 import { setNews, rotateNews } from "./ui/hud.js";
 import { buildBuildingRows, setBuyAmt, toggleShowAllUpgrades } from "./ui/store.js";
 import { wireTabs, renderStats, renderAchievements, tabVisible } from "./ui/tabs.js";
-import { buildJobList, renderJobs } from "./ui/jobsList.js";
+import { buildJobList } from "./ui/jobsList.js";
 import { wireMarket, drawMarket } from "./ui/market.js";
 import { addTestToolbar } from "./ui/testToolbar.js";
 
@@ -42,7 +42,7 @@ function wire() {
   wireTabs();
   wireMarket();
   wireJobWindow();
-  setJobHooks({ onOpen: hideTip, save, onChange: () => renderJobs(false) });
+  setJobHooks({ onOpen: hideTip, onStart: act.startJob, onWin: act.winJob, onPayOut: act.jobPayOut, onClose: () => act.updateJobs(true) });
 
   $("bigDollar").addEventListener("click", act.clickDollar);
   $("payBtn").addEventListener("click", act.payFines);
@@ -119,7 +119,7 @@ function tick() {
   lastTick = now;
 
   if (++tickCount % 10 === 0) { // once a second
-    renderJobs(true);
+    act.updateJobs();
     sampleMarket(game.mkt, game.D.indCps);
     drawMarket();
     act.awardAchievements();
@@ -138,7 +138,7 @@ async function boot() {
   $("companyName").value = game.S.company;
   act.loadSavedGame();
   act.update();
-  renderJobs(false);
+  act.updateJobs(true);
   setNews();
   for (let k = 0; k < 60; k++) sampleMarket(game.mkt, game.D.indCps); // a minute of history so the charts aren't empty
   drawMarket();
