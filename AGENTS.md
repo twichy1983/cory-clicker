@@ -28,4 +28,4 @@ Clickonomics: an idle clicker game in plain HTML/CSS/JS ES modules. No framework
 - CrazyGames requirements (SDK in `<head>`, saves only through the SDK Data module, relative paths, no fullscreen button, PEGI 12) are summarised in `docs/releasing.md`.
 
 ## Docs
-`docs/architecture.md`, `docs/making-changes.md` (recipes for industries, scandals, achievements, minigames and save format changes), `docs/git-workflow.md` (feature branches, merge to `main`, imperative commit messages), `docs/testing.md`, `docs/releasing.md`.
+`docs/architecture.md`, `docs/making-changes.md` (recipes for industries, scandals, achievements, minigames and save format changes), `docs/testing.md`, `docs/releasing.md`.

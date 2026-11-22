@@ -49,10 +49,15 @@ scripts/            dev server, build, test browser, screenshots
 docs/               how the project works and how to change it
 ```
 
+## Contributing
+
+- **Every push to `main` goes live** on GitHub Pages within a few minutes. Use a branch for anything you aren't ready to ship.
+- Before pushing to `main`: `npm test` and `npm run test:e2e` pass, and you've played the change in `npm run dev`. If you changed the layout, check `npm run screenshots`; if you changed the save format, check an old save still loads.
+- Commit messages: a short first line saying what the commit does ("Fix fines counting twice after import"), then bullets for the why if it isn't obvious.
+
 ## Docs
 
 - [Architecture](docs/architecture.md): how the code fits together
 - [Making changes](docs/making-changes.md): recipes for common changes (new industry, scandal, achievement, minigame)
-- [Git workflow](docs/git-workflow.md): branches, commits and getting changes live
 - [Testing](docs/testing.md): unit tests, end-to-end tests and manual checks
 - [Releasing](docs/releasing.md): GitHub Pages and the CrazyGames upload
