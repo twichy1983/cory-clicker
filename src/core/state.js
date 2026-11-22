@@ -2,6 +2,8 @@
 import { BASE_TIMER } from "./constants.js";
 import { INDUSTRIES } from "./data/industries.js";
 
+export const MAX_COMPANY_NAME = 128;
+
 // The parts of the state that a bankruptcy resets
 export function freshRun(now) {
   return {

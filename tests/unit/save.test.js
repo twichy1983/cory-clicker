@@ -1,9 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { newState } from "../../src/core/state.js";
+import { newState, MAX_COMPANY_NAME } from "../../src/core/state.js";
 import { encodeSave, decodeSave, sanitize } from "../../src/core/save.js";
 
 const T0 = 1_000_000_000_000;
+const HOUR_MS = 3600 * 1000;
 
 test("save and load gives back the same game", () => {
   const S = newState(T0);
@@ -40,6 +41,23 @@ test("unknown and badly typed fields are dropped", () => {
   assert.deepEqual(S.jobs, { waste: 99 });
   assert.equal(S.timerLobbyists, 0);
   assert.equal("hacked" in S, false);
+});
+
+test("company names are trimmed and capped at 128 characters", () => {
+  assert.equal(sanitize({ company: "x".repeat(5000) }, T0).company.length, MAX_COMPANY_NAME);
+  assert.equal([...sanitize({ company: "💸".repeat(200) }, T0).company].length, MAX_COMPANY_NAME); // emoji aren't split
+  assert.equal(sanitize({ company: "  Acme  " }, T0).company, "Acme");
+  assert.equal(sanitize({ company: "   " }, T0).company, newState(T0).company);
+});
+
+test("bad dates and negative stats are reset", () => {
+  const S = sanitize({ startedAt: Infinity, clicks: -5, bankruptcies: NaN, finesPaid: 1e400 }, T0);
+  assert.equal(S.startedAt, T0);
+  assert.equal(S.clicks, 0);
+  assert.equal(S.bankruptcies, 0);
+  assert.equal(S.finesPaid, 0);
+  assert.equal(sanitize({ startedAt: T0 + HOUR_MS }, T0).startedAt, T0); // a start date in the future
+  assert.equal(sanitize({ startedAt: T0 - 5 }, T0).startedAt, T0 - 5);
 });
 
 test("saves from before the jobs list keep their waste-job cooldown", () => {

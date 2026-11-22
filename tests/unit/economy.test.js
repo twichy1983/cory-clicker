@@ -156,6 +156,28 @@ test("bug fix: clicking 'file compliance report' repeatedly doesn't count as sur
   assert.equal(S.cyclesSurvived, 1);
 });
 
+test("bug fix: paying fines just after the deadline reports the bankruptcy instead of hiding it", () => {
+  const S = newState(T0);
+  S.dollars = 100; S.fines = 30;
+  const res = E.payFines(S, E.derive(S), S.deadline + 50);
+  assert.equal(res.type, "deadline");
+  assert.equal(res.events.length, 1);
+  assert.equal(res.events[0].type, "bankrupt");
+  assert.equal(res.events[0].owed, 30);
+  assert.equal(S.bankruptcies, 1);
+  assert.equal(S.finesPaid, 0);
+});
+
+test("filing a report just after a clean deadline reports the survived deadline once", () => {
+  const S = newState(T0);
+  const deadline = S.deadline;
+  const res = E.payFines(S, E.derive(S), deadline + 50);
+  assert.equal(res.type, "deadline");
+  assert.deepEqual(res.events, [{ type: "survived", rebate: 0 }]);
+  assert.equal(S.cyclesSurvived, 1);
+  assert.equal(S.deadline, deadline + BASE_TIMER);
+});
+
 test("timer lobbyists add an hour to the window and the countdown", () => {
   const S = newState(T0);
   S.dollars = 50000;

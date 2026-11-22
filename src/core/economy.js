@@ -161,8 +161,11 @@ export function firePenaltyLobbyist(S) {
 
 // Pays the fines (or collects a rebate) early and restarts the clock.
 // Returns { type: "paid" | "rebate" | "filed", amount } or null if the player can't afford the fines.
+// If the deadline passed before the click was handled, it has already been settled: returns
+// { type: "deadline", events } with advance()'s events and doesn't pay anything.
 export function payFines(S, D, now) {
-  advance(S, D, now);
+  const events = advance(S, D, now);
+  if (events.length) return { type: "deadline", events };
   let ev;
   if (S.fines > 0) {
     if (S.dollars < S.fines) return null;

@@ -4,7 +4,7 @@ import { INDUSTRIES } from "./data/industries.js";
 import { UPG_BY_ID } from "./data/upgrades.js";
 import { ACH_BY_ID } from "./achievements.js";
 import { JOB_BY_ID } from "./jobs.js";
-import { newState } from "./state.js";
+import { newState, MAX_COMPANY_NAME } from "./state.js";
 
 // Base64 of the JSON (UTF-8 safe, so company names with emoji survive)
 export function encodeSave(S) {
@@ -40,7 +40,11 @@ export function sanitize(o, now) {
   for (const id in (o.jobWins || {})) if (JOB_BY_ID[id] && isFinite(o.jobWins[id])) base.jobWins[id] = count(o.jobWins[id]);
   // Saves from before the jobs list had a single waste-dumping cooldown
   if (isFinite(o.jobReadyAt) && o.jobReadyAt > 0 && !base.jobs.waste) base.jobs.waste = +o.jobReadyAt;
+  base.company = [...base.company.trim()].slice(0, MAX_COMPANY_NAME).join("") || newState(now).company;
   if (!isFinite(base.playTime) || base.playTime < 0) base.playTime = 0;
+  if (!isFinite(base.startedAt) || base.startedAt > now) base.startedAt = now;
+  for (const k of ["clicks", "clickEarned", "allTimeEarned", "finesPaid", "rebatesCollected", "bankruptcies", "cyclesSurvived"])
+    if (!isFinite(base[k]) || base[k] < 0) base[k] = 0;
   for (const k of ["dollars", "runEarned", "allTimeEarned", "fines", "deadline", "lastTick"]) if (!isFinite(base[k])) throw new Error("Corrupt save");
   return base;
 }

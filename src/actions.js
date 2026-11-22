@@ -4,7 +4,7 @@ import { game, refreshDerived } from "./game.js";
 import { HOUR, BASE_TIMER } from "./core/constants.js";
 import { UPG_BY_ID } from "./core/data/upgrades.js";
 import * as E from "./core/economy.js";
-import { newState } from "./core/state.js";
+import { newState, MAX_COMPANY_NAME } from "./core/state.js";
 import { decodeSave, encodeSave, sanitize } from "./core/save.js";
 import { checkAchievements, MAJOR_ACH } from "./core/achievements.js";
 import { resetMarket, scandalShock } from "./core/market.js";
@@ -148,6 +148,7 @@ export function firePenaltyLobbyist() {
 export function payFines() {
   const ev = E.payFines(game.S, game.D, Date.now());
   if (!ev) return;
+  if (ev.type === "deadline") { handleEvents(ev.events); render(); return; }
   if (ev.type === "paid") toast(`Paid ${money(ev.amount)} in fines. No wrongdoing admitted.`);
   else if (ev.type === "rebate") toast(`Collected a ${money(ev.amount)} regulatory rebate.`);
   else toast("Filed a spotless compliance report.");
@@ -155,7 +156,7 @@ export function payFines() {
 }
 
 export function renameCompany(name) {
-  game.S.company = name.trim() || "Unnamed Holdings";
+  game.S.company = [...name.trim()].slice(0, MAX_COMPANY_NAME).join("") || "Unnamed Holdings";
 }
 
 /* ---------- loading, importing and resetting ---------- */
