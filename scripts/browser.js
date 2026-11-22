@@ -1,4 +1,4 @@
-// Drives an installed Chrome or Edge in headless mode, with no extra packages.
+// Drives an installed Chrome or Edge (headless by default), with no extra packages.
 // Talks to the browser over the Chrome DevTools Protocol using Node's built-in WebSocket.
 // Used by the end-to-end tests (tests/e2e) and scripts/screenshots.js.
 // Set BROWSER_PATH to use a specific browser executable.
@@ -40,11 +40,19 @@ export async function serve(dir = ".") {
   return { url: `http://127.0.0.1:${port}`, stop: () => ctx.dispose() };
 }
 
+// Shows the browser window instead of running headless: `npm run test:e2e:headed`, or set HEADED=1.
+// npm passes the script name to child processes, which works on every OS (unlike setting env vars in package.json).
+const HEADED = !!process.env.HEADED || process.env.npm_lifecycle_event === "test:e2e:headed";
+
 // Starts a headless browser with a fresh profile (so saves never leak between runs). Returns a page object.
 export async function launch({ width = 1400, height = 900 } = {}) {
   const profile = mkdtempSync(join(tmpdir(), "clickonomics-browser-"));
   const proc = spawn(findBrowser(), [
-    "--headless=new", "--remote-debugging-port=0", `--user-data-dir=${profile}`,
+    ...(HEADED
+      // A visible window that loses focus must keep full speed, or the minigame timers would slow down
+      ? ["--disable-background-timer-throttling", "--disable-renderer-backgrounding", "--disable-backgrounding-occluded-windows"]
+      : ["--headless=new"]),
+    "--remote-debugging-port=0", `--user-data-dir=${profile}`,
     "--no-first-run", "--no-default-browser-check", "--disable-extensions", `--window-size=${width},${height}`,
     "about:blank",
   ], { stdio: "ignore" });

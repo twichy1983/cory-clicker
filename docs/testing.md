@@ -30,6 +30,7 @@ test("unpaid fines at the deadline cause bankruptcy", () => {
 - **The browser:** `scripts/browser.js` finds an installed Chrome or Edge and controls it over the Chrome DevTools Protocol, using Node's built-in WebSocket. Edge comes with Windows, so it works there out of the box. To use a specific browser, set `BROWSER_PATH`:
   - macOS/Linux: `BROWSER_PATH="/path/to/chrome" npm run test:e2e`
   - Windows PowerShell: `$env:BROWSER_PATH="C:\path\to\chrome.exe"; npm run test:e2e`
+- **Watching the tests:** `npm run test:e2e:headed` opens a visible browser window instead of running headless (or set `HEADED=1` when running anything that uses `scripts/browser.js`). Keep your hands off it while it runs.
 - **Fresh state:** each test starts a new game with a fresh browser profile and cleared storage.
 - **Test hook:** source builds expose `window.__clickonomics` (`game`, `tick`, `save`, `act`) so tests can set up situations, for example `S.deadline = Date.now() - 1`, then `tick()`. The CrazyGames build doesn't include it.
 - **No network:** the CrazyGames SDK is blocked during tests, so they run offline.
