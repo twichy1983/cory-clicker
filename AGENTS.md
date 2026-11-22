@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Clickonomics: an idle clicker game in plain HTML/CSS/JS ES modules. No framework, no TypeScript, no bundler during development. The owner is a hobby developer; **keep code, structure and tooling simple**. Don't add dependencies, CI workflows, linters or config files without asking. esbuild is the only dev dependency.
+Clickonomics: an idle clicker game in plain HTML/CSS/JS ES modules. No framework, no TypeScript, no bundler during development. **keep code, structure and tooling simple**. Don't add dependencies, CI workflows, linters or config files without asking. esbuild is the only dev dependency.
 
 ## Commands
 - `npm run dev`: static server at http://localhost:8000 (esbuild's serve API, so no Python). Test mode is `/?test`.
@@ -25,7 +25,6 @@ Clickonomics: an idle clicker game in plain HTML/CSS/JS ES modules. No framework
 - The game saves on `pagehide` and `visibilitychange`, so e2e tests clear storage with `page.clearStorage(origin)` (from `about:blank`), not `localStorage.clear()`.
 - `window.__clickonomics` (`game`, `tick`, `save`, `act`) exists only in source builds; e2e tests use it to set up situations and then call `tick()`.
 - CrazyGames requirements (SDK in `<head>`, saves only through the SDK Data module, relative paths, no fullscreen button, PEGI 12) are summarised in `docs/releasing.md`.
-- `dist/`, `screenshots/` and `node_modules/` are gitignored. `package-lock.json` is committed; `.nojekyll` must stay.
 
 ## Docs
 `docs/architecture.md`, `docs/making-changes.md` (recipes for industries, scandals, achievements, minigames and save format changes), `docs/git-workflow.md` (feature branches, merge to `main`, imperative commit messages), `docs/testing.md`, `docs/releasing.md`.
