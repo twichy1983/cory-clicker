@@ -8,7 +8,7 @@ Clickonomics: an idle clicker game in plain HTML/CSS/JS ES modules. No framework
 - `npm test`: unit tests (`node:test`, about 1 s). Run a single test with `node --test --test-name-pattern="bankruptcy" tests/unit/economy.test.js`.
 - `npm run test:e2e`: about 40 s. Needs Chrome or Edge installed (`BROWSER_PATH` overrides the search). The CrazyGames-build test is skipped unless `npm run build` ran first.
 - `npm run build`: only the CrazyGames build (`dist/crazygames/` plus a zip). The web version has **no build**: GitHub Pages serves `main` as-is, so every push to `main` goes live.
-- `npm run format`: formats every file with Prettier (default settings, no config file). `npm run format:check` only reports.
+- `npm run format`: formats every file with Prettier (`.prettierrc.json`: 120 columns, no semicolons, no trailing commas). Keep each import on one line; if one gets too long, split it into two imports from the same file. `npm run format:check` only reports.
 - Before finishing a change, run `npm run format`, `npm test` and `npm run test:e2e`.
 - Scripts must stay cross-platform (Windows/macOS/Linux): write them in Node (`scripts/*.js`), never bash or sed.
 
