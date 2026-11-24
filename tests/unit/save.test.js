@@ -8,8 +8,13 @@ const HOUR_MS = 3600 * 1000;
 
 test("save and load gives back the same game", () => {
   const S = newState(T0);
-  S.dollars = 1234.5; S.owned[3] = 7; S.upgrades.s_food_0 = true; S.company = "Ünïcode Corp 💸";
-  S.achievements.own_10 = T0; S.jobs.waste = T0 + 5; S.jobWins.lemon = 2;
+  S.dollars = 1234.5;
+  S.owned[3] = 7;
+  S.upgrades.s_food_0 = true;
+  S.company = "Ünïcode Corp 💸";
+  S.achievements.own_10 = T0;
+  S.jobs.waste = T0 + 5;
+  S.jobWins.lemon = 2;
   const loaded = sanitize(decodeSave(encodeSave(S)), T0);
   assert.deepEqual(loaded, S);
 });
@@ -30,10 +35,18 @@ test("garbage is rejected", () => {
 });
 
 test("unknown and badly typed fields are dropped", () => {
-  const S = sanitize({
-    dollars: "lots", owned: [5, -3, "x", 2.7], upgrades: { s_food_0: true, made_up: true },
-    achievements: { own_10: 123, nope: 1 }, jobs: { waste: 99, fake: 1 }, timerLobbyists: -4, hacked: true,
-  }, T0);
+  const S = sanitize(
+    {
+      dollars: "lots",
+      owned: [5, -3, "x", 2.7],
+      upgrades: { s_food_0: true, made_up: true },
+      achievements: { own_10: 123, nope: 1 },
+      jobs: { waste: 99, fake: 1 },
+      timerLobbyists: -4,
+      hacked: true,
+    },
+    T0,
+  );
   assert.equal(S.dollars, 0);
   assert.deepEqual(S.owned.slice(0, 4), [5, 0, 0, 2]);
   assert.deepEqual(S.upgrades, { s_food_0: true });
@@ -44,14 +57,23 @@ test("unknown and badly typed fields are dropped", () => {
 });
 
 test("company names are trimmed and capped at 128 characters", () => {
-  assert.equal(sanitize({ company: "x".repeat(5000) }, T0).company.length, MAX_COMPANY_NAME);
-  assert.equal([...sanitize({ company: "💸".repeat(200) }, T0).company].length, MAX_COMPANY_NAME); // emoji aren't split
+  assert.equal(
+    sanitize({ company: "x".repeat(5000) }, T0).company.length,
+    MAX_COMPANY_NAME,
+  );
+  assert.equal(
+    [...sanitize({ company: "💸".repeat(200) }, T0).company].length,
+    MAX_COMPANY_NAME,
+  ); // emoji aren't split
   assert.equal(sanitize({ company: "  Acme  " }, T0).company, "Acme");
   assert.equal(sanitize({ company: "   " }, T0).company, newState(T0).company);
 });
 
 test("bad dates and negative stats are reset", () => {
-  const S = sanitize({ startedAt: Infinity, clicks: -5, bankruptcies: NaN, finesPaid: 1e400 }, T0);
+  const S = sanitize(
+    { startedAt: Infinity, clicks: -5, bankruptcies: NaN, finesPaid: 1e400 },
+    T0,
+  );
   assert.equal(S.startedAt, T0);
   assert.equal(S.clicks, 0);
   assert.equal(S.bankruptcies, 0);

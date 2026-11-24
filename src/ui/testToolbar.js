@@ -10,12 +10,16 @@ const BUTTONS = [
 export function addTestToolbar({ getState, earn, refresh }) {
   const bar = document.createElement("div");
   bar.id = "testBar";
-  bar.innerHTML = `<span>TEST MODE · all purchases free</span>` +
-    BUTTONS.map(([id, text]) => `<button data-t="${id}">${text}</button>`).join("");
-  bar.addEventListener("click", e => {
+  bar.innerHTML =
+    `<span>TEST MODE · all purchases free</span>` +
+    BUTTONS.map(([id, text]) => `<button data-t="${id}">${text}</button>`).join(
+      "",
+    );
+  bar.addEventListener("click", (e) => {
     const t = e.target.dataset.t;
     if (!t) return;
-    const S = getState(), now = Date.now();
+    const S = getState(),
+      now = Date.now();
     if (t === "deadline10") S.deadline = now + 10000;
     if (t === "deadline1h") S.deadline = now + 59 * 60000;
     if (t === "cash") earn(1e9);

@@ -5,8 +5,16 @@ import { serve, launch } from "./browser.js";
 
 // From the CrazyGames technical requirements (desktop, plus the mobile and tablet sizes)
 const SIZES = [
-  [907, 510], [1216, 684], [1077, 606], [821, 462], [1366, 768],
-  [1920, 1080], [1536, 864], [1280, 720], [800, 450], [1080, 607],
+  [907, 510],
+  [1216, 684],
+  [1077, 606],
+  [821, 462],
+  [1366, 768],
+  [1920, 1080],
+  [1536, 864],
+  [1280, 720],
+  [800, 450],
+  [1080, 607],
 ];
 
 mkdirSync("screenshots", { recursive: true });

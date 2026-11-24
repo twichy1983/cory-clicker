@@ -30,8 +30,14 @@ beforeEach(() => freshGame());
 test("the game boots with no errors and a new company", async () => {
   assert.equal(await page.text("#dollars"), "$0");
   assert.equal(await page.eval("document.title"), "$0 · Clickonomics");
-  assert.equal(await page.eval(`document.querySelectorAll("#buildings .bld").length`), 10);
-  assert.equal(await page.eval(`document.querySelectorAll("#jobList .job").length`), 10);
+  assert.equal(
+    await page.eval(`document.querySelectorAll("#buildings .bld").length`),
+    10,
+  );
+  assert.equal(
+    await page.eval(`document.querySelectorAll("#jobList .job").length`),
+    10,
+  );
   assert.equal(await page.eval(`!!document.querySelector("#testBar")`), false);
   assert.deepEqual(page.errors, []);
 });
@@ -52,7 +58,10 @@ test("buying an industry starts income and unlocks its job", async () => {
   assert.equal(S.owned[0], 1);
   assert.equal(S.dollars, 0);
   assert.match(await page.text("#cps"), /0\.15/);
-  assert.equal(await page.eval(`document.querySelector('[data-job="lemon"]').className`), "job ready");
+  assert.equal(
+    await page.eval(`document.querySelector('[data-job="lemon"]').className`),
+    "job ready",
+  );
 });
 
 test("paying fines restarts the clock", async () => {
@@ -65,7 +74,9 @@ test("paying fines restarts the clock", async () => {
 });
 
 test("unpaid fines at the deadline mean bankruptcy", async () => {
-  await page.eval(`(() => { const S = window.__clickonomics.game.S; S.owned[0] = 5; S.fines = 100; S.deadline = Date.now() - 1; })()`);
+  await page.eval(
+    `(() => { const S = window.__clickonomics.game.S; S.owned[0] = 5; S.fines = 100; S.deadline = Date.now() - 1; })()`,
+  );
   await tick();
   assert.match(await page.text("#modal h3"), /CEASE & DESIST/);
   const S = await state();
@@ -82,7 +93,9 @@ test("export and import a save through the Save tab", async () => {
 
   await freshGame();
   await page.click("#importBtn");
-  await page.eval(`document.querySelector("#importTxt").value = ${JSON.stringify(saved)}`);
+  await page.eval(
+    `document.querySelector("#importTxt").value = ${JSON.stringify(saved)}`,
+  );
   await page.click("#modal .row button:first-child"); // Load
   assert.equal((await state()).clicks, 7);
   assert.equal(await page.text("#dollars"), "$7");
@@ -91,7 +104,9 @@ test("export and import a save through the Save tab", async () => {
 test("a bad import string is rejected without changing the game", async () => {
   await page.click("#bigDollar");
   await page.click("#importBtn");
-  await page.eval(`document.querySelector("#importTxt").value = "definitely not a save"`);
+  await page.eval(
+    `document.querySelector("#importTxt").value = "definitely not a save"`,
+  );
   await page.click("#modal .row button:first-child");
   assert.equal((await state()).clicks, 1);
   assert.match(await page.text("#toasts"), /invalid/);
@@ -110,11 +125,17 @@ test("test mode: free purchases, a separate save slot and the toolbar", async ()
 test("every minigame opens, plays and quits without errors", async () => {
   await freshGame("/?test");
   for (let i = 0; i < 10; i++) await page.click(`[data-bld="${i}"]`);
-  const jobs = await page.eval(`[...document.querySelectorAll("#jobList [data-job]")].map(b => b.dataset.job)`);
+  const jobs = await page.eval(
+    `[...document.querySelectorAll("#jobList [data-job]")].map(b => b.dataset.job)`,
+  );
   assert.equal(jobs.length, 10);
   for (const id of jobs) {
     await page.click(`[data-job="${id}"]`);
-    assert.equal(await page.eval(`document.querySelector("#jobOverlay").hidden`), false, id);
+    assert.equal(
+      await page.eval(`document.querySelector("#jobOverlay").hidden`),
+      false,
+      id,
+    );
     await page.click(`#jobPanel [data-act="start"]`);
     // Random clicks, drags and keys across the canvas for about two seconds
     await page.eval(`(async () => {
@@ -129,24 +150,39 @@ test("every minigame opens, plays and quits without errors", async () => {
     })()`);
     await page.click("#jobClose"); // quit (or close the result screen)
     await page.wait(700);
-    if (!(await page.eval(`document.querySelector("#jobOverlay").hidden`))) await page.click("#jobClose");
-    assert.equal(await page.eval(`document.querySelector("#jobOverlay").hidden`), true, id);
+    if (!(await page.eval(`document.querySelector("#jobOverlay").hidden`)))
+      await page.click("#jobClose");
+    assert.equal(
+      await page.eval(`document.querySelector("#jobOverlay").hidden`),
+      true,
+      id,
+    );
     assert.deepEqual(page.errors, [], id);
   }
 });
 
-test("the CrazyGames build boots (run npm run build first)", { skip: !existsSync("dist/crazygames/index.html") }, async () => {
-  const dist = await serve("dist/crazygames");
-  try {
-    await page.clearStorage(dist.url);
-    await page.goto(dist.url + "/");
-    page.errors.length = 0;
-    await page.click("#bigDollar");
-    assert.equal(await page.text("#dollars"), "$1");
-    assert.equal(await page.eval("typeof window.__clickonomics"), "undefined"); // no test hooks in the release
-    // The SDK is blocked in tests, so the only allowed error is the failed SDK download
-    assert.deepEqual(page.errors.filter(e => !/crazygames/i.test(e)), []);
-  } finally {
-    await dist.stop();
-  }
-});
+test(
+  "the CrazyGames build boots (run npm run build first)",
+  { skip: !existsSync("dist/crazygames/index.html") },
+  async () => {
+    const dist = await serve("dist/crazygames");
+    try {
+      await page.clearStorage(dist.url);
+      await page.goto(dist.url + "/");
+      page.errors.length = 0;
+      await page.click("#bigDollar");
+      assert.equal(await page.text("#dollars"), "$1");
+      assert.equal(
+        await page.eval("typeof window.__clickonomics"),
+        "undefined",
+      ); // no test hooks in the release
+      // The SDK is blocked in tests, so the only allowed error is the failed SDK download
+      assert.deepEqual(
+        page.errors.filter((e) => !/crazygames/i.test(e)),
+        [],
+      );
+    } finally {
+      await dist.stop();
+    }
+  },
+);

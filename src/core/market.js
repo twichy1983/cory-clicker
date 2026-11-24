@@ -6,7 +6,12 @@ import { INDUSTRIES } from "./data/industries.js";
 export const MKT_LEN = 180;
 
 export function createMarket() {
-  return { idx: [], ind: INDUSTRIES.map(() => []), mood: INDUSTRIES.map(() => 1), hover: -1 };
+  return {
+    idx: [],
+    ind: INDUSTRIES.map(() => []),
+    mood: INDUSTRIES.map(() => 1),
+    hover: -1,
+  };
 }
 
 function pushCap(arr, v) {
@@ -32,7 +37,9 @@ export function sampleMarket(mkt, indCps, random = Math.random) {
 // Fresh history (new game, import, bankruptcy) seeded with a minute of samples so charts aren't empty
 export function resetMarket(mkt, indCps, random = Math.random) {
   mkt.idx.length = 0;
-  mkt.ind.forEach(h => { h.length = 0; });
+  mkt.ind.forEach((h) => {
+    h.length = 0;
+  });
   mkt.mood.fill(1);
   for (let k = 0; k < 60; k++) sampleMarket(mkt, indCps, random);
 }
@@ -44,7 +51,8 @@ export function scandalShock(mkt, ind) {
 
 // % change from the first non-zero sample to the latest, or null if there isn't one
 export function pctChange(h) {
-  const first = h.find(v => v > 0), last = h[h.length - 1];
+  const first = h.find((v) => v > 0),
+    last = h[h.length - 1];
   if (!first || !last) return null;
   return (last / first - 1) * 100;
 }

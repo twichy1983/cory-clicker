@@ -3,12 +3,15 @@
 import { $ } from "./dom.js";
 import { platform } from "../platform/index.js";
 
-let open = false, reportBreaks = false;
+let open = false,
+  reportBreaks = false;
 
 export const isModalOpen = () => open;
 
 // Called once the game has booted: before that, the loading screen already counts as a break
-export function startReportingBreaks() { reportBreaks = true; }
+export function startReportingBreaks() {
+  reportBreaks = true;
+}
 
 // buttons: [[label, onClick, extraClass?], ...]. `bad` makes it red and stops a click outside from closing it.
 export function showModal(title, html, buttons, bad) {
@@ -35,7 +38,8 @@ export function hideModal() {
 }
 
 export function wireModal() {
-  $("modalBg").addEventListener("click", e => {
-    if (e.target === $("modalBg") && !$("modal").classList.contains("bad")) hideModal();
+  $("modalBg").addEventListener("click", (e) => {
+    if (e.target === $("modalBg") && !$("modal").classList.contains("bad"))
+      hideModal();
   });
 }

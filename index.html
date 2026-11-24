@@ -1,140 +1,215 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Clickonomics</title>
-<link rel="stylesheet" href="./css/main.css">
-<link rel="stylesheet" href="./css/jobs.css">
-</head>
-<body>
-<div id="dangerOverlay"></div>
-<div id="app">
-  <!-- LEFT -->
-  <div class="col" id="left">
-    <div class="brand">
-      <h1>CLICKONOMICS</h1>
-      <div class="tag">Maximize shareholder value. Minimize everything else.</div>
-    </div>
-    <div class="nameRow">
-      <input id="companyName" maxlength="128" spellcheck="false" autocomplete="off" title="Click to rename your company" aria-label="Company name">
-      <button id="editName" title="Rename your company" aria-label="Rename your company">✎</button>
-    </div>
-    <div class="bank">
-      <div id="dollars">$0</div>
-      <div id="cps">per second: $0</div>
-    </div>
-    <div id="bigDollarWrap"><button id="bigDollar" aria-label="Make money"><span>$</span></button></div>
-    <div id="clickInfo">+$1 per click</div>
-    <div id="ticker"><b>WIRE</b><span id="tickerText">Markets open. Ethics closed.</span></div>
-    <div id="jobs">
-      <div class="jobsHead"><span>💼 Jobs</span><span id="jobsCount"></span></div>
-      <div id="jobList"></div>
-    </div>
-  </div>
-
-  <!-- CENTER -->
-  <div class="col" id="center">
-    <section id="reg">
-      <div class="reg-stripe"></div>
-      <div class="reg-head" id="regHead">⚠ FEDERAL REGULATORY ENFORCEMENT ⚠</div>
-      <div id="regLabel">FINES OWED</div>
-      <div id="fineAmt">$0</div>
-      <div class="reg-timer" id="timerLabel">PAYMENT DUE IN<span id="fineTimer">24:00:00</span></div>
-      <div class="reg-bar"><div id="fineBar"></div></div>
-      <div id="fineInfo"></div>
-      <button id="payBtn">PAY FINES</button>
-    </section>
-
-    <h2>Lobbying</h2>
-    <div class="lobby">
-      <div class="lobbyCol">
-        <button class="lobbyBtn" id="timerLobbyBtn" data-tt="lobby:timer">
-          <span class="n" id="timerLobbyN">0</span>
-          <div class="t">⏳ Timer Lobbyist</div>
-          <div class="d">+1 hour to the regulatory deadline.</div>
-          <div class="c" id="timerLobbyC">$0</div>
-        </button>
-        <button class="fireBtn" id="timerFireBtn" data-tt="fire:timer">Fire one · <span id="timerFireC">$0</span></button>
-      </div>
-      <div class="lobbyCol">
-        <button class="lobbyBtn" id="penaltyLobbyBtn" data-tt="lobby:penalty">
-          <span class="n" id="penaltyLobbyN">0</span>
-          <div class="t">🤝 Penalty Lobbyist</div>
-          <div class="d">−1% regulatory fines. Can go negative.</div>
-          <div class="c" id="penaltyLobbyC">$0</div>
-        </button>
-        <button class="fireBtn" id="penaltyFireBtn" data-tt="fire:penalty">Fire one · <span id="penaltyFireC">$0</span></button>
-      </div>
-    </div>
-
-    <h2>Market</h2>
-    <div class="mkt">
-      <div class="mktHead">
-        <div>
-          <div class="mktName">CLKX · Clickonomics Composite</div>
-          <div class="mktSub">All industries' income per second, adjusted for investor mood · last 3 min</div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Clickonomics</title>
+    <link rel="stylesheet" href="./css/main.css" />
+    <link rel="stylesheet" href="./css/jobs.css" />
+  </head>
+  <body>
+    <div id="dangerOverlay"></div>
+    <div id="app">
+      <!-- LEFT -->
+      <div class="col" id="left">
+        <div class="brand">
+          <h1>CLICKONOMICS</h1>
+          <div class="tag">
+            Maximize shareholder value. Minimize everything else.
+          </div>
         </div>
-        <div class="mktPx"><div id="idxPx">$0</div><div id="idxChg" class="chg">—</div></div>
+        <div class="nameRow">
+          <input
+            id="companyName"
+            maxlength="128"
+            spellcheck="false"
+            autocomplete="off"
+            title="Click to rename your company"
+            aria-label="Company name"
+          />
+          <button
+            id="editName"
+            title="Rename your company"
+            aria-label="Rename your company"
+          >
+            ✎
+          </button>
+        </div>
+        <div class="bank">
+          <div id="dollars">$0</div>
+          <div id="cps">per second: $0</div>
+        </div>
+        <div id="bigDollarWrap">
+          <button id="bigDollar" aria-label="Make money"><span>$</span></button>
+        </div>
+        <div id="clickInfo">+$1 per click</div>
+        <div id="ticker">
+          <b>WIRE</b><span id="tickerText">Markets open. Ethics closed.</span>
+        </div>
+        <div id="jobs">
+          <div class="jobsHead">
+            <span>💼 Jobs</span><span id="jobsCount"></span>
+          </div>
+          <div id="jobList"></div>
+        </div>
       </div>
-      <canvas id="idxChart" aria-label="Composite index chart"></canvas>
-    </div>
-    <div class="tickers" id="tickers"></div>
 
-    <div class="tabs">
-      <button class="tab on" data-tab="rap">Rap Sheet</button>
-      <button class="tab" data-tab="stats">Stats</button>
-      <button class="tab" data-tab="ach">🏆 <span id="achTabCount">0</span></button>
-      <button class="tab" data-tab="save">Save</button>
-    </div>
-    <div class="tabBody" id="tab-rap"><div id="rapSheet"></div></div>
-    <div class="tabBody" id="tab-stats" hidden><div id="stats"></div></div>
-    <div class="tabBody" id="tab-ach" hidden><div id="achievements"></div></div>
-    <div class="tabBody" id="tab-save" hidden>
-      <div class="saveBtns">
-        <button class="btn" id="saveNow">💾 Save now</button>
-        <button class="btn" id="exportBtn">📤 Export save</button>
-        <button class="btn" id="importBtn">📥 Import save</button>
-        <button class="btn danger" id="bankruptBtn">📉 Declare bankruptcy</button>
-        <button class="btn danger" id="resetBtn">🔥 Hard reset</button>
+      <!-- CENTER -->
+      <div class="col" id="center">
+        <section id="reg">
+          <div class="reg-stripe"></div>
+          <div class="reg-head" id="regHead">
+            ⚠ FEDERAL REGULATORY ENFORCEMENT ⚠
+          </div>
+          <div id="regLabel">FINES OWED</div>
+          <div id="fineAmt">$0</div>
+          <div class="reg-timer" id="timerLabel">
+            PAYMENT DUE IN<span id="fineTimer">24:00:00</span>
+          </div>
+          <div class="reg-bar"><div id="fineBar"></div></div>
+          <div id="fineInfo"></div>
+          <button id="payBtn">PAY FINES</button>
+        </section>
+
+        <h2>Lobbying</h2>
+        <div class="lobby">
+          <div class="lobbyCol">
+            <button class="lobbyBtn" id="timerLobbyBtn" data-tt="lobby:timer">
+              <span class="n" id="timerLobbyN">0</span>
+              <div class="t">⏳ Timer Lobbyist</div>
+              <div class="d">+1 hour to the regulatory deadline.</div>
+              <div class="c" id="timerLobbyC">$0</div>
+            </button>
+            <button class="fireBtn" id="timerFireBtn" data-tt="fire:timer">
+              Fire one · <span id="timerFireC">$0</span>
+            </button>
+          </div>
+          <div class="lobbyCol">
+            <button
+              class="lobbyBtn"
+              id="penaltyLobbyBtn"
+              data-tt="lobby:penalty"
+            >
+              <span class="n" id="penaltyLobbyN">0</span>
+              <div class="t">🤝 Penalty Lobbyist</div>
+              <div class="d">−1% regulatory fines. Can go negative.</div>
+              <div class="c" id="penaltyLobbyC">$0</div>
+            </button>
+            <button class="fireBtn" id="penaltyFireBtn" data-tt="fire:penalty">
+              Fire one · <span id="penaltyFireC">$0</span>
+            </button>
+          </div>
+        </div>
+
+        <h2>Market</h2>
+        <div class="mkt">
+          <div class="mktHead">
+            <div>
+              <div class="mktName">CLKX · Clickonomics Composite</div>
+              <div class="mktSub">
+                All industries' income per second, adjusted for investor mood ·
+                last 3 min
+              </div>
+            </div>
+            <div class="mktPx">
+              <div id="idxPx">$0</div>
+              <div id="idxChg" class="chg">—</div>
+            </div>
+          </div>
+          <canvas id="idxChart" aria-label="Composite index chart"></canvas>
+        </div>
+        <div class="tickers" id="tickers"></div>
+
+        <div class="tabs">
+          <button class="tab on" data-tab="rap">Rap Sheet</button>
+          <button class="tab" data-tab="stats">Stats</button>
+          <button class="tab" data-tab="ach">
+            🏆 <span id="achTabCount">0</span>
+          </button>
+          <button class="tab" data-tab="save">Save</button>
+        </div>
+        <div class="tabBody" id="tab-rap"><div id="rapSheet"></div></div>
+        <div class="tabBody" id="tab-stats" hidden><div id="stats"></div></div>
+        <div class="tabBody" id="tab-ach" hidden>
+          <div id="achievements"></div>
+        </div>
+        <div class="tabBody" id="tab-save" hidden>
+          <div class="saveBtns">
+            <button class="btn" id="saveNow">💾 Save now</button>
+            <button class="btn" id="exportBtn">📤 Export save</button>
+            <button class="btn" id="importBtn">📥 Import save</button>
+            <button class="btn danger" id="bankruptBtn">
+              📉 Declare bankruptcy
+            </button>
+            <button class="btn danger" id="resetBtn">🔥 Hard reset</button>
+          </div>
+          <div class="note" id="saveNote">
+            Autosaves to this browser every 30 seconds.
+          </div>
+          <div class="note">
+            The regulatory clock runs in real time, even while this tab is
+            closed. If it hits zero with fines unpaid, regulators seize
+            everything.
+          </div>
+        </div>
+        <footer>
+          Satire. Some upgrades are invented; others are dark-humor riffs on
+          widely reported historical corporate scandals, product recalls and
+          settlements. None are legal findings about anyone. No real companies
+          were harmed in the making of this game, which is more than can be said
+          for their customers.
+        </footer>
       </div>
-      <div class="note" id="saveNote">Autosaves to this browser every 30 seconds.</div>
-      <div class="note">The regulatory clock runs in real time, even while this tab is closed. If it hits zero with fines unpaid, regulators seize everything.</div>
-    </div>
-    <footer>Satire. Some upgrades are invented; others are dark-humor riffs on widely reported historical corporate scandals, product recalls and settlements. None are legal findings about anyone. No real companies were harmed in the making of this game, which is more than can be said for their customers.</footer>
-  </div>
 
-  <!-- RIGHT -->
-  <div class="col" id="right">
-    <div class="secHead"><h2>Upgrades</h2><span class="count" id="upgCount"></span></div>
-    <div id="upgrades"></div>
-    <div class="secHead"><h2>Industries</h2>
-      <div class="buyAmt" role="group" aria-label="Purchase quantity">
-        <button data-amt="1" class="on">×1</button><button data-amt="10">×10</button><button data-amt="100">×100</button>
+      <!-- RIGHT -->
+      <div class="col" id="right">
+        <div class="secHead">
+          <h2>Upgrades</h2>
+          <span class="count" id="upgCount"></span>
+        </div>
+        <div id="upgrades"></div>
+        <div class="secHead">
+          <h2>Industries</h2>
+          <div class="buyAmt" role="group" aria-label="Purchase quantity">
+            <button data-amt="1" class="on">×1</button
+            ><button data-amt="10">×10</button
+            ><button data-amt="100">×100</button>
+          </div>
+        </div>
+        <div id="buildings"></div>
       </div>
     </div>
-    <div id="buildings"></div>
-  </div>
-</div>
 
-<div id="jobOverlay" hidden>
-  <div class="jobFrame" id="jobFrame">
-    <canvas id="jobCanvas" width="1672" height="941" aria-label="Waste disposal minigame"></canvas>
-    <div class="jobHud">
-      <div class="jobPill" id="jobTimer">30.0</div>
-      <div class="jobPill jobMeter"><div class="lbl"><span id="jobMeterLbl"></span><span id="jobPct">0%</span></div><div class="jobBar"><div id="jobFill"></div></div></div>
-      <div class="jobPill" id="jobExtra"></div>
+    <div id="jobOverlay" hidden>
+      <div class="jobFrame" id="jobFrame">
+        <canvas
+          id="jobCanvas"
+          width="1672"
+          height="941"
+          aria-label="Waste disposal minigame"
+        ></canvas>
+        <div class="jobHud">
+          <div class="jobPill" id="jobTimer">30.0</div>
+          <div class="jobPill jobMeter">
+            <div class="lbl">
+              <span id="jobMeterLbl"></span><span id="jobPct">0%</span>
+            </div>
+            <div class="jobBar"><div id="jobFill"></div></div>
+          </div>
+          <div class="jobPill" id="jobExtra"></div>
+        </div>
+        <div id="jobAlert"></div>
+        <div id="jobPanel"></div>
+        <button class="jobClose" id="jobClose">✕ Quit job</button>
+      </div>
+      <div class="jobRotate">
+        📱↻ Turn your phone sideways for a bigger view
+      </div>
     </div>
-    <div id="jobAlert"></div>
-    <div id="jobPanel"></div>
-    <button class="jobClose" id="jobClose">✕ Quit job</button>
-  </div>
-  <div class="jobRotate">📱↻ Turn your phone sideways for a bigger view</div>
-</div>
-<div id="tip"></div>
-<div id="modalBg"><div id="modal"></div></div>
-<div id="toasts"></div>
+    <div id="tip"></div>
+    <div id="modalBg"><div id="modal"></div></div>
+    <div id="toasts"></div>
 
-<script type="module" src="./src/main.js"></script>
-</body>
+    <script type="module" src="./src/main.js"></script>
+  </body>
 </html>

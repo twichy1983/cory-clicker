@@ -2,7 +2,14 @@
 //   npm run build
 // The web version needs no build: GitHub Pages serves the source files directly.
 import * as esbuild from "esbuild";
-import { cpSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
+import {
+  cpSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
 import { zipFolder } from "./zip.js";
 
 const OUT = "dist/crazygames";
@@ -12,7 +19,10 @@ const SDK_TAG = `<script src="https://sdk.crazygames.com/crazygames-sdk-v3.js"><
 // Replaces `find` with `replace` in `text`, and stops the build if `find` doesn't appear exactly once.
 function replaceOnce(text, find, replace) {
   const count = text.split(find).length - 1;
-  if (count !== 1) throw new Error(`build: expected "${find}" exactly once in index.html, found ${count}`);
+  if (count !== 1)
+    throw new Error(
+      `build: expected "${find}" exactly once in index.html, found ${count}`,
+    );
   return text.replace(find, () => replace);
 }
 
@@ -33,8 +43,16 @@ await esbuild.build({
 
 // 2. The page: point at the bundle and load the SDK in <head>, as CrazyGames requires
 let html = readFileSync("index.html", "utf8");
-html = replaceOnce(html, `<script type="module" src="./src/main.js"></script>`, `<script src="./game.js"></script>`);
-html = replaceOnce(html, `<title>Clickonomics</title>`, `<title>Clickonomics</title>\n${SDK_TAG}`);
+html = replaceOnce(
+  html,
+  `<script type="module" src="./src/main.js"></script>`,
+  `<script src="./game.js"></script>`,
+);
+html = replaceOnce(
+  html,
+  `<title>Clickonomics</title>`,
+  `<title>Clickonomics</title>\n${SDK_TAG}`,
+);
 writeFileSync(`${OUT}/index.html`, html);
 
 // 3. Styles and images, copied as they are
@@ -42,10 +60,13 @@ cpSync("css", `${OUT}/css`, { recursive: true });
 cpSync("assets", `${OUT}/assets`, { recursive: true });
 
 // 4. CrazyGames only accepts relative paths
-if (/(src|href)="\//.test(html)) throw new Error("build: index.html uses an absolute path; use ./relative paths");
+if (/(src|href)="\//.test(html))
+  throw new Error(
+    "build: index.html uses an absolute path; use ./relative paths",
+  );
 
 // 5. Zip for upload
 const files = zipFolder(OUT, ZIP);
-const kb = f => (statSync(f).size / 1024).toFixed(0) + " KB";
+const kb = (f) => (statSync(f).size / 1024).toFixed(0) + " KB";
 console.log(`Built ${OUT}/ (${files} files) and ${ZIP} (${kb(ZIP)}).`);
 console.log(`Check it locally with: npm run preview`);

@@ -8,7 +8,10 @@ import { $ } from "./ui/dom.js";
 export function save() {
   try {
     platform.setItem(SAVE_KEY, encodeSave(game.S));
-    $("saveNote").textContent = "Saved at " + new Date().toLocaleTimeString() + ". Autosaves every 30 seconds.";
+    $("saveNote").textContent =
+      "Saved at " +
+      new Date().toLocaleTimeString() +
+      ". Autosaves every 30 seconds.";
   } catch (e) {
     $("saveNote").textContent = "Save failed: " + e.message;
   }

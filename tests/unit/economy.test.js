@@ -7,10 +7,14 @@ import * as E from "../../src/core/economy.js";
 
 const T0 = 1_000_000_000_000; // a fixed "now" so tests never depend on the real clock
 
-beforeEach(() => { rules.freePurchases = false; rules.jobCooldown = 0; });
+beforeEach(() => {
+  rules.freePurchases = false;
+  rules.jobCooldown = 0;
+});
 
 test("a new game: $0, $1 clicks, 24-hour deadline", () => {
-  const S = newState(T0), D = E.derive(S);
+  const S = newState(T0),
+    D = E.derive(S);
   assert.equal(S.dollars, 0);
   assert.equal(D.clickPower, 1);
   assert.equal(D.cps, 0);
@@ -18,7 +22,8 @@ test("a new game: $0, $1 clicks, 24-hour deadline", () => {
 });
 
 test("clicking earns money and accrues 10% fines", () => {
-  const S = newState(T0), D = E.derive(S);
+  const S = newState(T0),
+    D = E.derive(S);
   for (let i = 0; i < 10; i++) E.clickDollar(S, D);
   assert.equal(S.dollars, 10);
   assert.equal(S.clicks, 10);
@@ -81,7 +86,11 @@ test("offline income is earned up to now", () => {
 
 test("unpaid fines at the deadline cause bankruptcy, keeping lifetime stats", () => {
   const S = newState(T0);
-  S.owned[0] = 5; S.dollars = 500; S.fines = 50; S.clicks = 42; S.timerLobbyists = 2;
+  S.owned[0] = 5;
+  S.dollars = 500;
+  S.fines = 50;
+  S.clicks = 42;
+  S.timerLobbyists = 2;
   S.achievements.ind_lemon = T0;
   const D = E.derive(S);
   const events = E.advance(S, D, S.deadline + 1000);
@@ -129,7 +138,8 @@ test("several days away with a rebate survives several deadlines", () => {
 
 test("paying fines early restarts the clock", () => {
   const S = newState(T0);
-  S.dollars = 100; S.fines = 30;
+  S.dollars = 100;
+  S.fines = 30;
   const D = E.derive(S);
   const now = T0 + 2 * HOUR;
   assert.deepEqual(E.payFines(S, D, now), { type: "paid", amount: 30 });
@@ -141,7 +151,8 @@ test("paying fines early restarts the clock", () => {
 
 test("can't pay fines you can't afford", () => {
   const S = newState(T0);
-  S.dollars = 10; S.fines = 30;
+  S.dollars = 10;
+  S.fines = 30;
   assert.equal(E.payFines(S, E.derive(S), T0), null);
   assert.equal(S.fines, 30);
 });
@@ -158,7 +169,8 @@ test("bug fix: clicking 'file compliance report' repeatedly doesn't count as sur
 
 test("bug fix: paying fines just after the deadline reports the bankruptcy instead of hiding it", () => {
   const S = newState(T0);
-  S.dollars = 100; S.fines = 30;
+  S.dollars = 100;
+  S.fines = 30;
   const res = E.payFines(S, E.derive(S), S.deadline + 50);
   assert.equal(res.type, "deadline");
   assert.equal(res.events.length, 1);
@@ -190,7 +202,8 @@ test("timer lobbyists add an hour to the window and the countdown", () => {
 
 test("firing costs double the last hire and removes an hour", () => {
   const S = newState(T0);
-  S.timerLobbyists = 2; S.dollars = 1e9;
+  S.timerLobbyists = 2;
+  S.dollars = 1e9;
   const deadline = S.deadline;
   assert.equal(E.timerFireCost(S), 2 * Math.ceil(50000 * 1.6));
   E.fireTimerLobbyist(S, T0);
@@ -200,7 +213,8 @@ test("firing costs double the last hire and removes an hour", () => {
 
 test("bug fix: firing a timer lobbyist never adds time", () => {
   const S = newState(T0);
-  S.timerLobbyists = 1; S.dollars = 1e9;
+  S.timerLobbyists = 1;
+  S.dollars = 1e9;
   S.deadline = T0 + 10_000; // 10 seconds left
   E.fireTimerLobbyist(S, T0);
   assert.equal(S.deadline, T0 + 10_000);
@@ -222,9 +236,16 @@ test("penalty lobbyists lower the fine multiplier, below zero if you keep going"
 
 test("voluntary bankruptcy wipes the run", () => {
   const S = newState(T0);
-  S.dollars = 99; S.owned[2] = 3; S.fines = 10;
+  S.dollars = 99;
+  S.owned[2] = 3;
+  S.fines = 10;
   const ev = E.goBankrupt(S, T0 + 5, true);
-  assert.deepEqual(ev, { type: "bankrupt", owed: 10, lost: 99, voluntary: true });
+  assert.deepEqual(ev, {
+    type: "bankrupt",
+    owed: 10,
+    lost: 99,
+    voluntary: true,
+  });
   assert.equal(S.dollars, 0);
   assert.equal(S.fines, 0);
   assert.equal(S.deadline, T0 + 5 + BASE_TIMER);
@@ -235,6 +256,6 @@ test("test mode: everything is free and click upgrades unlock at once", () => {
   const S = newState(T0);
   assert.equal(E.buildingCost(S, 9, 100), 0);
   assert.equal(E.timerLobbyCost(S), 0);
-  assert.ok(E.availableUpgrades(S).some(u => u.id === "c7"));
+  assert.ok(E.availableUpgrades(S).some((u) => u.id === "c7"));
   assert.equal(E.buyUpgrade(S, "c7"), true);
 });

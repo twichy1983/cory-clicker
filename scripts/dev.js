@@ -16,6 +16,9 @@ if (!existsSync(dir)) {
 
 const ctx = await esbuild.context({});
 const { port } = await ctx.serve({ servedir: dir, host, port: 8000 });
-console.log(`Serving ${dir === "." ? "the source files" : dir} at http://localhost:${port}/`);
-if (dir === ".") console.log(`Test mode (everything free): http://localhost:${port}/?test`);
+console.log(
+  `Serving ${dir === "." ? "the source files" : dir} at http://localhost:${port}/`,
+);
+if (dir === ".")
+  console.log(`Test mode (everything free): http://localhost:${port}/?test`);
 console.log("Press Ctrl+C to stop.");

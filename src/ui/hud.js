@@ -1,29 +1,43 @@
 // The middle column: cash, the big dollar, the news ticker, the regulatory panel and the lobbyists.
 import { game } from "../game.js";
 import { HOUR, BASE_FINE_RATE } from "../core/constants.js";
-import { maxTimer, timerLobbyCost, penaltyLobbyCost, timerFireCost, penaltyFireCost } from "../core/economy.js";
+import {
+  maxTimer,
+  timerLobbyCost,
+  penaltyLobbyCost,
+  timerFireCost,
+  penaltyFireCost,
+} from "../core/economy.js";
 import { newsLine } from "../core/news.js";
 import { money, fmtTime } from "../core/format.js";
 import { GAME_TITLE } from "../config.js";
 import { $ } from "./dom.js";
 
 export function renderHud() {
-  const { S, D } = game, now = Date.now();
+  const { S, D } = game,
+    now = Date.now();
   $("dollars").textContent = money(S.dollars);
   $("cps").textContent = "per second: " + money(D.cps);
   $("clickInfo").textContent = "+" + money(D.clickPower) + " per click";
 
   // Regulatory panel
-  const left = S.deadline - now, rebate = S.fines < 0, urgent = !rebate && S.fines > 0 && left < HOUR;
+  const left = S.deadline - now,
+    rebate = S.fines < 0,
+    urgent = !rebate && S.fines > 0 && left < HOUR;
   const reg = $("reg");
   reg.classList.toggle("rebate", rebate || (S.fines === 0 && D.fineMult < 0));
   reg.classList.toggle("urgent", urgent);
-  $("regHead").textContent = rebate ? "✔ REGULATORY CAPTURE ACHIEVED ✔" : "⚠ FEDERAL REGULATORY ENFORCEMENT ⚠";
+  $("regHead").textContent = rebate
+    ? "✔ REGULATORY CAPTURE ACHIEVED ✔"
+    : "⚠ FEDERAL REGULATORY ENFORCEMENT ⚠";
   $("regLabel").textContent = rebate ? "REBATE OWED TO YOU" : "FINES OWED";
   $("fineAmt").textContent = money(Math.abs(S.fines));
-  $("timerLabel").firstChild.textContent = rebate ? "PAYOUT IN" : "PAYMENT DUE IN";
+  $("timerLabel").firstChild.textContent = rebate
+    ? "PAYOUT IN"
+    : "PAYMENT DUE IN";
   $("fineTimer").textContent = fmtTime(left);
-  $("fineBar").style.width = Math.max(0, Math.min(100, left / maxTimer(S) * 100)) + "%";
+  $("fineBar").style.width =
+    Math.max(0, Math.min(100, (left / maxTimer(S)) * 100)) + "%";
   const pct = (D.fineMult * 100).toFixed(0);
   $("fineInfo").innerHTML =
     `Fines accrue at ${(BASE_FINE_RATE * 100).toFixed(0)}% of all revenue × <b>${pct}%</b> multiplier ` +
@@ -32,16 +46,25 @@ export function renderHud() {
   const pay = $("payBtn");
   if (S.fines > 0) {
     pay.disabled = S.dollars < S.fines;
-    pay.textContent = pay.disabled ? `SHORT ${money(S.fines - S.dollars)} — CAN'T PAY` : `PAY ${money(S.fines)} NOW`;
+    pay.textContent = pay.disabled
+      ? `SHORT ${money(S.fines - S.dollars)} — CAN'T PAY`
+      : `PAY ${money(S.fines)} NOW`;
   } else {
     pay.disabled = false;
-    pay.textContent = rebate ? `COLLECT ${money(-S.fines)} REBATE` : "FILE COMPLIANCE REPORT";
+    pay.textContent = rebate
+      ? `COLLECT ${money(-S.fines)} REBATE`
+      : "FILE COMPLIANCE REPORT";
   }
   document.body.classList.toggle("danger", urgent);
-  document.title = urgent ? `⚠ ${fmtTime(left)} FINES DUE ⚠` : `${money(S.dollars)} · ${GAME_TITLE}`;
+  document.title = urgent
+    ? `⚠ ${fmtTime(left)} FINES DUE ⚠`
+    : `${money(S.dollars)} · ${GAME_TITLE}`;
 
   // Lobbyists
-  const tc = timerLobbyCost(S), pc = penaltyLobbyCost(S), tf = timerFireCost(S), pf = penaltyFireCost(S);
+  const tc = timerLobbyCost(S),
+    pc = penaltyLobbyCost(S),
+    tf = timerFireCost(S),
+    pf = penaltyFireCost(S);
   $("timerLobbyN").textContent = S.timerLobbyists;
   $("timerLobbyC").textContent = money(tc);
   $("timerLobbyBtn").classList.toggle("cant", S.dollars < tc);
@@ -66,8 +89,8 @@ export function showClickFeedback(amount, ev) {
   const f = document.createElement("div");
   f.className = "floater";
   f.textContent = "+" + money(amount);
-  f.style.left = (x - 20 + (Math.random() * 30 - 15)) + "px";
-  f.style.top = (y - 30) + "px";
+  f.style.left = x - 20 + (Math.random() * 30 - 15) + "px";
+  f.style.top = y - 30 + "px";
   document.body.appendChild(f);
   setTimeout(() => f.remove(), 1000);
 }
@@ -80,5 +103,8 @@ export function setNews() {
 export function rotateNews() {
   const t = $("ticker");
   t.style.opacity = 0;
-  setTimeout(() => { setNews(); t.style.opacity = 1; }, 400);
+  setTimeout(() => {
+    setNews();
+    t.style.opacity = 1;
+  }, 400);
 }

@@ -20,15 +20,15 @@ Edit a file and refresh the browser. There's no build step during development.
 
 ## Commands
 
-| Command | What it does |
-|---|---|
-| `npm run dev` | Runs the game locally at http://localhost:8000 (`/?test` for test mode) |
-| `npm test` | Unit tests for the game rules (about 1 second) |
-| `npm run test:e2e` | End-to-end tests in a headless Chrome or Edge (about 40 seconds) |
-| `npm run test:e2e:headed` | The same tests in a visible browser window, so you can watch them |
-| `npm run screenshots` | Saves screenshots at every CrazyGames frame size to `screenshots/` |
-| `npm run build` | Builds the CrazyGames upload: `dist/clickonomics-crazygames.zip` |
-| `npm run preview` | Runs the CrazyGames build locally, to check it before uploading |
+| Command                   | What it does                                                            |
+| ------------------------- | ----------------------------------------------------------------------- |
+| `npm run dev`             | Runs the game locally at http://localhost:8000 (`/?test` for test mode) |
+| `npm test`                | Unit tests for the game rules (about 1 second)                          |
+| `npm run test:e2e`        | End-to-end tests in a headless Chrome or Edge (about 40 seconds)        |
+| `npm run test:e2e:headed` | The same tests in a visible browser window, so you can watch them       |
+| `npm run screenshots`     | Saves screenshots at every CrazyGames frame size to `screenshots/`      |
+| `npm run build`           | Builds the CrazyGames upload: `dist/clickonomics-crazygames.zip`        |
+| `npm run preview`         | Runs the CrazyGames build locally, to check it before uploading         |
 
 ## Project layout
 

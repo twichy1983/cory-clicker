@@ -1,6 +1,14 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { fmt, money, fmtShort, fmtTime, fmtDuration, mmss, ordinal } from "../../src/core/format.js";
+import {
+  fmt,
+  money,
+  fmtShort,
+  fmtTime,
+  fmtDuration,
+  mmss,
+  ordinal,
+} from "../../src/core/format.js";
 
 test("fmt: small numbers", () => {
   assert.equal(fmt(0), "0");
@@ -42,12 +50,30 @@ test("time formats", () => {
   assert.equal(fmtTime(24 * 3600 * 1000), "24:00:00");
   assert.equal(fmtTime(-5), "00:00:00");
   assert.equal(fmtTime(61500), "00:01:01");
-  assert.equal(fmtDuration((2 * 86400 + 3 * 3600 + 15 * 60) * 1000), "2d 3h 15m");
+  assert.equal(
+    fmtDuration((2 * 86400 + 3 * 3600 + 15 * 60) * 1000),
+    "2d 3h 15m",
+  );
   assert.equal(fmtDuration(30000), "0m");
   assert.equal(mmss(61001), "1:02");
 });
 
 test("ordinal", () => {
-  assert.deepEqual([1, 2, 3, 4, 11, 12, 13, 21, 22, 23, 101, 111].map(ordinal),
-    ["1st", "2nd", "3rd", "4th", "11th", "12th", "13th", "21st", "22nd", "23rd", "101st", "111th"]);
+  assert.deepEqual(
+    [1, 2, 3, 4, 11, 12, 13, 21, 22, 23, 101, 111].map(ordinal),
+    [
+      "1st",
+      "2nd",
+      "3rd",
+      "4th",
+      "11th",
+      "12th",
+      "13th",
+      "21st",
+      "22nd",
+      "23rd",
+      "101st",
+      "111th",
+    ],
+  );
 });

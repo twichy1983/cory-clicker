@@ -19,20 +19,33 @@ export function buildJobList() {
     b.dataset.job = j.id;
     b.innerHTML = `<span class="ji">${j.icon}</span><span class="jm"><span class="jt">${j.name}</span><span class="jd"></span></span><span class="js"></span>`;
     wrap.appendChild(b);
-    els[j.id] = { el: b, d: b.querySelector(".jd"), st: b.querySelector(".js") };
+    els[j.id] = {
+      el: b,
+      d: b.querySelector(".jd"),
+      st: b.querySelector(".js"),
+    };
   }
 }
 
 // Updates every button
 export function renderJobs() {
-  const { S, D } = game, now = Date.now();
+  const { S, D } = game,
+    now = Date.now();
   let unlockedCount = 0;
   for (const j of JOBS) {
-    const e = els[j.id], unlocked = jobUnlocked(S, j), left = jobTimeLeft(S, j, now), ready = unlocked && left === 0;
+    const e = els[j.id],
+      unlocked = jobUnlocked(S, j),
+      left = jobTimeLeft(S, j, now),
+      ready = unlocked && left === 0;
     if (unlocked) unlockedCount++;
     e.el.className = "job " + (!unlocked ? "locked" : ready ? "ready" : "wait");
-    if (!unlocked) { e.d.textContent = `Acquire ${INDUSTRIES[j.ind].name} to unlock`; e.st.textContent = "🔒"; }
-    else { e.d.textContent = `Pays ${money(jobPay(D, j))} · ${jobPaySecs(j) / 60} min of income`; e.st.textContent = ready ? "GO ▶" : "⏳ " + mmss(left); }
+    if (!unlocked) {
+      e.d.textContent = `Acquire ${INDUSTRIES[j.ind].name} to unlock`;
+      e.st.textContent = "🔒";
+    } else {
+      e.d.textContent = `Pays ${money(jobPay(D, j))} · ${jobPaySecs(j) / 60} min of income`;
+      e.st.textContent = ready ? "GO ▶" : "⏳ " + mmss(left);
+    }
   }
   $("jobsCount").textContent = `${unlockedCount} / ${JOBS.length}`;
 }

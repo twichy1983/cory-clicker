@@ -7,7 +7,12 @@ import { newState } from "./core/state.js";
 import { derive } from "./core/economy.js";
 import { createMarket } from "./core/market.js";
 
-export const game = { S: newState(Date.now()), D: null, mkt: createMarket(), peakClickRate: 0 };
+export const game = {
+  S: newState(Date.now()),
+  D: null,
+  mkt: createMarket(),
+  peakClickRate: 0,
+};
 game.D = derive(game.S);
 
 // Call after anything that changes what the player owns
