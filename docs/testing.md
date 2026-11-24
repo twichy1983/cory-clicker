@@ -10,15 +10,17 @@ Both kinds of test use Node's built-in test runner (`node:test`) and `node:asser
 - Rules that use random numbers accept a `random` function, so tests can pass a fixed one: `sampleMarket(mkt, cps, () => 0.5)`.
 - Test mode switches (`rules.freePurchases`) are reset in `beforeEach`.
 
+`tests/unit/jobs.test.js` also covers the ten minigame rules in `src/jobs/` (the e2e suite only checks each one opens without crashing). It opens a real shift through the framework and steps it by hand: `tests/unit/helpers/fake-dom.js` installs quiet DOM and canvas stubs and a no-op `requestAnimationFrame` so `src/jobs/framework.js` imports and runs in Node, and `tests/unit/helpers/shift.js` opens the shift in the "play" phase and advances frames, so a test can drive a game's `step`/`down`/`up`/`key` and check `shift.strikes`, `shift.result` and the meters.
+
 A typical test:
 
 ```js
 test("unpaid fines at the deadline cause bankruptcy", () => {
-  const S = newState(T0);
-  S.fines = 50;
-  const events = advance(S, derive(S), S.deadline + 1000);
-  assert.equal(events[0].type, "bankrupt");
-});
+  const state = newState(T0)
+  state.fines = 50
+  const events = advance(state, derive(state), state.deadline + 1000)
+  assert.equal(events[0].type, "bankrupt")
+})
 ```
 
 **When you fix a bug in `core/`:** first write a test that fails because of the bug, then fix it. The test stops it from coming back. Tests named "bug fix: ..." are examples.
@@ -32,7 +34,7 @@ test("unpaid fines at the deadline cause bankruptcy", () => {
   - Windows PowerShell: `$env:BROWSER_PATH="C:\path\to\chrome.exe"; npm run test:e2e`
 - **Watching the tests:** `npm run test:e2e:headed` opens a visible browser window instead of running headless (or set `HEADED=1` when running anything that uses `scripts/browser.js`). Keep your hands off it while it runs.
 - **Fresh state:** each test starts a new game with a fresh browser profile and cleared storage.
-- **Test hook:** source builds expose `window.__clickonomics` (`game`, `tick`, `save`, `act`) so tests can set up situations, for example `S.deadline = Date.now() - 1`, then `tick()`. The CrazyGames build doesn't include it.
+- **Test hook:** source builds expose `window.__clickonomics` (`game`, `tick`, `save`, `act`) so tests can set up situations, for example `state.deadline = Date.now() - 1`, then `tick()`. The CrazyGames build doesn't include it.
 - **No network:** the CrazyGames SDK is blocked during tests, so they run offline.
 - **Errors fail tests:** any uncaught error or `console.error` in the page is collected in `page.errors`, and tests check it's empty.
 

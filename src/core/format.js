@@ -1,68 +1,104 @@
 // Number and time formatting.
-const SMALL_ILLIONS = ["million", "billion", "trillion", "quadrillion", "quintillion", "sextillion", "septillion", "octillion", "nonillion"];
-const UNITS = ["", "un", "duo", "tre", "quattuor", "quin", "sex", "septen", "octo", "novem"];
-const TENS = ["", "dec", "vigint", "trigint", "quadragint", "quinquagint", "sexagint", "septuagint", "octogint", "nonagint"];
+const SMALL_ILLIONS = [
+  "million",
+  "billion",
+  "trillion",
+  "quadrillion",
+  "quintillion",
+  "sextillion",
+  "septillion",
+  "octillion",
+  "nonillion"
+]
+const UNITS = ["", "un", "duo", "tre", "quattuor", "quin", "sex", "septen", "octo", "novem"]
+const TENS = [
+  "",
+  "dec",
+  "vigint",
+  "trigint",
+  "quadragint",
+  "quinquagint",
+  "sexagint",
+  "septuagint",
+  "octogint",
+  "nonagint"
+]
 
-// i = 1 -> million (10^6), i = 10 -> decillion (10^33), up to centillion
-function illionName(i) {
-  if (i <= 9) return SMALL_ILLIONS[i - 1];
-  if (i === 100) return "centillion";
-  if (i > 100) return null;
-  return UNITS[i % 10] + TENS[Math.floor(i / 10)] + "illion";
+// magnitude = 1 -> million (10^6), magnitude = 10 -> decillion (10^33), up to centillion
+function illionName(magnitude) {
+  if (magnitude <= 9) return SMALL_ILLIONS[magnitude - 1]
+  if (magnitude === 100) return "centillion"
+  if (magnitude > 100) return null
+  return UNITS[magnitude % 10] + TENS[Math.floor(magnitude / 10)] + "illion"
 }
 
 // 12 -> "12", 1234 -> "1,234", 1.5e9 -> "1.500 billion"
-export function fmt(n) {
-  if (!isFinite(n)) return "∞";
-  const neg = n < 0;
-  n = Math.abs(n);
-  let s;
-  if (n < 1000) s = (n < 1 && n % 1) ? n.toFixed(2) : (n < 100 && n % 1) ? n.toFixed(1) : Math.floor(n).toString();
-  else if (n < 1e6) s = Math.floor(n).toLocaleString("en-US");
+export function fmt(num) {
+  if (!isFinite(num)) return "∞"
+  const neg = num < 0
+  num = Math.abs(num)
+  let text
+  if (num < 1000)
+    text = num < 1 && num % 1 ? num.toFixed(2) : num < 100 && num % 1 ? num.toFixed(1) : Math.floor(num).toString()
+  else if (num < 1e6) text = Math.floor(num).toLocaleString("en-US")
   else {
-    let k = Math.floor(parseInt(n.toExponential().split("e")[1], 10) / 3);
-    let v = (n / Math.pow(10, k * 3)).toFixed(3);
-    if (v === "1000.000") { k++; v = "1.000"; }
-    const name = illionName(k - 1);
-    s = name ? v + " " + name : n.toExponential(3);
+    let magnitude = Math.floor(parseInt(num.toExponential().split("e")[1], 10) / 3)
+    let mantissa = (num / Math.pow(10, magnitude * 3)).toFixed(3)
+    if (mantissa === "1000.000") {
+      magnitude++
+      mantissa = "1.000"
+    }
+    const name = illionName(magnitude - 1)
+    text = name ? mantissa + " " + name : num.toExponential(3)
   }
-  return (neg ? "-" : "") + s;
+  return (neg ? "-" : "") + text
 }
 
-export const money = n => (n < 0 ? "-$" : "$") + fmt(Math.abs(n));
+export const money = (num) => (num < 0 ? "-$" : "$") + fmt(Math.abs(num))
 
 // Compact money for chart labels: 1234 -> "$1.23K"
-const SHORT = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc"];
-export function fmtShort(n) {
-  if (!isFinite(n) || n <= 0) return "$0";
-  if (n < 1000) return "$" + (n < 10 ? n.toFixed(2) : n < 100 ? n.toFixed(1) : n.toFixed(0));
-  const k = Math.floor(Math.log10(n) / 3);
-  if (k >= SHORT.length) return "$" + n.toExponential(2);
-  const v = n / Math.pow(1000, k);
-  return "$" + (v < 10 ? v.toFixed(2) : v < 100 ? v.toFixed(1) : v.toFixed(0)) + SHORT[k];
+const SHORT = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc"]
+export function fmtShort(num) {
+  if (!isFinite(num) || num <= 0) return "$0"
+  if (num < 1000) return "$" + (num < 10 ? num.toFixed(2) : num < 100 ? num.toFixed(1) : num.toFixed(0))
+  const magnitude = Math.floor(Math.log10(num) / 3)
+  if (magnitude >= SHORT.length) return "$" + num.toExponential(2)
+  const mantissa = num / Math.pow(1000, magnitude)
+  return (
+    "$" +
+    (mantissa < 10 ? mantissa.toFixed(2) : mantissa < 100 ? mantissa.toFixed(1) : mantissa.toFixed(0)) +
+    SHORT[magnitude]
+  )
 }
 
-// ms -> "HH:MM:SS"
-export function fmtTime(ms) {
-  const t = Math.floor(Math.max(0, ms) / 1000);
-  const h = Math.floor(t / 3600), m = Math.floor(t % 3600 / 60), s = t % 60;
-  return String(h).padStart(2, "0") + ":" + String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+// milliseconds -> "HH:MM:SS"
+export function fmtTime(milliseconds) {
+  const totalSeconds = Math.floor(Math.max(0, milliseconds) / 1000)
+  const hours = Math.floor(totalSeconds / 3600),
+    minutes = Math.floor((totalSeconds % 3600) / 60),
+    seconds = totalSeconds % 60
+  return (
+    String(hours).padStart(2, "0") + ":" + String(minutes).padStart(2, "0") + ":" + String(seconds).padStart(2, "0")
+  )
 }
 
-// ms -> "2d 3h 15m"
-export function fmtDuration(ms) {
-  const t = Math.floor(ms / 1000), d = Math.floor(t / 86400), h = Math.floor(t % 86400 / 3600), m = Math.floor(t % 3600 / 60);
-  return (d ? d + "d " : "") + (h ? h + "h " : "") + m + "m";
+// milliseconds -> "2d 3h 15m"
+export function fmtDuration(milliseconds) {
+  const totalSeconds = Math.floor(milliseconds / 1000),
+    days = Math.floor(totalSeconds / 86400),
+    hours = Math.floor((totalSeconds % 86400) / 3600),
+    minutes = Math.floor((totalSeconds % 3600) / 60)
+  return (days ? days + "d " : "") + (hours ? hours + "h " : "") + minutes + "m"
 }
 
-// ms -> "M:SS", rounding up
-export function mmss(ms) {
-  const s = Math.ceil(ms / 1000);
-  return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+// milliseconds -> "M:SS", rounding up
+export function mmss(milliseconds) {
+  const totalSeconds = Math.ceil(milliseconds / 1000)
+  return Math.floor(totalSeconds / 60) + ":" + String(totalSeconds % 60).padStart(2, "0")
 }
 
 // 1 -> "1st", 2 -> "2nd", 11 -> "11th", 23 -> "23rd"
-export function ordinal(n) {
-  const suffix = [11, 12, 13].includes(n % 100) ? "th" : ["st", "nd", "rd"][(n % 10) - 1] || "th";
-  return n + suffix;
+export function ordinal(num) {
+  const suffix = [11, 12, 13].includes(num % 100) ? "th" : ["st", "nd", "rd"][(num % 10) - 1] || "th"
+  return num + suffix
 }

@@ -1,38 +1,51 @@
 // The Jobs list under the big dollar: one button per job, showing locked / ready / cooling down.
-import { game } from "../game.js";
-import { INDUSTRIES } from "../core/data/industries.js";
-import { jobPay, jobPaySecs, jobTimeLeft, jobUnlocked } from "../core/jobs.js";
-import { JOBS } from "../jobs/index.js";
-import { money, mmss } from "../core/format.js";
-import { $ } from "./dom.js";
+import { game } from "../game.js"
+import { INDUSTRIES } from "../core/data/industries.js"
+import { jobPay, jobPaySecs, jobTimeLeft, jobUnlocked } from "../core/jobs.js"
+import { JOBS } from "../jobs/index.js"
+import { money, mmss } from "../core/format.js"
+import { $ } from "./dom.js"
 
-const els = {};
+const els = {}
 
 // Builds the buttons. Each carries data-job; main.js opens the job when it's clicked.
 export function buildJobList() {
-  const wrap = $("jobList");
-  wrap.innerHTML = "";
-  for (const j of JOBS) {
-    const b = document.createElement("button");
-    b.className = "job locked";
-    b.dataset.tt = "job:" + j.id;
-    b.dataset.job = j.id;
-    b.innerHTML = `<span class="ji">${j.icon}</span><span class="jm"><span class="jt">${j.name}</span><span class="jd"></span></span><span class="js"></span>`;
-    wrap.appendChild(b);
-    els[j.id] = { el: b, d: b.querySelector(".jd"), st: b.querySelector(".js") };
+  const wrap = $("jobList")
+  wrap.innerHTML = ""
+  for (const job of JOBS) {
+    const button = document.createElement("button")
+    button.className = "job locked"
+    button.dataset.tooltip = "job:" + job.id
+    button.dataset.job = job.id
+    button.innerHTML = `<span class="ji">${job.icon}</span><span class="jm"><span class="jt">${job.name}</span><span class="jd"></span></span><span class="js"></span>`
+    wrap.appendChild(button)
+    els[job.id] = {
+      element: button,
+      desc: button.querySelector(".jd"),
+      status: button.querySelector(".js")
+    }
   }
 }
 
 // Updates every button
 export function renderJobs() {
-  const { S, D } = game, now = Date.now();
-  let unlockedCount = 0;
-  for (const j of JOBS) {
-    const e = els[j.id], unlocked = jobUnlocked(S, j), left = jobTimeLeft(S, j, now), ready = unlocked && left === 0;
-    if (unlocked) unlockedCount++;
-    e.el.className = "job " + (!unlocked ? "locked" : ready ? "ready" : "wait");
-    if (!unlocked) { e.d.textContent = `Acquire ${INDUSTRIES[j.ind].name} to unlock`; e.st.textContent = "🔒"; }
-    else { e.d.textContent = `Pays ${money(jobPay(D, j))} · ${jobPaySecs(j) / 60} min of income`; e.st.textContent = ready ? "GO ▶" : "⏳ " + mmss(left); }
+  const { state, derived } = game,
+    now = Date.now()
+  let unlockedCount = 0
+  for (const job of JOBS) {
+    const entry = els[job.id],
+      unlocked = jobUnlocked(state, job),
+      left = jobTimeLeft(state, job, now),
+      ready = unlocked && left === 0
+    if (unlocked) unlockedCount++
+    entry.element.className = "job " + (!unlocked ? "locked" : ready ? "ready" : "wait")
+    if (!unlocked) {
+      entry.desc.textContent = `Acquire ${INDUSTRIES[job.ind].name} to unlock`
+      entry.status.textContent = "🔒"
+    } else {
+      entry.desc.textContent = `Pays ${money(jobPay(derived, job))} · ${jobPaySecs(job) / 60} min of income`
+      entry.status.textContent = ready ? "GO ▶" : "⏳ " + mmss(left)
+    }
   }
-  $("jobsCount").textContent = `${unlockedCount} / ${JOBS.length}`;
+  $("jobsCount").textContent = `${unlockedCount} / ${JOBS.length}`
 }

@@ -4,24 +4,26 @@ const BUTTONS = [
   ["deadline1h", "Deadline → 59m"],
   ["cash", "+$1 billion"],
   ["fines", "+$1 billion fines"],
-  ["rebate", "Fines → −$1 million"],
-];
+  ["rebate", "Fines → −$1 million"]
+]
 
 export function addTestToolbar({ getState, earn, refresh }) {
-  const bar = document.createElement("div");
-  bar.id = "testBar";
-  bar.innerHTML = `<span>TEST MODE · all purchases free</span>` +
-    BUTTONS.map(([id, text]) => `<button data-t="${id}">${text}</button>`).join("");
-  bar.addEventListener("click", e => {
-    const t = e.target.dataset.t;
-    if (!t) return;
-    const S = getState(), now = Date.now();
-    if (t === "deadline10") S.deadline = now + 10000;
-    if (t === "deadline1h") S.deadline = now + 59 * 60000;
-    if (t === "cash") earn(1e9);
-    if (t === "fines") S.fines += 1e9;
-    if (t === "rebate") S.fines = -1e6;
-    refresh();
-  });
-  document.body.appendChild(bar);
+  const bar = document.createElement("div")
+  bar.id = "testBar"
+  bar.innerHTML =
+    `<span>TEST MODE · all purchases free</span>` +
+    BUTTONS.map(([id, text]) => `<button data-tool="${id}">${text}</button>`).join("")
+  bar.addEventListener("click", (event) => {
+    const tool = /** @type {HTMLElement} */ (event.target).dataset.tool
+    if (!tool) return
+    const state = getState(),
+      now = Date.now()
+    if (tool === "deadline10") state.deadline = now + 10000
+    if (tool === "deadline1h") state.deadline = now + 59 * 60000
+    if (tool === "cash") earn(1e9)
+    if (tool === "fines") state.fines += 1e9
+    if (tool === "rebate") state.fines = -1e6
+    refresh()
+  })
+  document.body.appendChild(bar)
 }
