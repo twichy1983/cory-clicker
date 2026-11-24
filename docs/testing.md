@@ -14,11 +14,11 @@ A typical test:
 
 ```js
 test("unpaid fines at the deadline cause bankruptcy", () => {
-  const S = newState(T0);
-  S.fines = 50;
-  const events = advance(S, derive(S), S.deadline + 1000);
-  assert.equal(events[0].type, "bankrupt");
-});
+  const S = newState(T0)
+  S.fines = 50
+  const events = advance(S, derive(S), S.deadline + 1000)
+  assert.equal(events[0].type, "bankrupt")
+})
 ```
 
 **When you fix a bug in `core/`:** first write a test that fails because of the bug, then fix it. The test stops it from coming back. Tests named "bug fix: ..." are examples.

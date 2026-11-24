@@ -22,14 +22,7 @@ Add a `["Name.", "Description"]` line to that industry's list in `src/core/data/
 Add one line in `src/core/achievements.js`:
 
 ```js
-A(
-  "Clicking",
-  "clicks_1m",
-  "🧠",
-  "Click Singularity",
-  "Click the dollar 1,000,000 times.",
-  (c) => c.S.clicks >= 1e6,
-);
+A("Clicking", "clicks_1m", "🧠", "Click Singularity", "Click the dollar 1,000,000 times.", (c) => c.S.clicks >= 1e6)
 ```
 
 - The id (`"clicks_1m"`) is stored in saves. **Never rename or reuse an id.**

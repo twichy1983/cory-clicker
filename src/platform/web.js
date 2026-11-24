@@ -7,5 +7,5 @@ export const webPlatform = {
   loadingStop() {},
   gameplayStart() {},
   gameplayStop() {},
-  happytime() {},
-};
+  happytime() {}
+}

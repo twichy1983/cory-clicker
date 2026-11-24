@@ -1,8 +1,8 @@
 // The saved game state. Everything the game needs to remember lives in one plain object (S).
-import { BASE_TIMER } from "./constants.js";
-import { INDUSTRIES } from "./data/industries.js";
+import { BASE_TIMER } from "./constants.js"
+import { INDUSTRIES } from "./data/industries.js"
 
-export const MAX_COMPANY_NAME = 128;
+export const MAX_COMPANY_NAME = 128
 
 // The parts of the state that a bankruptcy resets
 export function freshRun(now) {
@@ -14,8 +14,8 @@ export function freshRun(now) {
     timerLobbyists: 0,
     penaltyLobbyists: 0,
     fines: 0,
-    deadline: now + BASE_TIMER,
-  };
+    deadline: now + BASE_TIMER
+  }
 }
 
 // A brand new game. Lifetime stats, achievements and job history survive bankruptcy.
@@ -35,6 +35,6 @@ export function newState(now) {
     jobs: {},
     jobWins: {},
     startedAt: now,
-    lastTick: now,
-  });
+    lastTick: now
+  })
 }

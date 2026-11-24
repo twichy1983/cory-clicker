@@ -8,7 +8,7 @@ export const INDUSTRIES = [
     icon: "🍋",
     base: 12,
     cps: 0.15,
-    flavor: "No permits. No lemons. No problem.",
+    flavor: "No permits. No lemons. No problem."
   },
   {
     key: "food",
@@ -17,7 +17,7 @@ export const INDUSTRIES = [
     icon: "🌾",
     base: 120,
     cps: 1.2,
-    flavor: "Sourcing ingredients from the lowest bidder since forever.",
+    flavor: "Sourcing ingredients from the lowest bidder since forever."
   },
   {
     key: "mfg",
@@ -26,7 +26,7 @@ export const INDUSTRIES = [
     icon: "🏭",
     base: 1500,
     cps: 10,
-    flavor: "The line never stops. Neither does the inspector's paperwork.",
+    flavor: "The line never stops. Neither does the inspector's paperwork."
   },
   {
     key: "additives",
@@ -35,7 +35,7 @@ export const INDUSTRIES = [
     icon: "🧪",
     base: 18000,
     cps: 60,
-    flavor: "Shelf life: eternal. Ingredient list: classified.",
+    flavor: "Shelf life: eternal. Ingredient list: classified."
   },
   {
     key: "consumer",
@@ -44,7 +44,7 @@ export const INDUSTRIES = [
     icon: "🧸",
     base: 2.2e5,
     cps: 380,
-    flavor: "Safety testing is just a really long customer beta.",
+    flavor: "Safety testing is just a really long customer beta."
   },
   {
     key: "pharma",
@@ -53,7 +53,7 @@ export const INDUSTRIES = [
     icon: "💊",
     base: 3e6,
     cps: 2200,
-    flavor: "A cure is a one-time sale. A treatment is forever.",
+    flavor: "A cure is a one-time sale. A treatment is forever."
   },
   {
     key: "industrial",
@@ -62,7 +62,7 @@ export const INDUSTRIES = [
     icon: "🛢️",
     base: 4.5e7,
     cps: 13000,
-    flavor: "Hard hats optional. Hard numbers mandatory.",
+    flavor: "Hard hats optional. Hard numbers mandatory."
   },
   {
     key: "auto",
@@ -71,7 +71,7 @@ export const INDUSTRIES = [
     icon: "✈️",
     base: 7e8,
     cps: 80000,
-    flavor: "Moves fast. Breaks things. Sometimes the things are physics.",
+    flavor: "Moves fast. Breaks things. Sometimes the things are physics."
   },
   {
     key: "tech",
@@ -80,7 +80,7 @@ export const INDUSTRIES = [
     icon: "🏦",
     base: 1.1e10,
     cps: 5e5,
-    flavor: "Your data, your money, our terms of service.",
+    flavor: "Your data, your money, our terms of service."
   },
   {
     key: "offshore",
@@ -89,23 +89,10 @@ export const INDUSTRIES = [
     icon: "🏝️",
     base: 1.8e11,
     cps: 3.2e6,
-    flavor: "A mailbox on an island that owns a mailbox on another island.",
-  },
-];
-export const IND_INDEX = Object.fromEntries(
-  INDUSTRIES.map((d, i) => [d.key, i]),
-);
+    flavor: "A mailbox on an island that owns a mailbox on another island."
+  }
+]
+export const IND_INDEX = Object.fromEntries(INDUSTRIES.map((d, i) => [d.key, i]))
 
 // Stock ticker symbol for each industry, in the same order
-export const TICKERS = [
-  "LMON",
-  "GRAN",
-  "PROC",
-  "ADTV",
-  "GOOD",
-  "PHRM",
-  "BOOM",
-  "CRSH",
-  "DATA",
-  "SHEL",
-];
+export const TICKERS = ["LMON", "GRAN", "PROC", "ADTV", "GOOD", "PHRM", "BOOM", "CRSH", "DATA", "SHEL"]

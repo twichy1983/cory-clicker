@@ -14,9 +14,7 @@
       <div class="col" id="left">
         <div class="brand">
           <h1>CLICKONOMICS</h1>
-          <div class="tag">
-            Maximize shareholder value. Minimize everything else.
-          </div>
+          <div class="tag">Maximize shareholder value. Minimize everything else.</div>
         </div>
         <div class="nameRow">
           <input
@@ -27,13 +25,7 @@
             title="Click to rename your company"
             aria-label="Company name"
           />
-          <button
-            id="editName"
-            title="Rename your company"
-            aria-label="Rename your company"
-          >
-            ✎
-          </button>
+          <button id="editName" title="Rename your company" aria-label="Rename your company">✎</button>
         </div>
         <div class="bank">
           <div id="dollars">$0</div>
@@ -43,13 +35,9 @@
           <button id="bigDollar" aria-label="Make money"><span>$</span></button>
         </div>
         <div id="clickInfo">+$1 per click</div>
-        <div id="ticker">
-          <b>WIRE</b><span id="tickerText">Markets open. Ethics closed.</span>
-        </div>
+        <div id="ticker"><b>WIRE</b><span id="tickerText">Markets open. Ethics closed.</span></div>
         <div id="jobs">
-          <div class="jobsHead">
-            <span>💼 Jobs</span><span id="jobsCount"></span>
-          </div>
+          <div class="jobsHead"><span>💼 Jobs</span><span id="jobsCount"></span></div>
           <div id="jobList"></div>
         </div>
       </div>
@@ -58,14 +46,10 @@
       <div class="col" id="center">
         <section id="reg">
           <div class="reg-stripe"></div>
-          <div class="reg-head" id="regHead">
-            ⚠ FEDERAL REGULATORY ENFORCEMENT ⚠
-          </div>
+          <div class="reg-head" id="regHead">⚠ FEDERAL REGULATORY ENFORCEMENT ⚠</div>
           <div id="regLabel">FINES OWED</div>
           <div id="fineAmt">$0</div>
-          <div class="reg-timer" id="timerLabel">
-            PAYMENT DUE IN<span id="fineTimer">24:00:00</span>
-          </div>
+          <div class="reg-timer" id="timerLabel">PAYMENT DUE IN<span id="fineTimer">24:00:00</span></div>
           <div class="reg-bar"><div id="fineBar"></div></div>
           <div id="fineInfo"></div>
           <button id="payBtn">PAY FINES</button>
@@ -85,11 +69,7 @@
             </button>
           </div>
           <div class="lobbyCol">
-            <button
-              class="lobbyBtn"
-              id="penaltyLobbyBtn"
-              data-tt="lobby:penalty"
-            >
+            <button class="lobbyBtn" id="penaltyLobbyBtn" data-tt="lobby:penalty">
               <span class="n" id="penaltyLobbyN">0</span>
               <div class="t">🤝 Penalty Lobbyist</div>
               <div class="d">−1% regulatory fines. Can go negative.</div>
@@ -106,10 +86,7 @@
           <div class="mktHead">
             <div>
               <div class="mktName">CLKX · Clickonomics Composite</div>
-              <div class="mktSub">
-                All industries' income per second, adjusted for investor mood ·
-                last 3 min
-              </div>
+              <div class="mktSub">All industries' income per second, adjusted for investor mood · last 3 min</div>
             </div>
             <div class="mktPx">
               <div id="idxPx">$0</div>
@@ -123,9 +100,7 @@
         <div class="tabs">
           <button class="tab on" data-tab="rap">Rap Sheet</button>
           <button class="tab" data-tab="stats">Stats</button>
-          <button class="tab" data-tab="ach">
-            🏆 <span id="achTabCount">0</span>
-          </button>
+          <button class="tab" data-tab="ach">🏆 <span id="achTabCount">0</span></button>
           <button class="tab" data-tab="save">Save</button>
         </div>
         <div class="tabBody" id="tab-rap"><div id="rapSheet"></div></div>
@@ -138,26 +113,19 @@
             <button class="btn" id="saveNow">💾 Save now</button>
             <button class="btn" id="exportBtn">📤 Export save</button>
             <button class="btn" id="importBtn">📥 Import save</button>
-            <button class="btn danger" id="bankruptBtn">
-              📉 Declare bankruptcy
-            </button>
+            <button class="btn danger" id="bankruptBtn">📉 Declare bankruptcy</button>
             <button class="btn danger" id="resetBtn">🔥 Hard reset</button>
           </div>
-          <div class="note" id="saveNote">
-            Autosaves to this browser every 30 seconds.
-          </div>
+          <div class="note" id="saveNote">Autosaves to this browser every 30 seconds.</div>
           <div class="note">
-            The regulatory clock runs in real time, even while this tab is
-            closed. If it hits zero with fines unpaid, regulators seize
-            everything.
+            The regulatory clock runs in real time, even while this tab is closed. If it hits zero with fines unpaid,
+            regulators seize everything.
           </div>
         </div>
         <footer>
-          Satire. Some upgrades are invented; others are dark-humor riffs on
-          widely reported historical corporate scandals, product recalls and
-          settlements. None are legal findings about anyone. No real companies
-          were harmed in the making of this game, which is more than can be said
-          for their customers.
+          Satire. Some upgrades are invented; others are dark-humor riffs on widely reported historical corporate
+          scandals, product recalls and settlements. None are legal findings about anyone. No real companies were harmed
+          in the making of this game, which is more than can be said for their customers.
         </footer>
       </div>
 
@@ -171,8 +139,7 @@
         <div class="secHead">
           <h2>Industries</h2>
           <div class="buyAmt" role="group" aria-label="Purchase quantity">
-            <button data-amt="1" class="on">×1</button
-            ><button data-amt="10">×10</button
+            <button data-amt="1" class="on">×1</button><button data-amt="10">×10</button
             ><button data-amt="100">×100</button>
           </div>
         </div>
@@ -182,18 +149,11 @@
 
     <div id="jobOverlay" hidden>
       <div class="jobFrame" id="jobFrame">
-        <canvas
-          id="jobCanvas"
-          width="1672"
-          height="941"
-          aria-label="Waste disposal minigame"
-        ></canvas>
+        <canvas id="jobCanvas" width="1672" height="941" aria-label="Waste disposal minigame"></canvas>
         <div class="jobHud">
           <div class="jobPill" id="jobTimer">30.0</div>
           <div class="jobPill jobMeter">
-            <div class="lbl">
-              <span id="jobMeterLbl"></span><span id="jobPct">0%</span>
-            </div>
+            <div class="lbl"><span id="jobMeterLbl"></span><span id="jobPct">0%</span></div>
             <div class="jobBar"><div id="jobFill"></div></div>
           </div>
           <div class="jobPill" id="jobExtra"></div>
@@ -202,9 +162,7 @@
         <div id="jobPanel"></div>
         <button class="jobClose" id="jobClose">✕ Quit job</button>
       </div>
-      <div class="jobRotate">
-        📱↻ Turn your phone sideways for a bigger view
-      </div>
+      <div class="jobRotate">📱↻ Turn your phone sideways for a bigger view</div>
     </div>
     <div id="tip"></div>
     <div id="modalBg"><div id="modal"></div></div>
