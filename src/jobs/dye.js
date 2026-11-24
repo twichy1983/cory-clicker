@@ -1,4 +1,16 @@
-import { JW, JH, pick, rr, vgrad, INK, emoji, label, plainText, button, inBox } from "./draw.js"
+import {
+  CANVAS_WIDTH,
+  CANVAS_HEIGHT,
+  pick,
+  roundedRect,
+  vgrad,
+  INK,
+  emoji,
+  label,
+  plainText,
+  button,
+  inBox
+} from "./draw.js"
 import { floatText, burst, endJob } from "./framework.js"
 
 /* ---------------------------------------------------------
@@ -127,86 +139,86 @@ const DyeGame = {
       [0, "#22313b"],
       [1, "#2f4250"]
     ])
-    ctx.fillRect(0, 0, JW, 560)
+    ctx.fillRect(0, 0, CANVAS_WIDTH, 560)
     ctx.fillStyle = "#3a2a1d"
     ;[200, 380].forEach((y) => {
-      rr(ctx, 60, y, 560, 20, 6)
+      roundedRect(ctx, 60, y, 560, 20, 6)
       ctx.fill()
     })
     ;["⚗️", "🧪", "🧫", "🧴", "⚗️"].forEach((icon, i) => emoji(ctx, icon, 110 + i * 110, 160, 60))
     ;["🧪", "🧴", "⚗️", "🧪"].forEach((icon, i) => emoji(ctx, icon, 130 + i * 130, 340, 60))
-    rr(ctx, 60, 440, 560, 70, 10)
+    roundedRect(ctx, 60, 440, 560, 70, 10)
     ctx.fillStyle = "#ffd23f"
     ctx.fill()
     ctx.lineWidth = 5
     ctx.strokeStyle = INK
     ctx.stroke()
     plainText(ctx, "⚠ BANNED IN 27 COUNTRIES (NOT OURS)", 340, 475, 24, "#1b1b1b", "center", 900)
-    ctx.fillStyle = vgrad(ctx, 540, JH, [
+    ctx.fillStyle = vgrad(ctx, 540, CANVAS_HEIGHT, [
       [0, "#9a6a3e"],
       [1, "#6e4626"]
     ])
-    ctx.fillRect(0, 540, JW, JH - 540)
+    ctx.fillRect(0, 540, CANVAS_WIDTH, CANVAS_HEIGHT - 540)
     ctx.strokeStyle = INK
     ctx.lineWidth = 6
     ctx.beginPath()
     ctx.moveTo(0, 540)
-    ctx.lineTo(JW, 540)
+    ctx.lineTo(CANVAS_WIDTH, 540)
     ctx.stroke()
     // beaker with the current batch
-    const bx = 836,
+    const beakerX = 836,
       btop = 230,
       bbot = 720,
-      bw = 300,
+      beakerWidth = 300,
       col = dyeColor(shift.drops),
       fill = shift.flushT > 0 ? 0.25 + 0.75 * (1 - shift.flushT / 0.9) : 1
     const level = bbot - (bbot - btop - 60) * 0.7 * fill
     ctx.save()
-    rr(ctx, bx - bw / 2, btop, bw, bbot - btop, 40)
+    roundedRect(ctx, beakerX - beakerWidth / 2, btop, beakerWidth, bbot - btop, 40)
     ctx.clip()
     ctx.fillStyle = "rgba(220,240,250,.25)"
-    ctx.fillRect(bx - bw / 2, btop, bw, bbot - btop)
+    ctx.fillRect(beakerX - beakerWidth / 2, btop, beakerWidth, bbot - btop)
     ctx.fillStyle = rgbStr(col)
-    ctx.fillRect(bx - bw / 2, level + (shift.splashT || 0) * 20, bw, bbot - level)
+    ctx.fillRect(beakerX - beakerWidth / 2, level + (shift.splashT || 0) * 20, beakerWidth, bbot - level)
     ctx.fillStyle = "rgba(255,255,255,.25)"
     for (let i = 0; i < 8; i++) {
-      const yy = bbot - ((now * 70 + i * 53) % (bbot - level))
+      const bubbleY = bbot - ((now * 70 + i * 53) % (bbot - level))
       ctx.beginPath()
-      ctx.arc(bx - 110 + i * 30, yy, 7, 0, Math.PI * 2)
+      ctx.arc(beakerX - 110 + i * 30, bubbleY, 7, 0, Math.PI * 2)
       ctx.fill()
     }
     ctx.restore()
-    rr(ctx, bx - bw / 2, btop, bw, bbot - btop, 40)
+    roundedRect(ctx, beakerX - beakerWidth / 2, btop, beakerWidth, bbot - btop, 40)
     ctx.lineWidth = 8
     ctx.strokeStyle = INK
     ctx.stroke()
-    rr(ctx, bx - bw / 2 - 20, btop - 16, bw + 40, 30, 10)
+    roundedRect(ctx, beakerX - beakerWidth / 2 - 20, btop - 16, beakerWidth + 40, 30, 10)
     ctx.fillStyle = "#d9eef7"
     ctx.fill()
     ctx.stroke()
     ctx.fillStyle = "rgba(255,255,255,.35)"
-    rr(ctx, bx - bw / 2 + 22, btop + 40, 24, bbot - btop - 90, 12)
+    roundedRect(ctx, beakerX - beakerWidth / 2 + 22, btop + 40, 24, bbot - btop - 90, 12)
     ctx.fill()
     for (let i = 1; i < 5; i++) {
       ctx.strokeStyle = "rgba(255,255,255,.6)"
       ctx.lineWidth = 3
       ctx.beginPath()
-      ctx.moveTo(bx + bw / 2 - 50, btop + i * 90)
-      ctx.lineTo(bx + bw / 2 - 16, btop + i * 90)
+      ctx.moveTo(beakerX + beakerWidth / 2 - 50, btop + i * 90)
+      ctx.lineTo(beakerX + beakerWidth / 2 - 16, btop + i * 90)
       ctx.stroke()
     }
     // match meter
     const matchPct = dyeMatch(shift)
-    rr(ctx, bx - 220, 770, 440, 40, 20)
+    roundedRect(ctx, beakerX - 220, 770, 440, 40, 20)
     ctx.fillStyle = "#1b2228"
     ctx.fill()
     ctx.lineWidth = 5
     ctx.strokeStyle = INK
     ctx.stroke()
-    rr(ctx, bx - 216, 774, (432 * matchPct) / 100, 32, 16)
+    roundedRect(ctx, beakerX - 216, 774, (432 * matchPct) / 100, 32, 16)
     ctx.fillStyle = matchPct >= 99 ? "#7cfc7c" : matchPct > 75 ? "#ffd23f" : "#ff7a59"
     ctx.fill()
-    label(ctx, `MATCH ${matchPct}%`, bx, 850, 40, "#fff")
+    label(ctx, `MATCH ${matchPct}%`, beakerX, 850, 40, "#fff")
     // dye bottles
     for (const [colorKey, dye] of Object.entries(DYES)) {
       const x = dye.x,
@@ -214,21 +226,21 @@ const DyeGame = {
         flying = shift.falling.some((drop) => drop.colorKey === colorKey)
       ctx.save()
       ctx.translate(x, y + (flying ? -10 : 0))
-      rr(ctx, -62, 0, 124, 200, 22)
+      roundedRect(ctx, -62, 0, 124, 200, 22)
       ctx.fillStyle = "rgba(230,245,255,.5)"
       ctx.fill()
       ctx.lineWidth = 6
       ctx.strokeStyle = INK
       ctx.stroke()
       ctx.save()
-      rr(ctx, -62, 0, 124, 200, 22)
+      roundedRect(ctx, -62, 0, 124, 200, 22)
       ctx.clip()
       ctx.fillStyle = rgbStr(dye.rgb)
       ctx.fillRect(-62, 60, 124, 140)
       ctx.restore()
-      rr(ctx, -62, 0, 124, 200, 22)
+      roundedRect(ctx, -62, 0, 124, 200, 22)
       ctx.stroke()
-      rr(ctx, -24, -50, 48, 56, 8)
+      roundedRect(ctx, -24, -50, 48, 56, 8)
       ctx.fillStyle = "#30363b"
       ctx.fill()
       ctx.stroke()
@@ -239,7 +251,7 @@ const DyeGame = {
       ctx.fillStyle = "#30363b"
       ctx.fill()
       ctx.stroke()
-      rr(ctx, -54, 100, 108, 52, 8)
+      roundedRect(ctx, -54, 100, 108, 52, 8)
       ctx.fillStyle = "#fff"
       ctx.fill()
       ctx.lineWidth = 4
@@ -279,14 +291,14 @@ const DyeGame = {
     ctx.save()
     ctx.translate(1330, 130)
     ctx.rotate(0.04)
-    rr(ctx, 0, 0, 290, 470, 18)
+    roundedRect(ctx, 0, 0, 290, 470, 18)
     ctx.fillStyle = "#fffdf3"
     ctx.fill()
     ctx.lineWidth = 6
     ctx.strokeStyle = INK
     ctx.stroke()
     plainText(ctx, "ORDER #" + (4100 + shift.orderNo), 145, 44, 28, "#555", "center", 900)
-    rr(ctx, 35, 80, 220, 220, 20)
+    roundedRect(ctx, 35, 80, 220, 220, 20)
     ctx.fillStyle = rgbStr(dyeColor(shift.order))
     ctx.fill()
     ctx.lineWidth = 6
@@ -295,7 +307,7 @@ const DyeGame = {
     plainText(ctx, "Client: Sugar Bombz (ages 2+)", 145, 385, 20, "#666")
     plainText(ctx, "Must glow. Must hook.", 145, 420, 20, "#c92a2a", "center", 900)
     ctx.restore()
-    if (shift.shipT > 0) label(ctx, "MATCH! SHIPPING…", bx, 170, 52, "#9dff6a")
+    if (shift.shipT > 0) label(ctx, "MATCH! SHIPPING…", beakerX, 170, 52, "#9dff6a")
   }
 }
 function dyeBottleAt(x, y) {

@@ -16,7 +16,7 @@ export function encodeSave(state) {
 
 export function decodeSave(str) {
   const bin = atob(str.trim())
-  const bytes = Uint8Array.from(bin, (ch) => ch.charCodeAt(0))
+  const bytes = Uint8Array.from(bin, (char) => char.charCodeAt(0))
   return JSON.parse(new TextDecoder().decode(bytes))
 }
 

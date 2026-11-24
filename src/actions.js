@@ -72,21 +72,21 @@ export function awardAchievements(quiet) {
 
 // Shows what the core rules reported: deadlines survived, a bankruptcy, or job news
 export function handleEvents(events) {
-  for (const ev of events) {
-    if (ev.type === "survived") {
+  for (const event of events) {
+    if (event.type === "survived") {
       toast(
-        ev.rebate > 0
-          ? `Deadline reached. Regulators paid YOU a ${money(ev.rebate)} rebate.`
+        event.rebate > 0
+          ? `Deadline reached. Regulators paid YOU a ${money(event.rebate)} rebate.`
           : "Deadline reached with a clean ledger. The clock resets."
       )
-    } else if (ev.type === "bankrupt") {
-      showBankruptcy(ev)
-    } else if (ev.type === "jobUnlocked") {
-      toast(`${ev.job.icon} New job unlocked: ${ev.job.name}`)
-    } else if (ev.type === "jobReady") {
-      toast(`${ev.job.icon} ${ev.job.name} is ready again.`)
-    } else if (ev.type === "jobWon") {
-      toast(`${ev.job.icon} ${ev.job.name} done. You made ${money(ev.reward)}.`, "gold")
+    } else if (event.type === "bankrupt") {
+      showBankruptcy(event)
+    } else if (event.type === "jobUnlocked") {
+      toast(`${event.job.icon} New job unlocked: ${event.job.name}`)
+    } else if (event.type === "jobReady") {
+      toast(`${event.job.icon} ${event.job.name} is ready again.`)
+    } else if (event.type === "jobWon") {
+      toast(`${event.job.icon} ${event.job.name} done. You made ${money(event.reward)}.`, "gold")
       platform.happytime()
     }
   }
@@ -122,10 +122,10 @@ function showBankruptcy({ owed, lost, voluntary }) {
 
 /* ---------- player actions ---------- */
 
-export function clickDollar(ev) {
+export function clickDollar(clickEvent) {
   const amount = economy.clickDollar(game.state, game.derived)
   recordClick()
-  showClickFeedback(amount, ev)
+  showClickFeedback(amount, clickEvent)
   render()
 }
 
@@ -172,15 +172,15 @@ export function firePenaltyLobbyist() {
 }
 
 export function payFines() {
-  const ev = economy.payFines(game.state, game.derived, Date.now())
-  if (!ev) return
-  if (ev.type === "deadline") {
-    handleEvents(ev.events)
+  const event = economy.payFines(game.state, game.derived, Date.now())
+  if (!event) return
+  if (event.type === "deadline") {
+    handleEvents(event.events)
     render()
     return
   }
-  if (ev.type === "paid") toast(`Paid ${money(ev.amount)} in fines. No wrongdoing admitted.`)
-  else if (ev.type === "rebate") toast(`Collected a ${money(ev.amount)} regulatory rebate.`)
+  if (event.type === "paid") toast(`Paid ${money(event.amount)} in fines. No wrongdoing admitted.`)
+  else if (event.type === "rebate") toast(`Collected a ${money(event.amount)} regulatory rebate.`)
   else toast("Filed a spotless compliance report.")
   render()
 }
@@ -195,10 +195,10 @@ export function startJob(job) {
 
 // Returns the reward, for the window's result screen
 export function winJob(job) {
-  const ev = jobRules.winJob(game.state, game.derived, job)
-  handleEvents([ev])
+  const event = jobRules.winJob(game.state, game.derived, job)
+  handleEvents([event])
   save()
-  return ev.reward
+  return event.reward
 }
 
 // Extra cash a minigame pays on top of the reward (the price-gouging profits)

@@ -8,7 +8,7 @@ import { tmpdir } from "node:os"
 import { delimiter, join } from "node:path"
 import * as esbuild from "esbuild"
 
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+const sleep = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds))
 
 export function findBrowser() {
   if (process.env.BROWSER_PATH) return process.env.BROWSER_PATH
@@ -86,39 +86,39 @@ export async function launch({ width = 1400, height = 900 } = {}) {
   await sleep(100)
   const port = readFileSync(portFile, "utf8").split("\n")[0].trim()
   const targets = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json()
-  const ws = new WebSocket(targets.find((target) => target.type === "page").webSocketDebuggerUrl)
+  const socket = new WebSocket(targets.find((target) => target.type === "page").webSocketDebuggerUrl)
   await new Promise((ok, fail) => {
-    ws.onopen = ok
-    ws.onerror = fail
+    socket.onopen = ok
+    socket.onerror = fail
   })
 
   let nextId = 1
   const pending = new Map(),
     listeners = [],
     errors = []
-  ws.onmessage = (msg) => {
+  socket.onmessage = (msg) => {
     const message = JSON.parse(msg.data)
     if (message.id && pending.has(message.id)) {
       const { ok, fail } = pending.get(message.id)
       pending.delete(message.id)
       message.error ? fail(new Error(message.error.message)) : ok(message.result)
-    } else if (message.method) listeners.forEach((fn) => fn(message))
+    } else if (message.method) listeners.forEach((listener) => listener(message))
   }
   const send = (method, params = {}) =>
     new Promise((ok, fail) => {
       const id = nextId++
       pending.set(id, { ok, fail })
-      ws.send(JSON.stringify({ id, method, params }))
+      socket.send(JSON.stringify({ id, method, params }))
     })
   const once = (method) =>
     new Promise((ok) => {
-      const fn = (message) => {
+      const listener = (message) => {
         if (message.method === method) {
-          listeners.splice(listeners.indexOf(fn), 1)
+          listeners.splice(listeners.indexOf(listener), 1)
           ok(message.params)
         }
       }
-      listeners.push(fn)
+      listeners.push(listener)
     })
 
   // Collect uncaught errors and console.error calls so tests can assert there were none
@@ -168,7 +168,7 @@ export async function launch({ width = 1400, height = 900 } = {}) {
     },
     async click(selector) {
       const ok = await page.eval(
-        `(() => { const el = document.querySelector(${JSON.stringify(selector)}); if (!el) return false; el.click(); return true; })()`
+        `(() => { const element = document.querySelector(${JSON.stringify(selector)}); if (!element) return false; element.click(); return true; })()`
       )
       if (!ok) throw new Error(`click: no element matches ${selector}`)
     },
@@ -191,7 +191,7 @@ export async function launch({ width = 1400, height = 900 } = {}) {
       } catch {
         /* already closing */
       }
-      ws.close()
+      socket.close()
       proc.kill()
       await sleep(200)
       rmSync(profile, {

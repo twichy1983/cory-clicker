@@ -10,7 +10,8 @@ const totalOwned = (state) => state.owned.reduce((sum, count) => sum + count, 0)
 const scandalsOwned = (state) =>
   UPGRADES.filter((upgrade) => upgrade.type === "scandal" && state.upgrades[upgrade.id]).length
 const upgradesOwned = (state) => Object.keys(state.upgrades).length
-const anyStock = (context, fn) => context.mkt.ind.some((history, i) => context.state.owned[i] > 0 && fn(history, i))
+const anyStock = (context, predicate) =>
+  context.mkt.ind.some((history, i) => context.state.owned[i] > 0 && predicate(history, i))
 
 export const ACH = []
 const addAchievement = (cat, id, icon, name, desc, test) => ACH.push({ cat, id, icon, name, desc, test })
@@ -362,8 +363,8 @@ addAchievement(
   "Watch the composite index lose 90% of its value.",
   (context) => {
     const history = context.mkt.idx,
-      hi = Math.max(0, ...history)
-    return totalOwned(context.state) > 0 && hi > 0 && history[history.length - 1] <= hi * 0.1
+      peak = Math.max(0, ...history)
+    return totalOwned(context.state) > 0 && peak > 0 && history[history.length - 1] <= peak * 0.1
   }
 )
 

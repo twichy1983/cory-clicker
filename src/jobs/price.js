@@ -1,4 +1,19 @@
-import { JW, JH, rand, pick, clamp, rr, vgrad, hgrad, INK, emoji, label, plainText, button, inBox } from "./draw.js"
+import {
+  CANVAS_WIDTH,
+  CANVAS_HEIGHT,
+  rand,
+  pick,
+  clamp,
+  roundedRect,
+  vgrad,
+  hgrad,
+  INK,
+  emoji,
+  label,
+  plainText,
+  button,
+  inBox
+} from "./draw.js"
 import { floatText, burst, jobAlert, endJob, jobReward, payOut } from "./framework.js"
 import { money } from "../core/format.js"
 
@@ -160,16 +175,16 @@ const PriceGame = {
     }
   },
   draw(ctx, shift, now) {
-    ctx.fillStyle = vgrad(ctx, 0, JH, [
+    ctx.fillStyle = vgrad(ctx, 0, CANVAS_HEIGHT, [
       [0, "#3b2418"],
       [1, "#24150e"]
     ])
-    ctx.fillRect(0, 0, JW, JH)
+    ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
     ctx.fillStyle = "rgba(255,255,255,.04)"
-    for (let x = 0; x < JW; x += 120) ctx.fillRect(x, 0, 60, 700)
+    for (let x = 0; x < CANVAS_WIDTH; x += 120) ctx.fillRect(x, 0, 60, 700)
     // wall screen with the price chart
     const chartBox = { x: 110, y: 110, width: 900, height: 560 }
-    rr(ctx, chartBox.x - 14, chartBox.y - 14, chartBox.width + 28, chartBox.height + 28, 18)
+    roundedRect(ctx, chartBox.x - 14, chartBox.y - 14, chartBox.width + 28, chartBox.height + 28, 18)
     ctx.fillStyle = "#121212"
     ctx.fill()
     ctx.lineWidth = 6
@@ -185,12 +200,16 @@ const PriceGame = {
       ctx.lineTo(chartBox.x + chartBox.width, chartBox.y + (i * chartBox.height) / 6)
       ctx.stroke()
     }
-    const lo = Math.log10(5),
-      hi = Math.max(Math.log10(200), Math.log10(Math.max(...shift.hist)) + 0.2)
+    const logMin = Math.log10(5),
+      logMax = Math.max(Math.log10(200), Math.log10(Math.max(...shift.hist)) + 0.2)
     ctx.beginPath()
     shift.hist.forEach((price, i) => {
       const x = chartBox.x + 30 + (i * (chartBox.width - 60)) / 59,
-        y = chartBox.y + chartBox.height - 40 - ((Math.log10(price) - lo) / (hi - lo)) * (chartBox.height - 120)
+        y =
+          chartBox.y +
+          chartBox.height -
+          40 -
+          ((Math.log10(price) - logMin) / (logMax - logMin)) * (chartBox.height - 120)
       i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)
     })
     ctx.lineWidth = 8
@@ -211,7 +230,7 @@ const PriceGame = {
     // pill bottle with a price tag
     ctx.save()
     ctx.translate(1230, 380)
-    rr(ctx, -95, -150, 190, 290, 30)
+    roundedRect(ctx, -95, -150, 190, 290, 30)
     ctx.fillStyle = hgrad(ctx, -95, 95, [
       [0, "#c25e00"],
       [0.4, "#ff9a2f"],
@@ -221,11 +240,11 @@ const PriceGame = {
     ctx.lineWidth = 7
     ctx.strokeStyle = INK
     ctx.stroke()
-    rr(ctx, -110, -215, 220, 75, 16)
+    roundedRect(ctx, -110, -215, 220, 75, 16)
     ctx.fillStyle = "#fff"
     ctx.fill()
     ctx.stroke()
-    rr(ctx, -80, -70, 160, 130, 12)
+    roundedRect(ctx, -80, -70, 160, 130, 12)
     ctx.fillStyle = "#fffdf3"
     ctx.fill()
     ctx.lineWidth = 4
@@ -236,7 +255,7 @@ const PriceGame = {
     ctx.save()
     ctx.translate(1350, 250)
     ctx.rotate(0.25 + Math.sin(now * 3) * 0.05)
-    rr(ctx, 0, 0, 190, 90, 14)
+    roundedRect(ctx, 0, 0, 190, 90, 14)
     ctx.fillStyle = "#fff36b"
     ctx.fill()
     ctx.lineWidth = 5
@@ -254,14 +273,14 @@ const PriceGame = {
     )
     ctx.restore()
     // outrage thermometer
-    rr(ctx, 1530, 110, 70, 520, 35)
+    roundedRect(ctx, 1530, 110, 70, 520, 35)
     ctx.fillStyle = "#1b1b1b"
     ctx.fill()
     ctx.lineWidth = 6
     ctx.strokeStyle = INK
     ctx.stroke()
-    const oh = (500 * shift.outrage) / 100
-    rr(ctx, 1540, 620 - oh, 50, oh, 25)
+    const outrageHeight = (500 * shift.outrage) / 100
+    roundedRect(ctx, 1540, 620 - outrageHeight, 50, outrageHeight, 25)
     ctx.fillStyle = shift.outrage > 70 ? "#ff3b30" : shift.outrage > 40 ? "#ff9f1c" : "#ffd23f"
     ctx.fill()
     plainText(ctx, "OUTRAGE", 1565, 670, 22, "#ffb3b3", "center", 900)
@@ -307,10 +326,10 @@ const PriceGame = {
     )
     for (let i = 0; i < PRICE.spinMax; i++) {
       // charge pips, with the next one filling up
-      const cx = PRICE_BTNS.spin.x + PRICE_BTNS.spin.width / 2 + (i - 1) * 46,
-        cy = PRICE_BTNS.spin.y - 28
+      const pipX = PRICE_BTNS.spin.x + PRICE_BTNS.spin.width / 2 + (i - 1) * 46,
+        pipY = PRICE_BTNS.spin.y - 28
       ctx.beginPath()
-      ctx.arc(cx, cy, 15, 0, Math.PI * 2)
+      ctx.arc(pipX, pipY, 15, 0, Math.PI * 2)
       ctx.fillStyle = "#2a1a12"
       ctx.fill()
       ctx.lineWidth = 4
@@ -318,13 +337,13 @@ const PriceGame = {
       ctx.stroke()
       if (i < shift.spins) {
         ctx.beginPath()
-        ctx.arc(cx, cy, 11, 0, Math.PI * 2)
+        ctx.arc(pipX, pipY, 11, 0, Math.PI * 2)
         ctx.fillStyle = "#ff9f1c"
         ctx.fill()
       } else if (i === shift.spins) {
         ctx.beginPath()
-        ctx.moveTo(cx, cy)
-        ctx.arc(cx, cy, 11, -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * shift.spinT) / PRICE.spinRecharge)
+        ctx.moveTo(pipX, pipY)
+        ctx.arc(pipX, pipY, 11, -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * shift.spinT) / PRICE.spinRecharge)
         ctx.closePath()
         ctx.fillStyle = "rgba(255,159,28,.5)"
         ctx.fill()

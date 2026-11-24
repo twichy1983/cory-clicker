@@ -11,7 +11,7 @@ import { INDUSTRIES } from "../core/data/industries.js"
 import { jobCooldown, jobPay, jobPaySecs, jobTimeLeft, jobUnlocked } from "../core/jobs.js"
 import { money, mmss } from "../core/format.js"
 import { $, esc } from "../ui/dom.js"
-import { JW, JH, rand, label } from "./draw.js"
+import { CANVAS_WIDTH, CANVAS_HEIGHT, rand, label } from "./draw.js"
 
 export let shift = null
 let raf = 0
@@ -64,7 +64,7 @@ export function jobAlert(text, cls) {
   if (shift) shift.alertT = 1.6
 }
 
-export function jobStrike(text, x = JW / 2, y = JH / 2) {
+export function jobStrike(text, x = CANVAS_WIDTH / 2, y = CANVAS_HEIGHT / 2) {
   if (!shift || shift.phase !== "play") return
   shift.strikes++
   floatText(text, x, y, true)
@@ -85,13 +85,13 @@ export function payOut(amount, text) {
 const images = {}
 export function jobImage(src) {
   if (!images[src]) {
-    const im = new Image()
-    im.src = src
-    images[src] = im
+    const image = new Image()
+    image.src = src
+    images[src] = image
   }
   return images[src]
 }
-export const imgReady = (im) => im && im.complete && im.naturalWidth > 0
+export const imgReady = (image) => image && image.complete && image.naturalWidth > 0
 
 /* ---------- the shift lifecycle: open -> start -> end -> close ---------- */
 
@@ -100,11 +100,11 @@ export const jobIsOpen = () => shift !== null
 export function openJob(job) {
   if (shift || !jobUnlocked(game.state, job) || jobTimeLeft(game.state, job, Date.now()) > 0) return
   hooks.onOpen()
-  const mg = job.game
-  if (mg.image) jobImage(mg.image)
+  const minigame = job.game
+  if (minigame.image) jobImage(minigame.image)
   shift = {
     job,
-    game: mg,
+    game: minigame,
     phase: "intro",
     elapsed: 0,
     pct: 0,
@@ -114,10 +114,10 @@ export function openJob(job) {
     parts: [],
     meterText: null
   }
-  mg.init(shift)
+  minigame.init(shift)
   $("jobOverlay").hidden = false
   $("jobAlert").className = ""
-  $("jobMeterLbl").textContent = mg.meter
+  $("jobMeterLbl").textContent = minigame.meter
   showJobPanel("intro")
   cancelAnimationFrame(raf)
   let last = performance.now()
@@ -160,24 +160,25 @@ export function endJob(result) {
 function showJobPanel(kind) {
   const panel = $("jobPanel"),
     job = shift.job,
-    mg = shift.game,
-    cd = jobCooldown(job)
-  const note = mg.resultNote ? `<p class="reward">${mg.resultNote(shift, kind)}</p>` : ""
+    minigame = shift.game,
+    cooldown = jobCooldown(job)
+  const note = minigame.resultNote ? `<p class="reward">${minigame.resultNote(shift, kind)}</p>` : ""
   let html
   if (kind === "intro") {
-    const cdText = `${Math.round(cd / 60000) || "few"} ${cd >= 120000 ? "minutes" : cd >= 60000 ? "minute" : "seconds"}`
+    const cdText = `${Math.round(cooldown / 60000) || "few"} ${cooldown >= 120000 ? "minutes" : cooldown >= 60000 ? "minute" : "seconds"}`
     html = `<div class="jobCardBig">
-      <h3>${job.icon} ${job.name}</h3><p>${mg.tagline}</p>
-      <ul>${mg.rules.map((rule) => `<li>${rule}</li>`).join("")}</ul>
+      <h3>${job.icon} ${job.name}</h3><p>${minigame.tagline}</p>
+      <ul>${minigame.rules.map((rule) => `<li>${rule}</li>`).join("")}</ul>
       <p class="reward">Reward: ${money(jobReward())} (${jobPaySecs(job) / 60} minutes of ${esc(INDUSTRIES[job.ind].name)} income)</p>
       <p style="color:var(--muted);font-size:.85em">Starting the shift uses this job for the next ${cdText}, win or lose.</p>
       <div class="row"><button class="alt" data-act="close">Not now</button><button class="go" data-act="start">Start shift</button></div></div>`
   } else if (kind === "win") {
-    html = `<div class="jobCardBig"><h3>${mg.winTitle}</h3><p>${mg.winText}</p>
+    html = `<div class="jobCardBig"><h3>${minigame.winTitle}</h3><p>${minigame.winText}</p>
       <p class="reward">+${money(shift.reward)}</p>${note}
       <div class="row"><button class="go" data-act="close">Back to the office</button></div></div>`
   } else {
-    const why = kind === "quit" ? "You walked off the job." : (mg.lose && mg.lose[kind]) || "The shift is over."
+    const why =
+      kind === "quit" ? "You walked off the job." : (minigame.lose && minigame.lose[kind]) || "The shift is over."
     const title = kind === "busted" ? "Busted!" : kind === "quit" ? "Shift abandoned" : "Shift over"
     html = `<div class="jobCardBig bad"><h3>${title}</h3><p>${why}</p>${note}
       <p style="color:var(--muted)">No job payout. This job is available again in ${mmss(jobTimeLeft(game.state, job, Date.now()))}.</p>
@@ -211,16 +212,16 @@ function stepJob(dt) {
 }
 
 function updateHud() {
-  const mg = shift.game,
-    left = Math.max(0, mg.time - shift.elapsed)
+  const minigame = shift.game,
+    left = Math.max(0, minigame.time - shift.elapsed)
   $("jobTimer").textContent = "⏱ " + left.toFixed(1) + "s"
   $("jobTimer").classList.toggle("low", shift.phase === "play" && left < 8)
   $("jobPct").textContent = shift.meterText || Math.floor(shift.pct) + "%"
   $("jobFill").style.width = shift.pct + "%"
-  const strikes = mg.strikes
-    ? "🚨 " + Array.from({ length: mg.strikes }, (_, i) => (i < shift.strikes ? "●" : "○")).join(" ")
+  const strikes = minigame.strikes
+    ? "🚨 " + Array.from({ length: minigame.strikes }, (_, i) => (i < shift.strikes ? "●" : "○")).join(" ")
     : ""
-  const extra = mg.extra ? mg.extra(shift) : strikes
+  const extra = minigame.extra ? minigame.extra(shift) : strikes
   $("jobExtra").textContent = extra
   $("jobExtra").hidden = !extra
 }
@@ -229,7 +230,7 @@ function drawJob(now) {
   if (!shift) return
   const ctx = $("jobCanvas").getContext("2d")
   ctx.save()
-  ctx.clearRect(0, 0, JW, JH)
+  ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
   shift.game.draw(ctx, shift, now)
   ctx.restore()
   for (const particle of shift.parts) {
@@ -259,7 +260,10 @@ function drawJob(now) {
 
 function canvasPoint(event) {
   const rect = $("jobCanvas").getBoundingClientRect()
-  return [((event.clientX - rect.left) * JW) / rect.width, ((event.clientY - rect.top) * JH) / rect.height]
+  return [
+    ((event.clientX - rect.left) * CANVAS_WIDTH) / rect.width,
+    ((event.clientY - rect.top) * CANVAS_HEIGHT) / rect.height
+  ]
 }
 
 // Connects the job window's buttons, canvas and keyboard. Called once from main.js.

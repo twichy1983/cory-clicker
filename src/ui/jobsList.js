@@ -15,14 +15,14 @@ export function buildJobList() {
   for (const job of JOBS) {
     const button = document.createElement("button")
     button.className = "job locked"
-    button.dataset.tt = "job:" + job.id
+    button.dataset.tooltip = "job:" + job.id
     button.dataset.job = job.id
     button.innerHTML = `<span class="ji">${job.icon}</span><span class="jm"><span class="jt">${job.name}</span><span class="jd"></span></span><span class="js"></span>`
     wrap.appendChild(button)
     els[job.id] = {
-      el: button,
+      element: button,
       desc: button.querySelector(".jd"),
-      st: button.querySelector(".js")
+      status: button.querySelector(".js")
     }
   }
 }
@@ -38,13 +38,13 @@ export function renderJobs() {
       left = jobTimeLeft(state, job, now),
       ready = unlocked && left === 0
     if (unlocked) unlockedCount++
-    entry.el.className = "job " + (!unlocked ? "locked" : ready ? "ready" : "wait")
+    entry.element.className = "job " + (!unlocked ? "locked" : ready ? "ready" : "wait")
     if (!unlocked) {
       entry.desc.textContent = `Acquire ${INDUSTRIES[job.ind].name} to unlock`
-      entry.st.textContent = "🔒"
+      entry.status.textContent = "🔒"
     } else {
       entry.desc.textContent = `Pays ${money(jobPay(derived, job))} · ${jobPaySecs(job) / 60} min of income`
-      entry.st.textContent = ready ? "GO ▶" : "⏳ " + mmss(left)
+      entry.status.textContent = ready ? "GO ▶" : "⏳ " + mmss(left)
     }
   }
   $("jobsCount").textContent = `${unlockedCount} / ${JOBS.length}`

@@ -1,4 +1,4 @@
-import { JW, JH, rand, pick, clamp, rr, vgrad, hgrad, emoji } from "./draw.js"
+import { CANVAS_WIDTH, CANVAS_HEIGHT, rand, pick, clamp, roundedRect, vgrad, hgrad, emoji } from "./draw.js"
 import { shift, floatText, jobAlert, jobStrike, endJob, jobImage, imgReady } from "./framework.js"
 
 /* ---------------------------------------------------------
@@ -75,9 +75,13 @@ const OUT_SCALE = 1.35,
 function inLake(x, y) {
   let inside = false
   for (let i = 0, j = LAKE.length - 1; i < LAKE.length; j = i++) {
-    const [xi, yi] = LAKE[i],
-      [xj, yj] = LAKE[j]
-    if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside
+    const [currentX, currentY] = LAKE[i],
+      [previousX, previousY] = LAKE[j]
+    if (
+      currentY > y !== previousY > y &&
+      x < ((previousX - currentX) * (y - currentY)) / (previousY - currentY) + currentX
+    )
+      inside = !inside
   }
   return inside
 }
@@ -141,7 +145,7 @@ const WasteGame = {
       blob.y += blob.vy * dt
       blob.vx *= 0.995
       blob.vy *= 0.995
-      blob.ph += dt
+      blob.phase += dt
     })
     shift.drops = shift.drops.filter(
       (drop) => ((drop.vy += 900 * dt), (drop.x += drop.vx * dt), (drop.y += drop.vy * dt), (drop.life -= dt)) > 0
@@ -196,10 +200,10 @@ const WasteGame = {
       if (!flyingBarrel.landed && flyingBarrel.elapsed >= flyingBarrel.dur) {
         flyingBarrel.landed = true
         delta += WASTE.barrelAmt
-        wasteSplash(flyingBarrel.tx, flyingBarrel.ty, true)
-        wasteBlob(flyingBarrel.tx, flyingBarrel.ty, rand(55, 75), 90)
+        wasteSplash(flyingBarrel.targetX, flyingBarrel.targetY, true)
+        wasteBlob(flyingBarrel.targetX, flyingBarrel.targetY, rand(55, 75), 90)
         if (shift.insp.state === "watch") wasteStrike()
-        floatText("+" + WASTE.barrelAmt + "%", flyingBarrel.tx, flyingBarrel.ty - 40)
+        floatText("+" + WASTE.barrelAmt + "%", flyingBarrel.targetX, flyingBarrel.targetY - 40)
       }
     }
     shift.flying = shift.flying.filter((flyingBarrel) => flyingBarrel.elapsed < flyingBarrel.dur + 0.55)
@@ -237,17 +241,17 @@ const WasteGame = {
   },
   draw(ctx, shift, now) {
     const img = jobImage(this.image)
-    if (imgReady(img)) ctx.drawImage(img, 0, 0, JW, JH)
+    if (imgReady(img)) ctx.drawImage(img, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
     else {
       ctx.fillStyle = "#4da9d8"
-      ctx.fillRect(0, 0, JW, JH)
+      ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
     }
     ctx.save()
     lakePath(ctx)
     ctx.clip()
     const murk = shift.pct / 100
     ctx.fillStyle = `rgba(96,118,22,${0.58 * murk})`
-    ctx.fillRect(0, 0, JW, JH)
+    ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
     // cartoon sludge slicks: outline pass first, then fills on top, so overlapping slicks merge into one outlined shape
     ctx.lineJoin = "round"
     ctx.strokeStyle = "#34470b"
@@ -292,14 +296,14 @@ const WasteGame = {
     }
     if (murk > 0.15)
       for (let i = 0; i < 18 * murk; i++) {
-        const bx = 260 + ((i * 397) % 1220),
-          by = 480 + ((i * 211) % 360),
-          ph = (now * 1.3 + i * 0.37) % 1
-        if (!inLake(bx, by)) continue
-        ctx.strokeStyle = `rgba(200,220,120,${0.55 * (1 - ph)})`
+        const bubbleX = 260 + ((i * 397) % 1220),
+          bubbleY = 480 + ((i * 211) % 360),
+          bubblePhase = (now * 1.3 + i * 0.37) % 1
+        if (!inLake(bubbleX, bubbleY)) continue
+        ctx.strokeStyle = `rgba(200,220,120,${0.55 * (1 - bubblePhase)})`
         ctx.lineWidth = 2
         ctx.beginPath()
-        ctx.ellipse(bx, by, 4 + ph * 9, (4 + ph * 9) * 0.5, 0, 0, Math.PI * 2)
+        ctx.ellipse(bubbleX, bubbleY, 4 + bubblePhase * 9, (4 + bubblePhase * 9) * 0.5, 0, 0, Math.PI * 2)
         ctx.stroke()
       }
     for (const ring of shift.rings) {
@@ -324,9 +328,9 @@ const WasteGame = {
       [640, 660]
     ]
     for (let i = 0; i < Math.min(FISH.length, Math.floor(shift.pct / 9)); i++) {
-      const [fx, fy] = FISH[i]
+      const [fishX, fishY] = FISH[i]
       ctx.save()
-      ctx.translate(fx + Math.sin(now * 0.8 + i) * 6, fy + Math.sin(now * 1.6 + i * 2) * 3)
+      ctx.translate(fishX + Math.sin(now * 0.8 + i) * 6, fishY + Math.sin(now * 1.6 + i * 2) * 3)
       ctx.rotate(Math.PI + (i % 2 ? 0.25 : -0.25))
       ctx.filter = "grayscale(1) sepia(.7) hue-rotate(35deg) brightness(1.15)" // pale, sickly, belly-up
       emoji(ctx, "🐟", 0, 0, 62)
@@ -356,10 +360,10 @@ const WasteGame = {
     for (const flyingBarrel of shift.flying) {
       const progress = Math.min(1, flyingBarrel.elapsed / flyingBarrel.dur)
       if (progress < 1) {
-        const x = flyingBarrel.x0 + (flyingBarrel.tx - flyingBarrel.x0) * progress,
+        const x = flyingBarrel.x0 + (flyingBarrel.targetX - flyingBarrel.x0) * progress,
           y =
             flyingBarrel.y0 +
-            (flyingBarrel.ty - flyingBarrel.y0) * progress -
+            (flyingBarrel.targetY - flyingBarrel.y0) * progress -
             Math.sin(Math.PI * progress) * flyingBarrel.arc
         drawBarrel(ctx, x, y, 1 - 0.25 * progress, flyingBarrel.spin * progress)
       } else {
@@ -368,8 +372,8 @@ const WasteGame = {
         ctx.globalAlpha = 1 - fade
         drawBarrel(
           ctx,
-          flyingBarrel.tx,
-          flyingBarrel.ty + 20 * fade,
+          flyingBarrel.targetX,
+          flyingBarrel.targetY + 20 * fade,
           0.75 * (1 - 0.4 * fade),
           flyingBarrel.spin + 0.5 * fade
         )
@@ -404,13 +408,13 @@ const WasteGame = {
       return
     }
     const barrel = wasteBarrelAt(x, y)
-    if (barrel) shift.drag = { barrel, x, y, sx: x, sy: y, moved: false }
+    if (barrel) shift.drag = { barrel, x, y, startX: x, startY: y, moved: false }
   },
   move(shift, x, y) {
     if (shift.drag) {
       shift.drag.x = x
       shift.drag.y = y + 40
-      if (Math.hypot(x - shift.drag.sx, y - shift.drag.sy) > 14) shift.drag.moved = true
+      if (Math.hypot(x - shift.drag.startX, y - shift.drag.startY) > 14) shift.drag.moved = true
     }
   },
   up(shift, x, y) {
@@ -419,8 +423,8 @@ const WasteGame = {
       barrel = drag.barrel
     shift.drag = null
     if (!drag.moved) {
-      const [tx, ty] = wasteLakeTarget(barrel.x)
-      wasteThrow(barrel, tx, ty)
+      const [targetX, targetY] = wasteLakeTarget(barrel.x)
+      wasteThrow(barrel, targetX, targetY)
       return
     }
     if (inLake(x, y)) {
@@ -448,7 +452,7 @@ function wasteBlob(x, y, radius, max) {
     target: Math.min(max * 1.7, radius + shift.pct * 1.1),
     vx: rand(-14, 14),
     vy: rand(-4, 10),
-    ph: rand(0, 6),
+    phase: rand(0, 6),
     hue: Math.random(),
     lobes: Array.from({ length: 9 }, () => rand(-0.22, 0.22))
   })
@@ -459,16 +463,16 @@ function blobPath(ctx, blob) {
     pts = []
   for (let i = 0; i < lobeCount; i++) {
     const angle = (i / lobeCount) * Math.PI * 2,
-      wobble = 1 + blob.lobes[i] + Math.sin(blob.ph * 1.6 + i) * 0.05
+      wobble = 1 + blob.lobes[i] + Math.sin(blob.phase * 1.6 + i) * 0.05
     pts.push([blob.x + Math.cos(angle) * blob.radius * wobble, blob.y + Math.sin(angle) * blob.radius * wobble * 0.5])
   }
   ctx.beginPath()
   for (let i = 0; i <= lobeCount; i++) {
     const point = pts[i % lobeCount],
       nextPoint = pts[(i + 1) % lobeCount],
-      mx = (point[0] + nextPoint[0]) / 2,
-      my = (point[1] + nextPoint[1]) / 2
-    i ? ctx.quadraticCurveTo(point[0], point[1], mx, my) : ctx.moveTo(mx, my)
+      midX = (point[0] + nextPoint[0]) / 2,
+      midY = (point[1] + nextPoint[1]) / 2
+    i ? ctx.quadraticCurveTo(point[0], point[1], midX, midY) : ctx.moveTo(midX, midY)
   }
   ctx.closePath()
 }
@@ -495,13 +499,13 @@ function wasteBarrelAt(x, y) {
       (barrel) => Math.abs(x - barrel.x) < 66 * BARREL_SCALE && y < barrel.y + 24 && y > barrel.y - 118 * BARREL_SCALE
     )
 }
-function wasteThrow(barrel, tx, ty, dur = 0.5, arc = 170) {
+function wasteThrow(barrel, targetX, targetY, dur = 0.5, arc = 170) {
   shift.barrels = shift.barrels.filter((other) => other !== barrel)
   shift.flying.push({
     x0: barrel.x,
     y0: barrel.y,
-    tx,
-    ty,
+    targetX,
+    targetY,
     elapsed: 0,
     dur,
     arc,
@@ -559,7 +563,7 @@ function drawOutfall(ctx, valve, now) {
   }
   ctx.lineWidth = 4
   ctx.strokeStyle = "#2c3136"
-  rr(ctx, x - bodyRadius, y - 46, bodyRadius * 2, 44, 10)
+  roundedRect(ctx, x - bodyRadius, y - 46, bodyRadius * 2, 44, 10)
   ctx.fillStyle = hgrad(ctx, x - bodyRadius, x + bodyRadius, [
     [0, "#5d656d"],
     [0.35, "#dfe4e8"],
@@ -568,7 +572,7 @@ function drawOutfall(ctx, valve, now) {
   ])
   ctx.fill()
   ctx.stroke()
-  rr(ctx, x - bodyRadius - 5, y - 24, bodyRadius * 2 + 10, 11, 4)
+  roundedRect(ctx, x - bodyRadius - 5, y - 24, bodyRadius * 2 + 10, 11, 4)
   ctx.fillStyle = "#7f8890"
   ctx.fill()
   ctx.stroke()
@@ -581,39 +585,39 @@ function drawOutfall(ctx, valve, now) {
   ctx.ellipse(x, y + 1, bodyRadius - 5, 8, 0, 0, Math.PI * 2)
   ctx.fillStyle = valve.open ? "#6d7f1c" : "#14171a"
   ctx.fill()
-  const wx = x,
-    wy = y - 86,
-    wr = 27
+  const wheelX = x,
+    wheelY = y - 86,
+    wheelRadius = 27
   ctx.fillStyle = "#6d757c"
-  rr(ctx, x - 5, wy, 10, 42, 3)
+  roundedRect(ctx, x - 5, wheelY, 10, 42, 3)
   ctx.fill()
   ctx.stroke()
   if (ready) {
     ctx.strokeStyle = `rgba(255,236,120,${0.55 + 0.45 * Math.sin(now * 6)})`
     ctx.lineWidth = 6
     ctx.beginPath()
-    ctx.arc(wx, wy, wr + 11, 0, Math.PI * 2)
+    ctx.arc(wheelX, wheelY, wheelRadius + 11, 0, Math.PI * 2)
     ctx.stroke()
   }
   ctx.save()
-  ctx.translate(wx, wy)
+  ctx.translate(wheelX, wheelY)
   ctx.rotate(valve.spin)
   ctx.strokeStyle = "#2c1212"
   ctx.lineWidth = 13
   ctx.beginPath()
-  ctx.arc(0, 0, wr, 0, Math.PI * 2)
+  ctx.arc(0, 0, wheelRadius, 0, Math.PI * 2)
   ctx.stroke()
   ctx.strokeStyle = valve.cool > 0 ? "#8a6a6a" : "#e0302a"
   ctx.lineWidth = 8
   ctx.beginPath()
-  ctx.arc(0, 0, wr, 0, Math.PI * 2)
+  ctx.arc(0, 0, wheelRadius, 0, Math.PI * 2)
   ctx.stroke()
   ctx.lineWidth = 5
   for (let i = 0; i < 4; i++) {
     ctx.rotate(Math.PI / 2)
     ctx.beginPath()
     ctx.moveTo(0, 0)
-    ctx.lineTo(wr - 2, 0)
+    ctx.lineTo(wheelRadius - 2, 0)
     ctx.stroke()
   }
   ctx.fillStyle = "#3a3f44"
@@ -625,13 +629,25 @@ function drawOutfall(ctx, valve, now) {
     ctx.strokeStyle = "#d8ff6a"
     ctx.lineWidth = 6
     ctx.beginPath()
-    ctx.arc(wx, wy, wr + 11, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * (1 - valve.openT / WASTE.valveOpen))
+    ctx.arc(
+      wheelX,
+      wheelY,
+      wheelRadius + 11,
+      -Math.PI / 2,
+      -Math.PI / 2 + Math.PI * 2 * (1 - valve.openT / WASTE.valveOpen)
+    )
     ctx.stroke()
   } else if (valve.cool > 0) {
     ctx.strokeStyle = "rgba(255,255,255,.7)"
     ctx.lineWidth = 6
     ctx.beginPath()
-    ctx.arc(wx, wy, wr + 11, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * (1 - valve.cool / WASTE.valveCool))
+    ctx.arc(
+      wheelX,
+      wheelY,
+      wheelRadius + 11,
+      -Math.PI / 2,
+      -Math.PI / 2 + Math.PI * 2 * (1 - valve.cool / WASTE.valveCool)
+    )
     ctx.stroke()
   }
 }
@@ -650,7 +666,7 @@ function drawBarrel(ctx, x, y, scale, rot) {
     top = -height
   ctx.lineWidth = 4
   ctx.strokeStyle = "#2a2009"
-  rr(ctx, -width / 2, top, width, height, 12)
+  roundedRect(ctx, -width / 2, top, width, height, 12)
   ctx.fillStyle = hgrad(ctx, -width / 2, width / 2, [
     [0, "#b8860e"],
     [0.3, "#ffd84a"],
@@ -668,10 +684,10 @@ function drawBarrel(ctx, x, y, scale, rot) {
   ctx.fillText("☣", 0, top + 46)
   ctx.strokeStyle = "rgba(60,40,0,.55)"
   ctx.lineWidth = 3
-  ;[top + 14, top + height - 14].forEach((ry) => {
+  ;[top + 14, top + height - 14].forEach((ribY) => {
     ctx.beginPath()
-    ctx.moveTo(-width / 2 + 3, ry)
-    ctx.lineTo(width / 2 - 3, ry)
+    ctx.moveTo(-width / 2 + 3, ribY)
+    ctx.lineTo(width / 2 - 3, ribY)
     ctx.stroke()
   })
   ctx.beginPath()

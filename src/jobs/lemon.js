@@ -1,4 +1,17 @@
-import { JW, JH, rand, pick, rr, vgrad, INK, emoji, label, plainText, bubble, cloud } from "./draw.js"
+import {
+  CANVAS_WIDTH,
+  CANVAS_HEIGHT,
+  rand,
+  pick,
+  roundedRect,
+  vgrad,
+  INK,
+  emoji,
+  label,
+  plainText,
+  bubble,
+  cloud
+} from "./draw.js"
 import { burst, jobStrike, endJob } from "./framework.js"
 
 /* ---------------------------------------------------------
@@ -63,7 +76,7 @@ const LemonGame = {
       [0, "#6cc6ff"],
       [1, "#dff4ff"]
     ])
-    ctx.fillRect(0, 0, JW, 640)
+    ctx.fillRect(0, 0, CANVAS_WIDTH, 640)
     ctx.fillStyle = "rgba(255,236,120,.35)"
     ctx.beginPath()
     ctx.arc(230, 180, 120, 0, Math.PI * 2)
@@ -85,24 +98,24 @@ const LemonGame = {
     ctx.ellipse(300, 650, 520, 140, 0, Math.PI, 0)
     ctx.ellipse(1400, 660, 600, 170, 0, Math.PI, 0)
     ctx.fill()
-    ctx.fillStyle = vgrad(ctx, 600, JH, [
+    ctx.fillStyle = vgrad(ctx, 600, CANVAS_HEIGHT, [
       [0, "#e9dfcc"],
       [1, "#cfc2a8"]
     ])
-    ctx.fillRect(0, 600, JW, JH - 600)
+    ctx.fillRect(0, 600, CANVAS_WIDTH, CANVAS_HEIGHT - 600)
     ctx.strokeStyle = "rgba(120,100,70,.35)"
     ctx.lineWidth = 4
-    for (let x = -100; x < JW; x += 260) {
+    for (let x = -100; x < CANVAS_WIDTH; x += 260) {
       ctx.beginPath()
       ctx.moveTo(x, 600)
-      ctx.lineTo(x - 120, JH)
+      ctx.lineTo(x - 120, CANVAS_HEIGHT)
       ctx.stroke()
     }
     // the stand
     ctx.fillStyle = "#c98a4a"
     ctx.strokeStyle = INK
     ctx.lineWidth = 6
-    rr(ctx, 470, 560, 732, 250, 16)
+    roundedRect(ctx, 470, 560, 732, 250, 16)
     ctx.fill()
     ctx.stroke()
     ctx.strokeStyle = "rgba(90,50,20,.45)"
@@ -113,14 +126,14 @@ const LemonGame = {
       ctx.lineTo(1192, y)
       ctx.stroke()
     }
-    rr(ctx, 440, 540, 792, 34, 10)
+    roundedRect(ctx, 440, 540, 792, 34, 10)
     ctx.fillStyle = "#a96b33"
     ctx.fill()
     ctx.strokeStyle = INK
     ctx.lineWidth = 6
     ctx.stroke()
     ;[490, 1180].forEach((x) => {
-      rr(ctx, x - 14, 250, 28, 300, 8)
+      roundedRect(ctx, x - 14, 250, 28, 300, 8)
       ctx.fillStyle = "#b67a3c"
       ctx.fill()
       ctx.stroke()
@@ -146,7 +159,7 @@ const LemonGame = {
     for (let i = 8; i >= 0; i--) ctx.arc(440 + i * 88 + 44, 300, 44, 0, Math.PI)
     ctx.lineTo(440, 200)
     ctx.stroke()
-    rr(ctx, 600, 100, 472, 92, 18)
+    roundedRect(ctx, 600, 100, 472, 92, 18)
     ctx.fillStyle = "#fff6d5"
     ctx.fill()
     ctx.lineWidth = 6
@@ -184,20 +197,20 @@ const LemonGame = {
     cupPath()
     ctx.clip()
     ctx.fillStyle = "rgba(120,220,120,.35)"
-    ctx.fillRect(0, zoneY, JW, lineY - zoneY)
+    ctx.fillRect(0, zoneY, CANVAS_WIDTH, lineY - zoneY)
     ctx.fillStyle = vgrad(ctx, lvlY, cup.cupBot, [
       [0, "#fff27a"],
       [1, "#ffc928"]
     ])
-    ctx.fillRect(0, lvlY, JW, cup.cupBot - lvlY)
+    ctx.fillRect(0, lvlY, CANVAS_WIDTH, cup.cupBot - lvlY)
     if (shift.level > 0.08) {
       ;[
         [-60, 0],
         [40, 18],
         [-5, 34]
-      ].forEach(([dx, dy], i) => {
-        const cy = Math.max(lvlY + 18 + dy, cup.cupTop + 20)
-        rr(ctx, cup.cupX + dx - 26, cy, 52, 46, 9)
+      ].forEach(([offsetX, offsetY], i) => {
+        const cubeY = Math.max(lvlY + 18 + offsetY, cup.cupTop + 20)
+        roundedRect(ctx, cup.cupX + offsetX - 26, cubeY, 52, 46, 9)
         ctx.fillStyle = "rgba(255,255,255,.55)"
         ctx.fill()
         ctx.strokeStyle = "rgba(255,255,255,.9)"
@@ -206,33 +219,33 @@ const LemonGame = {
       })
     }
     for (let i = 0; i < 7; i++) {
-      const by = cup.cupBot - ((now * 60 + i * 67) % Math.max(1, cup.cupBot - lvlY))
-      if (by > lvlY) {
+      const bubbleY = cup.cupBot - ((now * 60 + i * 67) % Math.max(1, cup.cupBot - lvlY))
+      if (bubbleY > lvlY) {
         ctx.fillStyle = "rgba(255,255,255,.6)"
         ctx.beginPath()
-        ctx.arc(cup.cupX - 80 + i * 26, by, 5, 0, Math.PI * 2)
+        ctx.arc(cup.cupX - 80 + i * 26, bubbleY, 5, 0, Math.PI * 2)
         ctx.fill()
       }
     }
     if (shift.level > 0.12) {
       // previously-enjoyed floaters: a hair, some gum, a mystery crumb
-      const fy = lvlY + 14
+      const floaterY = lvlY + 14
       ctx.strokeStyle = "#3b2a1a"
       ctx.lineWidth = 3
       ctx.beginPath()
-      ctx.moveTo(cup.cupX - 70, fy + 6)
-      ctx.bezierCurveTo(cup.cupX - 40, fy - 12, cup.cupX - 10, fy + 22, cup.cupX + 20, fy + 4)
+      ctx.moveTo(cup.cupX - 70, floaterY + 6)
+      ctx.bezierCurveTo(cup.cupX - 40, floaterY - 12, cup.cupX - 10, floaterY + 22, cup.cupX + 20, floaterY + 4)
       ctx.stroke()
       ctx.fillStyle = "#ff8fc0"
       ctx.beginPath()
-      ctx.ellipse(cup.cupX + 60, fy + 10, 16, 9, 0.3, 0, Math.PI * 2)
+      ctx.ellipse(cup.cupX + 60, floaterY + 10, 16, 9, 0.3, 0, Math.PI * 2)
       ctx.fill()
       ctx.lineWidth = 3
       ctx.strokeStyle = INK
       ctx.stroke()
       ctx.fillStyle = "#6b4a2a"
       ctx.beginPath()
-      ctx.arc(cup.cupX - 20, fy + 40, 6, 0, Math.PI * 2)
+      ctx.arc(cup.cupX - 20, floaterY + 40, 6, 0, Math.PI * 2)
       ctx.fill()
     }
     ctx.restore()
@@ -265,19 +278,19 @@ const LemonGame = {
     ctx.fill()
     // pitcher (tilts while pouring)
     const tilt = shift.state === "pour" ? -0.85 : -0.15,
-      px = 1010,
-      py = 330
+      pitcherX = 1010,
+      pitcherY = 330
     ctx.save()
-    ctx.translate(px, py)
+    ctx.translate(pitcherX, pitcherY)
     ctx.rotate(tilt)
-    rr(ctx, -70, -110, 140, 190, 26)
+    roundedRect(ctx, -70, -110, 140, 190, 26)
     ctx.fillStyle = "rgba(230,248,255,.75)"
     ctx.fill()
     ctx.lineWidth = 6
     ctx.strokeStyle = INK
     ctx.stroke()
     ctx.save()
-    rr(ctx, -70, -110, 140, 190, 26)
+    roundedRect(ctx, -70, -110, 140, 190, 26)
     ctx.clip()
     ctx.fillStyle = "#ffd94a"
     ctx.fillRect(-70, -40, 140, 130)
@@ -290,7 +303,7 @@ const LemonGame = {
     ctx.lineWidth = 7
     ctx.strokeStyle = "#e9f8ff"
     ctx.stroke()
-    rr(ctx, -58, -96, 116, 40, 8)
+    roundedRect(ctx, -58, -96, 116, 40, 8)
     ctx.fillStyle = "#fff"
     ctx.fill()
     ctx.lineWidth = 4
@@ -299,15 +312,15 @@ const LemonGame = {
     plainText(ctx, "♻ BACKWASH", 0, -76, 20, "#2f9e44", "center", 900)
     ctx.restore()
     if (shift.state === "pour") {
-      const sx = px - 120,
-        sy = py - 40,
+      const streamX = pitcherX - 120,
+        streamY = pitcherY - 40,
         wob = Math.sin(now * 30) * 4
       ctx.strokeStyle = "#ffcd2e"
       ctx.lineWidth = 22
       ctx.lineCap = "round"
       ctx.beginPath()
-      ctx.moveTo(sx, sy)
-      ctx.quadraticCurveTo(sx - 20 + wob, sy + 60, cup.cupX + 30, lvlY)
+      ctx.moveTo(streamX, streamY)
+      ctx.quadraticCurveTo(streamX - 20 + wob, streamY + 60, cup.cupX + 30, lvlY)
       ctx.stroke()
       ctx.lineCap = "butt"
     }

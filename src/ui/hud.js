@@ -46,31 +46,31 @@ export function renderHud() {
   document.title = urgent ? `⚠ ${fmtTime(left)} FINES DUE ⚠` : `${money(state.dollars)} · ${GAME_TITLE}`
 
   // Lobbyists
-  const tc = timerLobbyCost(state),
-    pc = penaltyLobbyCost(state),
-    tf = timerFireCost(state),
-    pf = penaltyFireCost(state)
+  const timerHireCost = timerLobbyCost(state),
+    penaltyHireCost = penaltyLobbyCost(state),
+    timerSeveranceCost = timerFireCost(state),
+    penaltySeveranceCost = penaltyFireCost(state)
   $("timerLobbyN").textContent = state.timerLobbyists
-  $("timerLobbyC").textContent = money(tc)
-  $("timerLobbyBtn").classList.toggle("cant", state.dollars < tc)
+  $("timerLobbyC").textContent = money(timerHireCost)
+  $("timerLobbyBtn").classList.toggle("cant", state.dollars < timerHireCost)
   $("penaltyLobbyN").textContent = state.penaltyLobbyists
-  $("penaltyLobbyC").textContent = money(pc)
-  $("penaltyLobbyBtn").classList.toggle("cant", state.dollars < pc)
-  $("timerFireC").textContent = state.timerLobbyists ? money(tf) : "none hired"
-  $("timerFireBtn").disabled = !state.timerLobbyists || state.dollars < tf
-  $("penaltyFireC").textContent = state.penaltyLobbyists ? money(pf) : "none hired"
-  $("penaltyFireBtn").disabled = !state.penaltyLobbyists || state.dollars < pf
+  $("penaltyLobbyC").textContent = money(penaltyHireCost)
+  $("penaltyLobbyBtn").classList.toggle("cant", state.dollars < penaltyHireCost)
+  $("timerFireC").textContent = state.timerLobbyists ? money(timerSeveranceCost) : "none hired"
+  $("timerFireBtn").disabled = !state.timerLobbyists || state.dollars < timerSeveranceCost
+  $("penaltyFireC").textContent = state.penaltyLobbyists ? money(penaltySeveranceCost) : "none hired"
+  $("penaltyFireBtn").disabled = !state.penaltyLobbyists || state.dollars < penaltySeveranceCost
 }
 
 // The pop animation and floating "+$5" after a click on the big dollar
-export function showClickFeedback(amount, ev) {
+export function showClickFeedback(amount, clickEvent) {
   const btn = $("bigDollar")
   btn.classList.remove("pop")
   void btn.offsetWidth // restart the CSS animation
   btn.classList.add("pop")
   const rect = btn.getBoundingClientRect()
-  const x = ev && ev.clientX ? ev.clientX : rect.left + rect.width / 2
-  const y = ev && ev.clientY ? ev.clientY : rect.top + rect.height / 2
+  const x = clickEvent && clickEvent.clientX ? clickEvent.clientX : rect.left + rect.width / 2
+  const y = clickEvent && clickEvent.clientY ? clickEvent.clientY : rect.top + rect.height / 2
   const floater = document.createElement("div")
   floater.className = "floater"
   floater.textContent = "+" + money(amount)

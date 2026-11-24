@@ -8,7 +8,7 @@ import { JOB_BY_ID, jobCooldown, jobPay, jobTimeLeft, startJobCooldown } from ".
 import { recordJobWin, totalJobWins, winJob, jobChanges } from "../../src/core/jobs.js"
 import { newsLine } from "../../src/core/news.js"
 
-const T0 = 1_000_000_000_000
+const START_TIME = 1_000_000_000_000
 
 test("market: price tracks income times mood, history is capped at 3 minutes", () => {
   const mkt = createMarket(),
@@ -40,31 +40,31 @@ test("jobs: default 5-minute cooldown, waste dumping every 2 minutes for 10 minu
   rules.jobCooldown = 0
   assert.equal(jobCooldown(JOB_BY_ID.lemon), 5 * 60 * 1000)
   assert.equal(jobCooldown(JOB_BY_ID.waste), 2 * 60 * 1000)
-  const state = newState(T0)
+  const state = newState(START_TIME)
   state.owned[2] = 10
   assert.equal(jobPay(derive(state), JOB_BY_ID.waste), 10 * 10 * 600)
 })
 
 test("jobs: cooldown starts with the shift; wins are counted", () => {
-  const state = newState(T0),
+  const state = newState(START_TIME),
     job = JOB_BY_ID.milk
-  assert.equal(jobTimeLeft(state, job, T0), 0)
-  startJobCooldown(state, job, T0)
-  assert.equal(jobTimeLeft(state, job, T0 + 1000), 5 * 60 * 1000 - 1000)
+  assert.equal(jobTimeLeft(state, job, START_TIME), 0)
+  startJobCooldown(state, job, START_TIME)
+  assert.equal(jobTimeLeft(state, job, START_TIME + 1000), 5 * 60 * 1000 - 1000)
   recordJobWin(state, job)
   recordJobWin(state, JOB_BY_ID.lemon)
   assert.equal(totalJobWins(state), 2)
 })
 
 test("jobs: winning pays the reward, counts the win and reports it", () => {
-  const state = newState(T0),
+  const state = newState(START_TIME),
     job = JOB_BY_ID.lemon
   state.owned[0] = 10
   const derived = derive(state),
     reward = jobPay(derived, job)
   assert.ok(reward > 0)
-  const ev = winJob(state, derived, job)
-  assert.deepEqual(ev, { type: "jobWon", job, reward })
+  const event = winJob(state, derived, job)
+  assert.deepEqual(event, { type: "jobWon", job, reward })
   assert.equal(state.dollars, reward)
   assert.equal(state.allTimeEarned, reward)
   assert.ok(state.fines > 0) // job pay is income like any other, so fines accrue on it
@@ -73,31 +73,31 @@ test("jobs: winning pays the reward, counts the win and reports it", () => {
 
 test("jobs: changes are reported once, and never on the first check", () => {
   rules.jobCooldown = 0
-  const state = newState(T0),
+  const state = newState(START_TIME),
     seen = {},
     lemon = JOB_BY_ID.lemon
   state.owned[0] = 1
-  assert.deepEqual(jobChanges(seen, state, T0), []) // first look: nothing to compare against
+  assert.deepEqual(jobChanges(seen, state, START_TIME), []) // first look: nothing to compare against
 
   state.owned[1] = 1
-  assert.deepEqual(jobChanges(seen, state, T0), [{ type: "jobUnlocked", job: JOB_BY_ID.milk }])
-  assert.deepEqual(jobChanges(seen, state, T0), [])
+  assert.deepEqual(jobChanges(seen, state, START_TIME), [{ type: "jobUnlocked", job: JOB_BY_ID.milk }])
+  assert.deepEqual(jobChanges(seen, state, START_TIME), [])
 
-  startJobCooldown(state, lemon, T0)
-  assert.deepEqual(jobChanges(seen, state, T0 + 1000), [])
-  assert.deepEqual(jobChanges(seen, state, T0 + jobCooldown(lemon)), [{ type: "jobReady", job: lemon }])
-  assert.deepEqual(jobChanges(seen, state, T0 + jobCooldown(lemon) + 1000), [])
+  startJobCooldown(state, lemon, START_TIME)
+  assert.deepEqual(jobChanges(seen, state, START_TIME + 1000), [])
+  assert.deepEqual(jobChanges(seen, state, START_TIME + jobCooldown(lemon)), [{ type: "jobReady", job: lemon }])
+  assert.deepEqual(jobChanges(seen, state, START_TIME + jobCooldown(lemon) + 1000), [])
 })
 
 test("jobs: a job that unlocks while still cooling down isn't reported as ready", () => {
-  const state = newState(T0),
+  const state = newState(START_TIME),
     seen = {},
     milk = JOB_BY_ID.milk
-  startJobCooldown(state, milk, T0)
-  jobChanges(seen, state, T0)
+  startJobCooldown(state, milk, START_TIME)
+  jobChanges(seen, state, START_TIME)
   state.owned[1] = 1
-  assert.deepEqual(jobChanges(seen, state, T0), [{ type: "jobUnlocked", job: milk }])
-  assert.deepEqual(jobChanges(seen, state, T0 + jobCooldown(milk)), [{ type: "jobReady", job: milk }])
+  assert.deepEqual(jobChanges(seen, state, START_TIME), [{ type: "jobUnlocked", job: milk }])
+  assert.deepEqual(jobChanges(seen, state, START_TIME + jobCooldown(milk)), [{ type: "jobReady", job: milk }])
 })
 
 test("jobs: test mode replays after 5 seconds", () => {
@@ -107,11 +107,11 @@ test("jobs: test mode replays after 5 seconds", () => {
 })
 
 test("news: the final hour with fines owed always shows the warning", () => {
-  const state = newState(T0)
+  const state = newState(START_TIME)
   state.fines = 10
-  state.deadline = T0 + 1000
+  state.deadline = START_TIME + 1000
   assert.match(
-    newsLine(state, derive(state), T0, () => 0.99),
+    newsLine(state, derive(state), START_TIME, () => 0.99),
     /PAY YOUR FINES/
   )
 })

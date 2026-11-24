@@ -23,25 +23,25 @@ export function buildBuildingRows() {
   INDUSTRIES.forEach((ind, i) => {
     const button = document.createElement("button")
     button.className = "bld"
-    button.dataset.tt = "bld:" + i
+    button.dataset.tooltip = "bld:" + i
     button.dataset.bld = i
     button.innerHTML = `<div class="bTop"><span class="ic"></span><div class="info"><div class="nm"></div><div class="sec"></div></div><span class="tkr">${TICKERS[i]}</span></div>
       <div class="bBot"><span class="own"></span><span class="rate"></span><span class="cost"></span></div>`
     wrap.appendChild(button)
     rows.push({
-      el: button,
-      nm: button.querySelector(".nm"),
+      element: button,
+      name: button.querySelector(".nm"),
       sec: button.querySelector(".sec"),
       cost: button.querySelector(".cost"),
       own: button.querySelector(".own"),
       rate: button.querySelector(".rate"),
-      ic: button.querySelector(".ic")
+      icon: button.querySelector(".ic")
     })
   })
 }
 
 // Industries not yet revealed show as a single "rumored acquisition" teaser
-export const isMystery = (i) => rows[i].el.classList.contains("mystery")
+export const isMystery = (i) => rows[i].element.classList.contains("mystery")
 
 function renderBuildings() {
   const { state, derived } = game
@@ -50,26 +50,26 @@ function renderBuildings() {
     const row = rows[i]
     const revealed = state.owned[i] > 0 || i === 0 || state.runEarned >= ind.base * 0.5 || state.owned[i - 1] > 0
     if (revealed) {
-      row.el.style.display = ""
-      row.el.classList.remove("mystery")
-      row.ic.textContent = ind.icon
-      row.nm.textContent = ind.name
+      row.element.style.display = ""
+      row.element.classList.remove("mystery")
+      row.icon.textContent = ind.icon
+      row.name.textContent = ind.name
       row.sec.textContent = ind.sector
       const price = buildingCost(state, i, buyAmt)
       row.cost.textContent = `Acquire ×${buyAmt} · ${money(price)}`
       row.own.textContent = "Owned " + fmt(state.owned[i])
       row.rate.textContent = state.owned[i] ? money(derived.indCps[i]) + "/s" : "Not yet acquired"
-      row.el.classList.toggle("cant", state.dollars < price)
+      row.element.classList.toggle("cant", state.dollars < price)
     } else if (!shownRumor) {
       shownRumor = true
-      row.el.style.display = ""
-      row.el.classList.add("mystery")
-      row.el.classList.remove("cant")
-      row.ic.textContent = "🔍"
-      row.nm.textContent = "Rumored acquisition"
+      row.element.style.display = ""
+      row.element.classList.add("mystery")
+      row.element.classList.remove("cant")
+      row.icon.textContent = "🔍"
+      row.name.textContent = "Rumored acquisition"
       row.sec.textContent = "Due diligence underway"
       row.rate.textContent = `Revealed after earning ${money(ind.base * 0.5)} this run`
-    } else row.el.style.display = "none"
+    } else row.element.style.display = "none"
   })
 }
 
@@ -105,7 +105,7 @@ function rebuildUpgrades() {
   wrap.innerHTML = shown
     .map(
       (upgrade) =>
-        `<button class="upg ${upgrade.type}" data-tt="upg:${upgrade.id}" data-id="${upgrade.id}">` +
+        `<button class="upg ${upgrade.type}" data-tooltip="upg:${upgrade.id}" data-id="${upgrade.id}">` +
         `<span class="uIc">${upgrade.icon}</span><span class="uNm">${esc(upgrade.name)}</span><span class="uCost">${money(upgradeCost(upgrade))}</span>` +
         `<span class="uTag">${esc(upgradeTag(upgrade))}</span></button>`
     )
@@ -130,14 +130,14 @@ let lastRapKey = ""
 function renderRapSheet() {
   const owned = UPGRADES.filter((upgrade) => upgrade.type === "scandal" && game.state.upgrades[upgrade.id])
   const key = owned.map((upgrade) => upgrade.id).join(",")
-  const el = $("rapSheet")
-  if (key === lastRapKey && el.childElementCount) return
+  const element = $("rapSheet")
+  if (key === lastRapKey && element.childElementCount) return
   lastRapKey = key
   if (!owned.length) {
-    el.innerHTML = `<div class="empty">Your record is spotless. For now.</div>`
+    element.innerHTML = `<div class="empty">Your record is spotless. For now.</div>`
     return
   }
-  el.innerHTML =
+  element.innerHTML =
     `<div class="note" style="margin-top:0">${owned.length} scandal${owned.length > 1 ? "s" : ""} on record. Click one to read the charges.</div>` +
     owned
       .map(

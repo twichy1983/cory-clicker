@@ -1,4 +1,16 @@
-import { JW, JH, rand, rr, vgrad, hgrad, INK, emoji, label, inBox, cloud } from "./draw.js"
+import {
+  CANVAS_WIDTH,
+  CANVAS_HEIGHT,
+  rand,
+  roundedRect,
+  vgrad,
+  hgrad,
+  INK,
+  emoji,
+  label,
+  inBox,
+  cloud
+} from "./draw.js"
 import { jobAlert, jobStrike, endJob } from "./framework.js"
 
 /* ---------------------------------------------------------
@@ -97,7 +109,7 @@ const DefeatGame = {
         [0, "#64c3ff"],
         [1, "#cdeeff"]
       ])
-      ctx.fillRect(0, 0, JW, 520)
+      ctx.fillRect(0, 0, CANVAS_WIDTH, 520)
       ;[
         [300 - ((shift.road * 0.05) % 1900), 120, 1.1],
         [1100 - ((shift.road * 0.05) % 1900), 80, 0.9],
@@ -106,25 +118,25 @@ const DefeatGame = {
       ctx.fillStyle = "#7cc65a"
       ctx.beginPath()
       for (let i = -1; i < 6; i++) {
-        const hx = i * 400 - ((shift.road * 0.2) % 400)
-        ctx.ellipse(hx, 520, 260, 120, 0, Math.PI, 0)
+        const hillX = i * 400 - ((shift.road * 0.2) % 400)
+        ctx.ellipse(hillX, 520, 260, 120, 0, Math.PI, 0)
       }
       ctx.fill()
       ctx.fillStyle = "#4f5359"
-      ctx.fillRect(0, 520, JW, JH - 520)
+      ctx.fillRect(0, 520, CANVAS_WIDTH, CANVAS_HEIGHT - 520)
       ctx.fillStyle = "#ffd23f"
-      for (let x = -(shift.road % 220); x < JW; x += 220) ctx.fillRect(x, 700, 120, 16)
+      for (let x = -(shift.road % 220); x < CANVAS_WIDTH; x += 220) ctx.fillRect(x, 700, 120, 16)
       ctx.fillStyle = "#3d9a3d"
-      ctx.fillRect(0, 500, JW, 26)
+      ctx.fillRect(0, 500, CANVAS_WIDTH, 26)
     } else {
       ctx.fillStyle = vgrad(ctx, 0, 620, [
         [0, "#cfd6dc"],
         [1, "#b3bcc4"]
       ])
-      ctx.fillRect(0, 0, JW, 620)
+      ctx.fillRect(0, 0, CANVAS_WIDTH, 620)
       ctx.fillStyle = "#8a949c"
-      ctx.fillRect(0, 620, JW, JH - 620)
-      rr(ctx, 520, 90, 640, 100, 14)
+      ctx.fillRect(0, 620, CANVAS_WIDTH, CANVAS_HEIGHT - 620)
+      roundedRect(ctx, 520, 90, 640, 100, 14)
       ctx.fillStyle = "#1e3a5f"
       ctx.fill()
       ctx.lineWidth = 6
@@ -135,7 +147,7 @@ const DefeatGame = {
         [560, 645],
         [1110, 645]
       ].forEach(([x, y]) => {
-        rr(ctx, x - 110, y - 20, 220, 50, 22)
+        roundedRect(ctx, x - 110, y - 20, 220, 50, 22)
         ctx.fillStyle = "#3a4046"
         ctx.fill()
         ctx.lineWidth = 5
@@ -144,7 +156,7 @@ const DefeatGame = {
       })
       emoji(ctx, "🧑‍🔬", 1420, 470, 190)
       emoji(ctx, "📋", 1340, 540, 70)
-      rr(ctx, 230, 560, 140, 26, 10)
+      roundedRect(ctx, 230, 560, 140, 26, 10)
       ctx.fillStyle = "#555"
       ctx.fill()
       ctx.stroke()
@@ -155,7 +167,7 @@ const DefeatGame = {
       for (let i = 0; i < 3; i++) emoji(ctx, "🌱", 330 - i * 60, 600 - ((now * 60 + i * 30) % 80), 34, 0.8)
     const sign = road ? ["🛣️ ON THE ROAD", "#2fb35a"] : ["🧪 EMISSIONS TEST", "#e03131"]
     const warnFlash = road && shift.warned && Math.sin(now * 18) > 0
-    rr(ctx, 1240, 60, 380, 90, 18)
+    roundedRect(ctx, 1240, 60, 380, 90, 18)
     ctx.fillStyle = warnFlash ? "#ffd23f" : sign[1]
     ctx.fill()
     ctx.lineWidth = 6
@@ -165,13 +177,13 @@ const DefeatGame = {
     // mode switch
     const switchBox = DEFEAT_SWITCH,
       beast = shift.mode === "beast"
-    rr(ctx, switchBox.x, switchBox.y, switchBox.width, switchBox.height, 55)
+    roundedRect(ctx, switchBox.x, switchBox.y, switchBox.width, switchBox.height, 55)
     ctx.fillStyle = "#1b1f23"
     ctx.fill()
     ctx.lineWidth = 6
     ctx.strokeStyle = INK
     ctx.stroke()
-    rr(
+    roundedRect(
       ctx,
       switchBox.x + (beast ? switchBox.width / 2 : 6),
       switchBox.y + 6,
@@ -243,10 +255,10 @@ function drawCar(ctx, x, y, wheel, beast) {
   ctx.fill()
   ctx.stroke()
   ctx.fillStyle = "#ffe066"
-  rr(ctx, 360, -50, 46, 30, 10)
+  roundedRect(ctx, 360, -50, 46, 30, 10)
   ctx.fill()
   ctx.stroke()
-  rr(ctx, -420, 0, 44, 20, 6)
+  roundedRect(ctx, -420, 0, 44, 20, 6)
   ctx.fillStyle = "#555"
   ctx.fill()
   ctx.stroke()
@@ -259,20 +271,20 @@ function drawCar(ctx, x, y, wheel, beast) {
     ctx.closePath()
     ctx.fill()
   }
-  ;[-240, 250].forEach((wx) => {
+  ;[-240, 250].forEach((wheelX) => {
     ctx.beginPath()
-    ctx.arc(wx, 30, 78, 0, Math.PI * 2)
+    ctx.arc(wheelX, 30, 78, 0, Math.PI * 2)
     ctx.fillStyle = "#1d1d1d"
     ctx.fill()
     ctx.lineWidth = 6
     ctx.strokeStyle = INK
     ctx.stroke()
     ctx.beginPath()
-    ctx.arc(wx, 30, 42, 0, Math.PI * 2)
+    ctx.arc(wheelX, 30, 42, 0, Math.PI * 2)
     ctx.fillStyle = "#c9ced3"
     ctx.fill()
     ctx.save()
-    ctx.translate(wx, 30)
+    ctx.translate(wheelX, 30)
     ctx.rotate(wheel)
     ctx.strokeStyle = "#6b7177"
     ctx.lineWidth = 7

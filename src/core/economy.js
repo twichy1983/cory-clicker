@@ -100,22 +100,22 @@ export function advance(state, derived, now) {
     if (until > state.lastTick) earn(state, derived, (derived.cps * (until - state.lastTick)) / 1000)
     state.lastTick = Math.max(state.lastTick, until)
     if (now < state.deadline) break
-    const ev = settleDeadline(state, state.deadline, now)
-    events.push(ev)
-    if (ev.type === "bankrupt") break // income stops: the industries are gone
+    const event = settleDeadline(state, state.deadline, now)
+    events.push(event)
+    if (event.type === "bankrupt") break // income stops: the industries are gone
   }
   state.lastTick = now
   return events
 }
 
-// The deadline at time `at` has arrived: a clean or negative ledger survives, unpaid fines mean bankruptcy.
-function settleDeadline(state, at, now) {
+// The deadline at time `deadlineTime` has arrived: a clean or negative ledger survives, unpaid fines mean bankruptcy.
+function settleDeadline(state, deadlineTime, now) {
   if (state.fines > 0) return goBankrupt(state, now, false)
   const rebate = -state.fines || 0 // "|| 0" turns -0 into 0
   state.dollars += rebate
   state.rebatesCollected += rebate
   state.fines = 0
-  state.deadline = at + maxTimer(state)
+  state.deadline = deadlineTime + maxTimer(state)
   state.cyclesSurvived++
   return { type: "survived", rebate }
 }
@@ -195,15 +195,15 @@ export function firePenaltyLobbyist(state) {
 export function payFines(state, derived, now) {
   const events = advance(state, derived, now)
   if (events.length) return { type: "deadline", events }
-  let ev
+  let event
   if (state.fines > 0) {
     if (state.dollars < state.fines) return null
-    ev = { type: "paid", amount: state.fines }
+    event = { type: "paid", amount: state.fines }
     state.dollars -= state.fines
     state.finesPaid += state.fines
   } else {
     const rebate = -state.fines || 0 // "|| 0" turns -0 into 0
-    ev = { type: rebate > 0 ? "rebate" : "filed", amount: rebate }
+    event = { type: rebate > 0 ? "rebate" : "filed", amount: rebate }
     state.dollars += rebate
     state.rebatesCollected += rebate
   }
@@ -212,5 +212,5 @@ export function payFines(state, derived, now) {
   if (maxTimer(state) - (state.deadline - now) >= HOUR) state.cyclesSurvived++
   state.fines = 0
   state.deadline = now + maxTimer(state)
-  return ev
+  return event
 }

@@ -71,9 +71,9 @@ export function fmtShort(num) {
   )
 }
 
-// ms -> "HH:MM:SS"
-export function fmtTime(ms) {
-  const totalSeconds = Math.floor(Math.max(0, ms) / 1000)
+// milliseconds -> "HH:MM:SS"
+export function fmtTime(milliseconds) {
+  const totalSeconds = Math.floor(Math.max(0, milliseconds) / 1000)
   const hours = Math.floor(totalSeconds / 3600),
     minutes = Math.floor((totalSeconds % 3600) / 60),
     seconds = totalSeconds % 60
@@ -82,18 +82,18 @@ export function fmtTime(ms) {
   )
 }
 
-// ms -> "2d 3h 15m"
-export function fmtDuration(ms) {
-  const totalSeconds = Math.floor(ms / 1000),
+// milliseconds -> "2d 3h 15m"
+export function fmtDuration(milliseconds) {
+  const totalSeconds = Math.floor(milliseconds / 1000),
     days = Math.floor(totalSeconds / 86400),
     hours = Math.floor((totalSeconds % 86400) / 3600),
     minutes = Math.floor((totalSeconds % 3600) / 60)
   return (days ? days + "d " : "") + (hours ? hours + "h " : "") + minutes + "m"
 }
 
-// ms -> "M:SS", rounding up
-export function mmss(ms) {
-  const totalSeconds = Math.ceil(ms / 1000)
+// milliseconds -> "M:SS", rounding up
+export function mmss(milliseconds) {
+  const totalSeconds = Math.ceil(milliseconds / 1000)
   return Math.floor(totalSeconds / 60) + ":" + String(totalSeconds % 60).padStart(2, "0")
 }
 

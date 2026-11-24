@@ -1,4 +1,4 @@
-import { JW, JH, rand, pick, rr, vgrad, INK, emoji, label, plainText } from "./draw.js"
+import { CANVAS_WIDTH, CANVAS_HEIGHT, rand, pick, roundedRect, vgrad, INK, emoji, label, plainText } from "./draw.js"
 import { shift, floatText, jobAlert, jobStrike, endJob } from "./framework.js"
 
 /* ---------------------------------------------------------
@@ -63,7 +63,7 @@ const ShredGame = {
         x: rand(170, 1500),
         y: -60,
         vy: rand(175, 220) + shift.elapsed * 9,
-        ph: rand(0, 6),
+        phase: rand(0, 6),
         sway: rand(20, 50),
         keep,
         icon: pick(src.icons),
@@ -73,7 +73,7 @@ const ShredGame = {
     }
     for (const letter of shift.letters) {
       letter.y += letter.vy * dt
-      letter.ph += dt * 2
+      letter.phase += dt * 2
     }
     for (const letter of shift.letters)
       if (!letter.gone && letter.y > SHRED.inbox) {
@@ -121,8 +121,8 @@ const ShredGame = {
       [0, "#3a4a63"],
       [1, "#2a364a"]
     ])
-    ctx.fillRect(0, 0, JW, JH)
-    rr(ctx, 110, 120, 560, 360, 14)
+    ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
+    roundedRect(ctx, 110, 120, 560, 360, 14)
     ctx.fillStyle = vgrad(ctx, 120, 480, [
       [0, "#ffb36b"],
       [1, "#ffd9a1"]
@@ -139,7 +139,7 @@ const ShredGame = {
     ].forEach(([x, y, width, height]) => ctx.fillRect(x, y, width, height))
     ctx.lineWidth = 12
     ctx.strokeStyle = "#cfd6df"
-    rr(ctx, 110, 120, 560, 360, 14)
+    roundedRect(ctx, 110, 120, 560, 360, 14)
     ctx.stroke()
     ctx.beginPath()
     ctx.moveTo(390, 120)
@@ -148,7 +148,7 @@ const ShredGame = {
     ctx.save()
     ctx.translate(1170, 120)
     ctx.rotate(-0.03)
-    rr(ctx, 0, 0, 380, 230, 10)
+    roundedRect(ctx, 0, 0, 380, 230, 10)
     ctx.fillStyle = "#f5f1e6"
     ctx.fill()
     ctx.lineWidth = 8
@@ -159,18 +159,18 @@ const ShredGame = {
     plainText(ctx, "(after shipping)", 190, 185, 24, "#777", "center", 700)
     ctx.restore()
     // office furniture: filing cabinet, plant, wall clock
-    rr(ctx, 1290, 470, 230, 345, 12)
+    roundedRect(ctx, 1290, 470, 230, 345, 12)
     ctx.fillStyle = "#7c8a99"
     ctx.fill()
     ctx.lineWidth = 6
     ctx.strokeStyle = INK
     ctx.stroke()
     ;[490, 600, 710].forEach((y) => {
-      rr(ctx, 1310, y, 190, 90, 8)
+      roundedRect(ctx, 1310, y, 190, 90, 8)
       ctx.fillStyle = "#9aa8b6"
       ctx.fill()
       ctx.stroke()
-      rr(ctx, 1375, y + 36, 60, 16, 6)
+      roundedRect(ctx, 1375, y + 36, 60, 16, 6)
       ctx.fillStyle = "#3d4650"
       ctx.fill()
     })
@@ -195,16 +195,16 @@ const ShredGame = {
     ctx.lineTo(836 + Math.cos(now / 12) * 28, 120 + Math.sin(now / 12) * 28)
     ctx.stroke()
     // regulator's inbox along the bottom
-    ctx.fillStyle = vgrad(ctx, SHRED.inbox, JH, [
+    ctx.fillStyle = vgrad(ctx, SHRED.inbox, CANVAS_HEIGHT, [
       [0, "#8c2a2a"],
       [1, "#5e1515"]
     ])
-    ctx.fillRect(0, SHRED.inbox, JW, JH - SHRED.inbox)
+    ctx.fillRect(0, SHRED.inbox, CANVAS_WIDTH, CANVAS_HEIGHT - SHRED.inbox)
     ctx.lineWidth = 6
     ctx.strokeStyle = INK
     ctx.beginPath()
     ctx.moveTo(0, SHRED.inbox)
-    ctx.lineTo(JW, SHRED.inbox)
+    ctx.lineTo(CANVAS_WIDTH, SHRED.inbox)
     ctx.stroke()
     label(ctx, "📥 TO: FEDERAL INVESTIGATORS", 836, SHRED.inbox + 60, 44, "#ffd9d9")
     for (const letter of shift.letters) drawLetter(ctx, letter)
@@ -216,12 +216,12 @@ function shredLetterAt(x, y) {
     .reverse()
     .find(
       (letter) =>
-        Math.abs(x - (letter.x + Math.sin(letter.ph) * letter.sway)) < 95 * LETTER_SCALE &&
+        Math.abs(x - (letter.x + Math.sin(letter.phase) * letter.sway)) < 95 * LETTER_SCALE &&
         Math.abs(y - letter.y) < 72 * LETTER_SCALE
     )
 }
 function drawLetter(ctx, letter) {
-  const x = letter.x + Math.sin(letter.ph) * letter.sway,
+  const x = letter.x + Math.sin(letter.phase) * letter.sway,
     y = letter.y
   ctx.save()
   ctx.translate(x, y)
@@ -234,8 +234,8 @@ function drawLetterShape(ctx, letter, x, y) {
   if (letter.keep) return drawKeepFolder(ctx, letter, x, y)
   ctx.save()
   ctx.translate(x, y)
-  ctx.rotate(Math.sin(letter.ph) * 0.12)
-  rr(ctx, -85, -55, 170, 110, 10)
+  ctx.rotate(Math.sin(letter.phase) * 0.12)
+  roundedRect(ctx, -85, -55, 170, 110, 10)
   ctx.fillStyle = "#fffaf0"
   ctx.fill()
   ctx.lineWidth = 5
@@ -256,14 +256,14 @@ function drawKeepFolder(ctx, letter, x, y) {
   // a gold manila folder with a green KEEP stamp: do not shred
   ctx.save()
   ctx.translate(x, y)
-  ctx.rotate(Math.sin(letter.ph) * 0.12)
+  ctx.rotate(Math.sin(letter.phase) * 0.12)
   ctx.lineWidth = 5
   ctx.strokeStyle = INK
-  rr(ctx, -85, -70, 70, 26, 8)
+  roundedRect(ctx, -85, -70, 70, 26, 8)
   ctx.fillStyle = "#e0b43a"
   ctx.fill()
   ctx.stroke() // folder tab
-  rr(ctx, -85, -55, 170, 110, 10)
+  roundedRect(ctx, -85, -55, 170, 110, 10)
   ctx.fillStyle = vgrad(ctx, -55, 55, [
     [0, "#ffd866"],
     [1, "#e8b331"]
@@ -278,7 +278,7 @@ function drawKeepFolder(ctx, letter, x, y) {
   ctx.stroke()
   ctx.save()
   ctx.rotate(-0.18)
-  rr(ctx, -46, -30, 92, 38, 8)
+  roundedRect(ctx, -46, -30, 92, 38, 8)
   ctx.lineWidth = 5
   ctx.strokeStyle = "#1f9d55"
   ctx.stroke()

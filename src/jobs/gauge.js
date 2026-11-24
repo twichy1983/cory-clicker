@@ -1,4 +1,4 @@
-import { JW, JH, rand, rr, vgrad, hgrad, INK, emoji, plainText } from "./draw.js"
+import { CANVAS_WIDTH, CANVAS_HEIGHT, rand, roundedRect, vgrad, hgrad, INK, emoji, plainText } from "./draw.js"
 import { shift, floatText, jobStrike } from "./framework.js"
 
 /* ---------------------------------------------------------
@@ -92,7 +92,7 @@ const GaugeGame = {
       [0.6, "#a34f5c"],
       [1, "#f08a4b"]
     ])
-    ctx.fillRect(0, 0, JW, 520)
+    ctx.fillRect(0, 0, CANVAS_WIDTH, 520)
     ctx.fillStyle = "#1c1a24"
     ;[
       [80, 260, 160, 260],
@@ -101,39 +101,40 @@ const GaugeGame = {
       [1180, 240, 90, 280],
       [1320, 300, 260, 220]
     ].forEach(([x, y, width, height]) => {
-      rr(ctx, x, y, width, height, 14)
+      roundedRect(ctx, x, y, width, height, 14)
       ctx.fill()
     })
     ;[
       [335, 200],
       [1225, 240]
     ].forEach(([x, y], i) => {
-      const fl = 1 + Math.sin(now * 12 + i) * 0.15
-      emoji(ctx, "🔥", x, y - 40 * fl, 70 * fl)
+      const flicker = 1 + Math.sin(now * 12 + i) * 0.15
+      emoji(ctx, "🔥", x, y - 40 * flicker, 70 * flicker)
     })
     ctx.fillStyle = "#2a2a30"
-    ctx.fillRect(0, 500, JW, JH - 500)
-    ctx.fillStyle = hgrad(ctx, 0, JW, [
+    ctx.fillRect(0, 500, CANVAS_WIDTH, CANVAS_HEIGHT - 500)
+    ctx.fillStyle = hgrad(ctx, 0, CANVAS_WIDTH, [
       [0, "#6b6f75"],
       [0.5, "#a9aeb4"],
       [1, "#6b6f75"]
     ])
     ;[520, 760].forEach((y) => {
-      rr(ctx, -10, y, JW + 20, 46, 20)
+      roundedRect(ctx, -10, y, CANVAS_WIDTH + 20, 46, 20)
       ctx.fill()
       ctx.lineWidth = 5
       ctx.strokeStyle = INK
       ctx.stroke()
     })
     // the crew, still inside; they panic when a nearby needle is in the red
-    ;[398, 690, 982, 1274].forEach((wx, i) => {
-      const near = shift.gauges.filter((gauge) => Math.abs(gauge.x - wx) < 320),
+    ;[398, 690, 982, 1274].forEach((workerX, i) => {
+      const near = shift.gauges.filter((gauge) => Math.abs(gauge.x - workerX) < 320),
         scared = near.some((gauge) => gauge.pressure > 0.8 || gauge.fire > 0)
-      emoji(ctx, "👷", wx + (scared ? Math.sin(now * 30 + i) * 6 : 0), 880, 92)
-      if (scared) emoji(ctx, "😱", wx + 30, 810, 46)
+      emoji(ctx, "👷", workerX + (scared ? Math.sin(now * 30 + i) * 6 : 0), 880, 92)
+      if (scared) emoji(ctx, "😱", workerX + 30, 810, 46)
     })
     for (const gauge of shift.gauges) drawGauge(ctx, gauge, now)
-    if (shift.gauges.some((gauge) => gauge.fire > 0)) emoji(ctx, "🚑", JW - ((now * 700) % (JW + 300)) + 150, 470, 110)
+    if (shift.gauges.some((gauge) => gauge.fire > 0))
+      emoji(ctx, "🚑", CANVAS_WIDTH - ((now * 700) % (CANVAS_WIDTH + 300)) + 150, 470, 110)
   }
 }
 function gaugeNew(spot) {
@@ -152,10 +153,10 @@ function gaugeAt(x, y) {
 function drawGauge(ctx, gauge, now) {
   const { x, y } = gauge,
     radius = GAUGE_R,
-    a0 = Math.PI * 0.75,
-    a1 = Math.PI * 2.25,
-    ang = (fraction) => a0 + (a1 - a0) * fraction
-  rr(ctx, x - 16, y + radius - 10, 32, 120, 6)
+    startAngle = Math.PI * 0.75,
+    endAngle = Math.PI * 2.25,
+    ang = (fraction) => startAngle + (endAngle - startAngle) * fraction
+  roundedRect(ctx, x - 16, y + radius - 10, 32, 120, 6)
   ctx.fillStyle = "#7c8187"
   ctx.fill()
   ctx.lineWidth = 5
@@ -191,10 +192,10 @@ function drawGauge(ctx, gauge, now) {
     ctx.stroke()
   }
   const shake = gauge.pressure > 0.8 ? Math.sin(now * 60) * 0.04 : 0,
-    na = ang(Math.min(1, gauge.pressure)) + shake
+    needleAngle = ang(Math.min(1, gauge.pressure)) + shake
   ctx.beginPath()
   ctx.moveTo(x, y)
-  ctx.lineTo(x + Math.cos(na) * (radius - 22), y + Math.sin(na) * (radius - 22))
+  ctx.lineTo(x + Math.cos(needleAngle) * (radius - 22), y + Math.sin(needleAngle) * (radius - 22))
   ctx.lineWidth = 9
   ctx.lineCap = "round"
   ctx.strokeStyle = "#c1121f"

@@ -46,6 +46,6 @@ if (/(src|href)="\//.test(html)) throw new Error("build: index.html uses an abso
 
 // 5. Zip for upload
 const files = zipFolder(OUT, ZIP)
-const kb = (file) => (statSync(file).size / 1024).toFixed(0) + " KB"
-console.log(`Built ${OUT}/ (${files} files) and ${ZIP} (${kb(ZIP)}).`)
+const formatKb = (file) => (statSync(file).size / 1024).toFixed(0) + " KB"
+console.log(`Built ${OUT}/ (${files} files) and ${ZIP} (${formatKb(ZIP)}).`)
 console.log(`Check it locally with: npm run preview`)

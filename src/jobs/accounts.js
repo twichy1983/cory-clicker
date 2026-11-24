@@ -1,4 +1,4 @@
-import { JW, JH, pick, rr, vgrad, INK, emoji, label } from "./draw.js"
+import { CANVAS_WIDTH, CANVAS_HEIGHT, pick, roundedRect, vgrad, INK, emoji, label } from "./draw.js"
 import { shift, floatText, burst, jobStrike, endJob } from "./framework.js"
 
 /* ---------------------------------------------------------
@@ -79,12 +79,12 @@ const AccountsGame = {
     }
   },
   draw(ctx, shift, now) {
-    ctx.fillStyle = vgrad(ctx, 0, JH, [
+    ctx.fillStyle = vgrad(ctx, 0, CANVAS_HEIGHT, [
       [0, "#f3ead7"],
       [1, "#d9ccb0"]
     ])
-    ctx.fillRect(0, 0, JW, JH)
-    rr(ctx, 536, 18, 600, 76, 16)
+    ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
+    roundedRect(ctx, 536, 18, 600, 76, 16)
     ctx.fillStyle = "#14365e"
     ctx.fill()
     ctx.lineWidth = 6
@@ -94,7 +94,7 @@ const AccountsGame = {
     for (const teller of TELLERS) {
       const x = teller.x,
         y = teller.y
-      rr(ctx, x - 150, y - 300, 300, 300, 28)
+      roundedRect(ctx, x - 150, y - 300, 300, 300, 28)
       ctx.fillStyle = "#c9b48a"
       ctx.fill()
       ctx.lineWidth = 6
@@ -135,7 +135,7 @@ const AccountsGame = {
         ctx.lineTo(x + i * 60, y - 230)
         ctx.stroke()
       }
-      rr(ctx, x - 165, y - 24, 330, 40, 10)
+      roundedRect(ctx, x - 165, y - 24, 330, 40, 10)
       ctx.fillStyle = "#7a5230"
       ctx.fill()
       ctx.lineWidth = 6

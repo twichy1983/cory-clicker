@@ -1,10 +1,10 @@
 // Drawing helpers shared by every minigame. All games draw in the same 1672x941 (16:9) canvas space.
-export const JW = 1672,
-  JH = 941
+export const CANVAS_WIDTH = 1672,
+  CANVAS_HEIGHT = 941
 export const rand = (min, max) => min + Math.random() * (max - min)
 export const pick = (arr) => arr[Math.floor(Math.random() * arr.length)]
 export const clamp = (value, min, max) => Math.max(min, Math.min(max, value))
-export function rr(ctx, x, y, width, height, radius) {
+export function roundedRect(ctx, x, y, width, height, radius) {
   ctx.beginPath()
   ctx.roundRect ? ctx.roundRect(x, y, width, height, radius) : ctx.rect(x, y, width, height)
 }
@@ -58,7 +58,7 @@ export function bubble(ctx, text, x, y, size = 34) {
   ctx.font = `800 ${size}px 'Segoe UI', sans-serif`
   const width = ctx.measureText(text).width + size * 1.2,
     height = size * 1.9
-  rr(ctx, x - width / 2, y - height, width, height, height / 2)
+  roundedRect(ctx, x - width / 2, y - height, width, height, height / 2)
   ctx.fillStyle = "#fff"
   ctx.fill()
   ctx.lineWidth = 5
@@ -83,14 +83,14 @@ export function bubble(ctx, text, x, y, size = 34) {
 }
 export function button(ctx, x, y, width, height, text, color, active, disabled) {
   ctx.save()
-  rr(ctx, x, y + (active ? 6 : 0), width, height, 22)
+  roundedRect(ctx, x, y + (active ? 6 : 0), width, height, 22)
   ctx.fillStyle = disabled ? "#555c58" : color
   ctx.fill()
   ctx.lineWidth = 6
   ctx.strokeStyle = INK
   ctx.stroke()
   if (!active) {
-    rr(ctx, x, y + height - 4, width, 12, 8)
+    roundedRect(ctx, x, y + height - 4, width, 12, 8)
     ctx.fillStyle = "rgba(0,0,0,.35)"
     ctx.fill()
   }

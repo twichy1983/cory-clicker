@@ -56,7 +56,7 @@ export function renderAchievements(force) {
       list
         .map(
           (achievement) =>
-            `<div class="ach${state.achievements[achievement.id] ? "" : " locked"}" data-tt="ach:${achievement.id}">${state.achievements[achievement.id] ? achievement.icon : "🔒"}</div>`
+            `<div class="ach${state.achievements[achievement.id] ? "" : " locked"}" data-tooltip="ach:${achievement.id}">${state.achievements[achievement.id] ? achievement.icon : "🔒"}</div>`
         )
         .join("") +
       `</div>`

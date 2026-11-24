@@ -1,4 +1,4 @@
-// Hover details for anything with a data-tt="kind:id" attribute.
+// Hover details for anything with a data-tooltip="kind:id" attribute.
 // With a mouse the panel follows the pointer; on touch screens CSS docks it to the top or bottom edge.
 import { game } from "../game.js"
 import { HOUR } from "../core/constants.js"
@@ -171,7 +171,7 @@ export function wireTooltips() {
     true
   )
   document.addEventListener("mouseover", (event) => {
-    const target = event.target.closest("[data-tt]")
+    const target = event.target.closest("[data-tooltip]")
     if (!target) {
       hideTip()
       return
@@ -181,8 +181,8 @@ export function wireTooltips() {
       const rect = target.getBoundingClientRect()
       $("tip").classList.toggle("top", rect.top + rect.height / 2 > innerHeight / 2)
     }
-    if (target.dataset.tt !== tipKey) {
-      tipKey = target.dataset.tt
+    if (target.dataset.tooltip !== tipKey) {
+      tipKey = target.dataset.tooltip
       $("tip").style.display = "block"
       refreshTip()
     }

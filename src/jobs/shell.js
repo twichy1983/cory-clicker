@@ -1,4 +1,4 @@
-import { JW, JH, rr, vgrad, INK, emoji, label } from "./draw.js"
+import { CANVAS_WIDTH, CANVAS_HEIGHT, roundedRect, vgrad, INK, emoji, label } from "./draw.js"
 import { floatText, burst, jobAlert, jobStrike, endJob } from "./framework.js"
 
 /* ---------------------------------------------------------
@@ -33,7 +33,7 @@ const ShellGame = {
       found: 0,
       round: 0,
       stage: "show",
-      st: 0,
+      stageTimer: 0,
       swap: null,
       swapsLeft: 0,
       lift: [1, 1, 1],
@@ -42,38 +42,38 @@ const ShellGame = {
     shellRound(shift)
   },
   step(shift, dt) {
-    shift.st += dt
+    shift.stageTimer += dt
     const liftTo = (i, target) => (shift.lift[i] += (target - shift.lift[i]) * Math.min(1, dt * 12))
     if (shift.stage === "show") {
       shift.lift.forEach((_, i) => liftTo(i, i === shift.money ? 1 : 0))
-      if (shift.st > 1.1) {
+      if (shift.stageTimer > 1.1) {
         shift.stage = "lower"
-        shift.st = 0
+        shift.stageTimer = 0
       }
     } else if (shift.stage === "lower") {
       shift.lift.forEach((_, i) => liftTo(i, 0))
-      if (shift.st > 0.35) {
+      if (shift.stageTimer > 0.35) {
         shift.stage = "shuffle"
-        shift.st = 0
+        shift.stageTimer = 0
         shellNextSwap(shift)
       }
     } else if (shift.stage === "shuffle") {
-      if (shift.st >= shift.swap.dur) {
+      if (shift.stageTimer >= shift.swap.dur) {
         const { indexA, indexB } = shift.swap
         ;[shift.slot[indexA], shift.slot[indexB]] = [shift.slot[indexB], shift.slot[indexA]]
         if (--shift.swapsLeft > 0) {
-          shift.st = 0
+          shift.stageTimer = 0
           shellNextSwap(shift)
         } else {
           shift.stage = "pick"
-          shift.st = 0
+          shift.stageTimer = 0
           shift.swap = null
           jobAlert("Where's the money?", "warn")
         }
       }
     } else if (shift.stage === "reveal") {
       shift.lift.forEach((_, i) => liftTo(i, 1))
-      if (shift.st > 1.1) {
+      if (shift.stageTimer > 1.1) {
         if (shift.found >= SHELL_GOAL) endJob("win")
         else shellRound(shift)
       }
@@ -90,7 +90,7 @@ const ShellGame = {
     if (i < 0) return
     shift.pickI = i
     shift.stage = "reveal"
-    shift.st = 0
+    shift.stageTimer = 0
     const pos = shellPos(shift, i)
     if (i === shift.money) {
       shift.found++
@@ -103,14 +103,14 @@ const ShellGame = {
       [0, "#0b1d3a"],
       [1, "#3c2a6b"]
     ])
-    ctx.fillRect(0, 0, JW, 520)
+    ctx.fillRect(0, 0, CANVAS_WIDTH, 520)
     ctx.fillStyle = "#fff"
     for (let i = 0; i < 60; i++) {
-      const sx = (i * 397) % JW,
-        sy = (i * 131) % 420,
-        tw = 0.5 + 0.5 * Math.sin(now * 2 + i)
-      ctx.globalAlpha = 0.3 + 0.7 * tw
-      ctx.fillRect(sx, sy, 3, 3)
+      const starX = (i * 397) % CANVAS_WIDTH,
+        starY = (i * 131) % 420,
+        twinkle = 0.5 + 0.5 * Math.sin(now * 2 + i)
+      ctx.globalAlpha = 0.3 + 0.7 * twinkle
+      ctx.fillRect(starX, starY, 3, 3)
     }
     ctx.globalAlpha = 1
     ctx.fillStyle = "#fff6d5"
@@ -121,30 +121,30 @@ const ShellGame = {
       [0, "#1d5b8f"],
       [1, "#2b7fb8"]
     ])
-    ctx.fillRect(0, 420, JW, 140)
-    ctx.fillStyle = vgrad(ctx, 540, JH, [
+    ctx.fillRect(0, 420, CANVAS_WIDTH, 140)
+    ctx.fillStyle = vgrad(ctx, 540, CANVAS_HEIGHT, [
       [0, "#f2d49b"],
       [1, "#d9b26f"]
     ])
-    ctx.fillRect(0, 540, JW, JH - 540)
+    ctx.fillRect(0, 540, CANVAS_WIDTH, CANVAS_HEIGHT - 540)
     emoji(ctx, "🌴", 150, 430, 320)
     emoji(ctx, "🌴", 1540, 450, 280)
-    rr(ctx, 300, SHELL_Y - 10, 1072, 70, 18)
+    roundedRect(ctx, 300, SHELL_Y - 10, 1072, 70, 18)
     ctx.fillStyle = "#8a5a33"
     ctx.fill()
     ctx.lineWidth = 6
     ctx.strokeStyle = INK
     ctx.stroke()
-    rr(ctx, 360, SHELL_Y + 60, 40, 200, 8)
+    roundedRect(ctx, 360, SHELL_Y + 60, 40, 200, 8)
     ctx.fill()
     ctx.stroke()
-    rr(ctx, 1272, SHELL_Y + 60, 40, 200, 8)
+    roundedRect(ctx, 1272, SHELL_Y + 60, 40, 200, 8)
     ctx.fill()
     ctx.stroke()
-    const mp = shellPos(shift, shift.money)
+    const moneyPos = shellPos(shift, shift.money)
     if (shift.lift[shift.money] > 0.05) {
-      emoji(ctx, "💰", mp.x, SHELL_Y - 40, 110)
-      label(ctx, "PENSIONS", mp.x, SHELL_Y + 26, 24, "#ffe066")
+      emoji(ctx, "💰", moneyPos.x, SHELL_Y - 40, 110)
+      label(ctx, "PENSIONS", moneyPos.x, SHELL_Y + 26, 24, "#ffe066")
     }
     ;[0, 1, 2].forEach((i) => {
       const pos = shellPos(shift, i)
@@ -161,7 +161,7 @@ function shellRound(shift) {
   shift.round++
   shift.money = Math.floor(Math.random() * 3)
   shift.stage = "show"
-  shift.st = 0
+  shift.stageTimer = 0
   shift.swapsLeft = 3 + shift.round * 2
   shift.lift = [0, 0, 0]
 }
@@ -174,7 +174,7 @@ function shellPos(shift, i) {
   let x = SHELL_X[shift.slot[i]],
     lift = 0
   if (shift.stage === "shuffle" && shift.swap && (i === shift.swap.indexA || i === shift.swap.indexB)) {
-    const progress = Math.min(1, shift.st / shift.swap.dur),
+    const progress = Math.min(1, shift.stageTimer / shift.swap.dur),
       eased = progress * progress * (3 - 2 * progress),
       other = i === shift.swap.indexA ? shift.swap.indexB : shift.swap.indexA
     x = SHELL_X[shift.slot[i]] + (SHELL_X[shift.slot[other]] - SHELL_X[shift.slot[i]]) * eased
@@ -215,7 +215,7 @@ function drawShell(ctx, x, y, wob) {
     ctx.lineTo(i * 46, -195 + Math.abs(i) * 18)
     ctx.stroke()
   }
-  rr(ctx, -46, -10, 92, 34, 10)
+  roundedRect(ctx, -46, -10, 92, 34, 10)
   ctx.fillStyle = "#f08aa8"
   ctx.fill()
   ctx.lineWidth = 6

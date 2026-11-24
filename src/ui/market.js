@@ -5,19 +5,19 @@ import { MKT_LEN, pctChange } from "../core/market.js"
 import { money, fmtShort } from "../core/format.js"
 import { $ } from "./dom.js"
 
-const UP = "#3ddc84",
-  DOWN = "#ff5c5c"
+const UP_COLOR = "#3ddc84",
+  DOWN_COLOR = "#ff5c5c"
 
-function drawChart(cv, data, big) {
+function drawChart(canvas, data, big) {
   const dpr = window.devicePixelRatio || 1,
-    width = cv.clientWidth,
-    height = cv.clientHeight
+    width = canvas.clientWidth,
+    height = canvas.clientHeight
   if (!width || !height) return
-  if (cv.width !== Math.round(width * dpr) || cv.height !== Math.round(height * dpr)) {
-    cv.width = Math.round(width * dpr)
-    cv.height = Math.round(height * dpr)
+  if (canvas.width !== Math.round(width * dpr) || canvas.height !== Math.round(height * dpr)) {
+    canvas.width = Math.round(width * dpr)
+    canvas.height = Math.round(height * dpr)
   }
-  const ctx = cv.getContext("2d")
+  const ctx = canvas.getContext("2d")
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
   ctx.clearRect(0, 0, width, height)
   const padR = big ? 58 : 5,
@@ -43,18 +43,18 @@ function drawChart(cv, data, big) {
   }
   const start = data.findIndex((value) => value > 0) // line begins at the "IPO" (first earning sample)
   const shown = data.slice(start)
-  let lo = Math.min(...shown),
-    hi = Math.max(...shown)
-  if (hi === lo) {
-    hi = hi * 1.05 + 1e-9
-    lo = lo * 0.95
+  let low = Math.min(...shown),
+    high = Math.max(...shown)
+  if (high === low) {
+    high = high * 1.05 + 1e-9
+    low = low * 0.95
   }
-  const span = hi - lo
-  hi += span * 0.08
-  lo = Math.max(0, lo - span * 0.08)
+  const span = high - low
+  high += span * 0.08
+  low = Math.max(0, low - span * 0.08)
   const xForIndex = (index) => ((index + MKT_LEN - data.length) / (MKT_LEN - 1)) * plotW // right-aligned: newest sample at the right edge
-  const yForValue = (value) => padT + (1 - (value - lo) / (hi - lo)) * plotH
-  const color = data[data.length - 1] >= (live[0] || 0) ? UP : DOWN
+  const yForValue = (value) => padT + (1 - (value - low) / (high - low)) * plotH
+  const color = data[data.length - 1] >= (live[0] || 0) ? UP_COLOR : DOWN_COLOR
 
   if (big) {
     // recessive grid + right-hand axis labels
@@ -62,7 +62,7 @@ function drawChart(cv, data, big) {
     ctx.textAlign = "left"
     ctx.textBaseline = "middle"
     for (let gridLine = 0; gridLine <= 3; gridLine++) {
-      const value = lo + (hi - lo) * (gridLine / 3),
+      const value = low + (high - low) * (gridLine / 3),
         y = yForValue(value)
       ctx.strokeStyle = "rgba(255,255,255,.06)"
       ctx.lineWidth = 1
@@ -94,10 +94,10 @@ function drawChart(cv, data, big) {
   ctx.fillStyle = grad
   ctx.fill()
   // latest point
-  const lx = xForIndex(data.length - 1),
-    ly = yForValue(data[data.length - 1])
+  const lastX = xForIndex(data.length - 1),
+    lastY = yForValue(data[data.length - 1])
   ctx.beginPath()
-  ctx.arc(lx, ly, big ? 4 : 3, 0, Math.PI * 2)
+  ctx.arc(lastX, lastY, big ? 4 : 3, 0, Math.PI * 2)
   ctx.fillStyle = color
   ctx.fill()
   ctx.lineWidth = 2
@@ -126,19 +126,19 @@ function drawChart(cv, data, big) {
     const label = `${money(data[hoverIndex])}/s · ${ago ? ago + "s ago" : "now"}`
     ctx.font = "bold 12px Segoe UI, sans-serif"
     ctx.textBaseline = "middle"
-    const tw = ctx.measureText(label).width + 14
-    let bx = x + 10
-    if (bx + tw > plotW) bx = x - 10 - tw
+    const boxWidth = ctx.measureText(label).width + 14
+    let boxX = x + 10
+    if (boxX + boxWidth > plotW) boxX = x - 10 - boxWidth
     ctx.fillStyle = "rgba(10,15,13,.95)"
     ctx.strokeStyle = "#3a5446"
     ctx.lineWidth = 1
     ctx.beginPath()
-    ctx.roundRect ? ctx.roundRect(bx, padT + 2, tw, 22, 4) : ctx.rect(bx, padT + 2, tw, 22)
+    ctx.roundRect ? ctx.roundRect(boxX, padT + 2, boxWidth, 22, 4) : ctx.rect(boxX, padT + 2, boxWidth, 22)
     ctx.fill()
     ctx.stroke()
     ctx.fillStyle = "#eafff1"
     ctx.textAlign = "left"
-    ctx.fillText(label, bx + 7, padT + 13)
+    ctx.fillText(label, boxX + 7, padT + 13)
   }
 }
 const tkEls = []
@@ -158,22 +158,22 @@ function rebuildTickers() {
   listed.forEach((i) => {
     const row = document.createElement("div")
     row.className = "tk"
-    row.dataset.tt = "mkt:" + i
+    row.dataset.tooltip = "mkt:" + i
     row.innerHTML = `<div class="tkTop"><span class="tkSym">${INDUSTRIES[i].icon} ${TICKERS[i]}</span><span class="tkPx"></span></div><div class="chg"></div><canvas></canvas>`
     wrap.appendChild(row)
     tkEls.push({
       i,
-      px: row.querySelector(".tkPx"),
+      price: row.querySelector(".tkPx"),
       chg: row.querySelector(".chg"),
-      cv: row.querySelector("canvas")
+      canvas: row.querySelector("canvas")
     })
   })
 }
-function setChange(el, history) {
+function setChange(element, history) {
   const change = pctChange(history)
-  el.classList.toggle("up", change !== null && change >= 0)
-  el.classList.toggle("down", change !== null && change < 0)
-  el.textContent = change === null ? "—" : (change >= 0 ? "▲ +" : "▼ ") + change.toFixed(2) + "% (3m)"
+  element.classList.toggle("up", change !== null && change >= 0)
+  element.classList.toggle("down", change !== null && change < 0)
+  element.textContent = change === null ? "—" : (change >= 0 ? "▲ +" : "▼ ") + change.toFixed(2) + "% (3m)"
 }
 // Redraws every chart (called once a second, on resize and after a reset)
 export function drawMarket() {
@@ -184,9 +184,9 @@ export function drawMarket() {
   drawChart($("idxChart"), idx, true)
   tkEls.forEach((entry) => {
     const history = game.mkt.ind[entry.i]
-    entry.px.textContent = fmtShort(history[history.length - 1] || 0)
+    entry.price.textContent = fmtShort(history[history.length - 1] || 0)
     setChange(entry.chg, history)
-    drawChart(entry.cv, history, false)
+    drawChart(entry.canvas, history, false)
   })
 }
 // Forget the ticker layout so the next draw rebuilds it (after a new game, import or bankruptcy)

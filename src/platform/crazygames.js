@@ -5,10 +5,10 @@
 // everything falls back to localStorage and the events do nothing.
 let sdk = null
 
-function call(fn) {
+function call(callback) {
   if (!sdk) return
   try {
-    fn(sdk)
+    callback(sdk)
   } catch (error) {
     console.warn("CrazyGames SDK call failed", error)
   }
