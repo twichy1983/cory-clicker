@@ -12,11 +12,14 @@ Clickonomics: an idle clicker game in plain HTML/CSS/JS ES modules. No framework
 - Before finishing a change, run `npm run format`, `npm test` and `npm run test:e2e`.
 - Scripts must stay cross-platform (Windows/macOS/Linux): write them in Node (`scripts/*.js`), never bash or sed.
 
-## Naming
+## Code style
 
 - Names must be clear and easy to read: `state`, `upgrade`, `radius`, `elapsed`, not `S`, `u`, `r`, `t`. This applies to variables, parameters, functions and object properties.
 - No single-letter names, except `i`/`j` as a plain loop index, `x`/`y` for coordinates, `_` for an unused parameter and the `$` DOM helper. Write `width`/`height`, never `w`/`h`, and `event`, not `e`.
 - The shared objects are `game.state` (saved), `game.derived` (worked out from it) and `shift` (the open minigame shift, from `src/jobs/framework.js`).
+- One step per statement: no comma expressions (`(a += 1), (b -= 1)`) and no assignments inside conditions (`if ((timer -= dt) <= 0)`). Update first, then check.
+- No inline `style="..."` in HTML built by JavaScript: add a class to `css/main.css` (`.gain`, `.loss`, `.muted`, `.small`, `.note.first` exist). Values computed in code, like a progress bar width, are the exception.
+- Types are JSDoc comments, checked by VS Code through `jsconfig.json` (`checkJs`); there is no TypeScript and no type-check step. The main types are `GameState` (`src/core/state.js`), `Derived` (`src/core/economy.js`), and `Shift` and `Minigame` (`src/jobs/framework.js`). Keep them up to date and keep `src/` free of type errors (check with `npx -p typescript tsc -p jsconfig.json`).
 
 ## Architecture rules
 
@@ -32,7 +35,7 @@ Clickonomics: an idle clicker game in plain HTML/CSS/JS ES modules. No framework
 
 - Imports must be relative, include `.js`, and use lowercase file names: Pages is case-sensitive and the site lives under `/cory-clicker/`. No absolute `/` paths (the build checks this).
 - `scripts/build.js` uses exact string replacements on `index.html` (the CSS and module script tags and `<title>`) and fails if they change. Update both together.
-- Save compatibility: never rename or reuse achievement, upgrade or job ids; add industries only at the end of `INDUSTRIES` (owned counts are stored by index); new state fields need defaults in `newState()` and type checks in `sanitize()`. Save keys: `coryClicker.save.v1` and `coryClicker.TEST.save.v1`.
+- Save compatibility: never rename or reuse achievement, upgrade or job ids; add industries only at the end of `INDUSTRIES` (owned counts are stored by index); new state fields need defaults in `newState()`, a `@property` in the `GameState` type and type checks in `sanitize()`. Save keys: `coryClicker.save.v1` and `coryClicker.TEST.save.v1`.
 - The game saves on `pagehide` and `visibilitychange`, so e2e tests clear storage with `page.clearStorage(origin)` (from `about:blank`), not `localStorage.clear()`.
 - `window.__clickonomics` (`game`, `tick`, `save`, `act`) exists only in source builds; e2e tests use it to set up situations and then call `tick()`.
 - CrazyGames requirements (SDK in `<head>`, saves only through the SDK Data module, relative paths, no fullscreen button, PEGI 12) are summarised in `docs/releasing.md`.

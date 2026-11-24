@@ -1,9 +1,6 @@
 // The shared minigame window: intro card, timer, progress meter, strikes, alerts, result screens,
-// the animation loop and mouse/touch/keyboard input. Each minigame (lemon.js, milk.js, ...) is an object with:
-//   time, strikes?, meter, image?, tagline, rules[], winTitle, winText, lose{busted,time}
-//   init(shift)  step(shift, dt)  ambient?(shift, dt)  stop?(shift)  draw(ctx, shift, now)
-//   down?/move?/up?(shift, x, y)  cursor?(shift, x, y)  key?(shift, key) -> true if used  extra?(shift)  onTimeUp?(shift)  resultNote?(shift, kind)
-// `shift` is the current shift's state (null when no job is open). Minigames read it from here.
+// the animation loop and mouse/touch/keyboard input. Each minigame (lemon.js, milk.js, ...) is a `Minigame` object
+// (see the type below). `shift` is the current shift's state (null when no job is open). Minigames read it from here.
 // This module only runs the window. What a shift does to the game (cooldown, pay, toasts, saving) happens in
 // actions.js, which main.js connects through setJobHooks.
 import { game } from "../game.js"
@@ -13,6 +10,52 @@ import { money, mmss } from "../core/format.js"
 import { $, esc } from "../ui/dom.js"
 import { CANVAS_WIDTH, CANVAS_HEIGHT, rand, label } from "./draw.js"
 
+/**
+ * A minigame (lemon.js, milk.js, ...). Optional methods are marked with `?`.
+ * @typedef {object} Minigame
+ * @property {number} time  shift length in seconds
+ * @property {number} [strikes]  strikes before the player is busted
+ * @property {string} meter  label of the progress meter
+ * @property {string} [image]
+ * @property {string} tagline
+ * @property {string[]} rules
+ * @property {string} winTitle
+ * @property {string} winText
+ * @property {Record<string, string>} lose  text shown for each way to lose ("busted", "time", ...)
+ * @property {(shift: Shift) => void} init
+ * @property {(shift: Shift, dt: number) => void} step
+ * @property {(shift: Shift, dt: number) => void} [ambient]  runs in every phase, also before and after play
+ * @property {(shift: Shift) => void} [stop]
+ * @property {(ctx: CanvasRenderingContext2D, shift: Shift, now: number) => void} draw
+ * @property {(shift: Shift, x: number, y: number) => void} [down]
+ * @property {(shift: Shift, x: number, y: number) => void} [move]
+ * @property {(shift: Shift, x: number, y: number) => void} [up]
+ * @property {(shift: Shift, x?: number, y?: number) => boolean} [cursor]  true to show a pointer cursor
+ * @property {(shift: Shift, key: string) => boolean | void} [key]  returns true for keys it uses
+ * @property {(shift: Shift) => string} [extra]  HTML shown next to the meter instead of the strikes
+ * @property {(shift: Shift) => string} [onTimeUp]  returns the result when time runs out
+ * @property {(shift: Shift, kind: string) => string} [resultNote]
+ */
+
+/**
+ * The state of the shift in progress. Each minigame adds its own fields in init().
+ * @typedef {object} ShiftCommon
+ * @property {object} job  the job definition (see core/jobs.js and jobs/index.js)
+ * @property {Minigame} game
+ * @property {"intro" | "play" | "over"} phase
+ * @property {number} elapsed  seconds since the shift started
+ * @property {number} pct  progress meter, 0 to 100
+ * @property {number} strikes
+ * @property {number} alertT  seconds left to show the alert banner
+ * @property {{ text: string, x: number, y: number, life: number, bad?: boolean }[]} floats  floating texts
+ * @property {object[]} parts  particles (see burst())
+ * @property {string | null} meterText  replaces the progress meter's text when set
+ * @property {string} [result]  how the shift ended
+ * @property {number} [reward]  pay for a won shift
+ * @typedef {ShiftCommon & Record<string, any>} Shift
+ */
+
+/** @type {Shift | null} */
 export let shift = null
 let raf = 0
 // Set by main.js:
@@ -23,11 +66,11 @@ let raf = 0
 //   onClose()               when the window closes
 const hooks = {
   onOpen() {},
-  onStart() {},
-  onWin() {
+  onStart(_job) {},
+  onWin(_job) {
     return 0
   },
-  onPayOut() {},
+  onPayOut(_amount, _text) {},
   onClose() {}
 }
 export function setJobHooks(newHooks) {
@@ -265,6 +308,7 @@ function drawJob(now) {
 
 /* ---------- input ---------- */
 
+/** @returns {[number, number]} */
 function canvasPoint(event) {
   const rect = $("jobCanvas").getBoundingClientRect()
   return [

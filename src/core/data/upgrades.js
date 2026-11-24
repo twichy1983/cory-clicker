@@ -22,6 +22,7 @@ for (const [key, list] of Object.entries(SCANDALS)) {
   })
 }
 // Doublers for the two industries that have no scandal list
+/** @type {[industry: string, required: number, name: string, desc: string][]} */
 const DOUBLERS = [
   ["lemon", 1, "Tap Water Concentrate", "Lemonade is mostly water. So is tap water. The math checks out."],
   ["lemon", 10, "Lemon-Adjacent Flavoring", "Legally distinct from lemons. Chemically distinct from food."],
@@ -45,6 +46,7 @@ DOUBLERS.forEach(([key, req, name, desc], i) => {
   })
 })
 // Click upgrades
+/** @type {[id: string, name: string, desc: string, cost: number, kind: string][]} */
 const CLICKS = [
   ["c0", "Gold-Plated Mouse", "Every click now feels expensive. Because it was.", 100, "x2"],
   ["c1", "Repetitive Strain Waiver", "Employees sign away their wrists. Productivity doubles.", 1000, "x2"],

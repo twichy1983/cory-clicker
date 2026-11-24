@@ -65,10 +65,10 @@ export function renderAchievements(force) {
 }
 
 export function wireTabs() {
-  document.querySelectorAll(".tab").forEach((tab) =>
+  document.querySelectorAll(".tab").forEach((/** @type {HTMLElement} */ tab) =>
     tab.addEventListener("click", () => {
       document.querySelectorAll(".tab").forEach((otherTab) => otherTab.classList.toggle("on", otherTab === tab))
-      document.querySelectorAll(".tabBody").forEach((panel) => {
+      document.querySelectorAll(".tabBody").forEach((/** @type {HTMLElement} */ panel) => {
         panel.hidden = panel.id !== "tab-" + tab.dataset.tab
       })
       if (tab.dataset.tab === "stats") renderStats()

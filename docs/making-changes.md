@@ -62,7 +62,8 @@ Saves store owned counts by position, so **add new industries at the end of the 
 ## Change the save format
 
 1. Add the new field with its default to `newState()` in `src/core/state.js`. Older saves then get the default.
-2. If the field isn't a plain number or string, add a check for it in `sanitize()` in `src/core/save.js`.
-3. Add a test to `tests/unit/save.test.js` that loads a save without the field.
+2. Describe it with a `@property` line in the `GameState` type above `newState()`.
+3. If the field isn't a plain number or string, add a check for it in `sanitize()` in `src/core/save.js`.
+4. Add a test to `tests/unit/save.test.js` that loads a save without the field.
 
 Never remove or rename a saved field without handling old saves: players would lose progress.

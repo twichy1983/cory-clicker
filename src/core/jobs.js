@@ -4,6 +4,9 @@
 import { rules } from "./rules.js"
 import { earn } from "./economy.js"
 
+/** @typedef {import("./state.js").GameState} GameState */
+/** @typedef {import("./economy.js").Derived} Derived */
+
 const JOB_COOLDOWN = 5 * 60 * 1000 // default: once every 5 minutes
 const JOB_PAY_SECS = 5 * 60 // default: pays 5 minutes of the industry's income
 
@@ -85,22 +88,34 @@ export const JOB_BY_ID = Object.fromEntries(JOB_DEFS.map((job) => [job.id, job])
 
 export const jobCooldown = (job) => rules.jobCooldown || job.cooldown || JOB_COOLDOWN
 export const jobPaySecs = (job) => job.paySecs || JOB_PAY_SECS
+/** @param {Derived} derived */
 export const jobPay = (derived, job) => derived.indCps[job.ind] * jobPaySecs(job)
+/** @param {GameState} state */
 export const jobUnlocked = (state, job) => state.owned[job.ind] > 0
-// ms until the job can be played again (0 = ready)
+/**
+ * ms until the job can be played again (0 = ready)
+ * @param {GameState} state
+ */
 export const jobTimeLeft = (state, job, now) => Math.max(0, (state.jobs[job.id] || 0) - now)
 
+/** @param {GameState} state */
 export function startJobCooldown(state, job, now) {
   state.jobs[job.id] = now + jobCooldown(job)
 }
 
+/** @param {GameState} state */
 export function recordJobWin(state, job) {
   state.jobWins[job.id] = (state.jobWins[job.id] || 0) + 1
 }
 
+/** @param {GameState} state */
 export const totalJobWins = (state) => Object.values(state.jobWins).reduce((sum, wins) => sum + wins, 0)
 
-// A won shift: pays the job's reward and counts the win. Returns { type: "jobWon", job, reward }.
+/**
+ * A won shift: pays the job's reward and counts the win. Returns { type: "jobWon", job, reward }.
+ * @param {GameState} state
+ * @param {Derived} derived
+ */
 export function winJob(state, derived, job) {
   const reward = jobPay(derived, job)
   earn(state, derived, reward)
@@ -108,9 +123,12 @@ export function winJob(state, derived, job) {
   return { type: "jobWon", job, reward }
 }
 
-// Compares every job with how it was last time and returns what changed:
-// { type: "jobUnlocked", job } and { type: "jobReady", job } (ready again after a cooldown).
-// `seen` is the caller's memory between calls ({} to start); the first look at a job reports nothing.
+/**
+ * Compares every job with how it was last time and returns what changed:
+ * { type: "jobUnlocked", job } and { type: "jobReady", job } (ready again after a cooldown).
+ * `seen` is the caller's memory between calls ({} to start); the first look at a job reports nothing.
+ * @param {GameState} state
+ */
 export function jobChanges(seen, state, now) {
   const events = []
   for (const job of JOB_DEFS) {

@@ -1,6 +1,8 @@
 import { CANVAS_WIDTH, CANVAS_HEIGHT, rand, pick, roundedRect, vgrad, INK, emoji, label, plainText } from "./draw.js"
 import { shift, floatText, jobAlert, jobStrike, endJob } from "./framework.js"
 
+/** @typedef {import("./framework.js").Minigame} Minigame */
+
 /* ---------------------------------------------------------
    JOB: SHRED THE COMPLAINTS (Consumer Goods Factory)
    Click falling complaint letters before they reach the regulator.
@@ -33,6 +35,7 @@ const SHRED_KEEP = {
     "SENATOR'S IOU"
   ]
 }
+/** @type {Minigame} */
 const ShredGame = {
   time: 30,
   strikes: 3,

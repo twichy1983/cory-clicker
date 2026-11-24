@@ -1,6 +1,8 @@
 import { CANVAS_WIDTH, CANVAS_HEIGHT, rand, roundedRect, vgrad, hgrad, INK, emoji, plainText } from "./draw.js"
 import { shift, floatText, jobStrike } from "./framework.js"
 
+/** @typedef {import("./framework.js").Minigame} Minigame */
+
 /* ---------------------------------------------------------
    JOB: SKIP MAINTENANCE (Refinery Complex)
    Survive the shift: vent gauges once they pass yellow, before they hit red.
@@ -15,6 +17,7 @@ const GAUGE_SPOTS = [
 ]
 const GAUGE_R = 105,
   GAUGE_VENT = 0.55
+/** @type {Minigame} */
 const GaugeGame = {
   time: 30,
   strikes: 3,

@@ -24,7 +24,7 @@ export function buildBuildingRows() {
     const button = document.createElement("button")
     button.className = "bld"
     button.dataset.tooltip = "bld:" + i
-    button.dataset.bld = i
+    button.dataset.bld = String(i)
     button.innerHTML = `<div class="bTop"><span class="ic"></span><div class="info"><div class="nm"></div><div class="sec"></div></div><span class="tkr">${TICKERS[i]}</span></div>
       <div class="bBot"><span class="own"></span><span class="rate"></span><span class="cost"></span></div>`
     wrap.appendChild(button)
@@ -118,7 +118,7 @@ function rebuildUpgrades() {
 }
 
 function renderUpgradeAffordability() {
-  document.querySelectorAll("#upgrades .upg").forEach((button) => {
+  document.querySelectorAll("#upgrades .upg").forEach((/** @type {HTMLElement} */ button) => {
     button.classList.toggle("cant", game.state.dollars < upgradeCost(UPG_BY_ID[button.dataset.id]))
   })
 }

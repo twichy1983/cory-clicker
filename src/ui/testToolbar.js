@@ -14,7 +14,7 @@ export function addTestToolbar({ getState, earn, refresh }) {
     `<span>TEST MODE · all purchases free</span>` +
     BUTTONS.map(([id, text]) => `<button data-tool="${id}">${text}</button>`).join("")
   bar.addEventListener("click", (event) => {
-    const tool = event.target.dataset.tool
+    const tool = /** @type {HTMLElement} */ (event.target).dataset.tool
     if (!tool) return
     const state = getState(),
       now = Date.now()

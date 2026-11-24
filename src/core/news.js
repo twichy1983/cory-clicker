@@ -3,6 +3,9 @@ import { HOUR } from "./constants.js"
 import { UPGRADES } from "./data/upgrades.js"
 import { ordinal } from "./format.js"
 
+/** @typedef {import("./state.js").GameState} GameState */
+/** @typedef {import("./economy.js").Derived} Derived */
+
 const NEWS = [
   "Analysts upgrade your stock to 'Morally Bankrupt (Strong Buy)'.",
   "PR department replaces the word 'scandal' with 'learning journey' in all communications.",
@@ -20,7 +23,11 @@ const NEWS = [
   "Corporate retreat theme announced: 'Plausible Deniability'."
 ]
 
-// Picks a headline that fits the current situation
+/**
+ * Picks a headline that fits the current situation
+ * @param {GameState} state
+ * @param {Derived} derived
+ */
 export function newsLine(state, derived, now, random = Math.random) {
   const left = state.deadline - now
   if (state.fines > 0 && left < HOUR)

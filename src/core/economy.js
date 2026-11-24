@@ -7,9 +7,27 @@ import { UPGRADES, UPG_BY_ID } from "./data/upgrades.js"
 import { freshRun } from "./state.js"
 import { rules } from "./rules.js"
 
+/** @typedef {import("./state.js").GameState} GameState */
+
 /* ---------- derived values (recomputed whenever state changes) ---------- */
 
-// Works out income, click power and the fine multiplier from what the player owns.
+/**
+ * Values worked out from the state (`game.derived`). Never saved; call refreshDerived() after changing ownership.
+ * @typedef {object} Derived
+ * @property {number} cps  total income in dollars per second
+ * @property {number[]} indMult  income multiplier of each industry (scandals and doublers)
+ * @property {number[]} indCps  income per second of each industry
+ * @property {number} scandals  scandals committed
+ * @property {number} clickPct  share of income added to each click (0.01 = 1%)
+ * @property {number} clickPower  dollars per click
+ * @property {number} fineMult  fine multiplier (scandals raise it, penalty lobbyists lower it)
+ */
+
+/**
+ * Works out income, click power and the fine multiplier from what the player owns.
+ * @param {GameState} state
+ * @returns {Derived}
+ */
 export function derive(state) {
   const scandalsIn = INDUSTRIES.map(() => 0),
     doublersIn = INDUSTRIES.map(() => 0)
@@ -46,7 +64,10 @@ export function derive(state) {
 
 export const maxTimer = (state) => BASE_TIMER + state.timerLobbyists * HOUR
 
-// Price of the next `count` of industry `i`
+/**
+ * Price of the next `count` of industry `i`
+ * @param {GameState} state
+ */
 export function buildingCost(state, i, count) {
   if (rules.freePurchases) return 0
   const price = INDUSTRIES[i].base * Math.pow(COST_GROWTH, state.owned[i])
@@ -54,21 +75,31 @@ export function buildingCost(state, i, count) {
 }
 
 const lobbyCost = (cfg, count) => (rules.freePurchases ? 0 : Math.ceil(cfg.base * Math.pow(cfg.growth, count)))
+/** @param {GameState} state */
 export const timerLobbyCost = (state) => lobbyCost(TIMER_LOBBY, state.timerLobbyists)
+/** @param {GameState} state */
 export const penaltyLobbyCost = (state) => lobbyCost(PENALTY_LOBBY, state.penaltyLobbyists)
-// Firing costs double what the most recently hired lobbyist of that type cost to hire
+/**
+ * Firing costs double what the most recently hired lobbyist of that type cost to hire
+ * @param {GameState} state
+ */
 export const timerFireCost = (state) => 2 * lobbyCost(TIMER_LOBBY, Math.max(0, state.timerLobbyists - 1))
+/** @param {GameState} state */
 export const penaltyFireCost = (state) => 2 * lobbyCost(PENALTY_LOBBY, Math.max(0, state.penaltyLobbyists - 1))
 
 export const upgradeCost = (upgrade) => (rules.freePurchases ? 0 : upgrade.cost)
 
+/** @param {GameState} state */
 function upgradeUnlocked(state, upgrade) {
   if (state.upgrades[upgrade.id]) return false
   if (upgrade.type === "click") return rules.freePurchases || state.runEarned >= upgrade.unlockAt
   return state.owned[upgrade.ind] >= upgrade.req
 }
 
-// Upgrades the player can buy right now, cheapest first
+/**
+ * Upgrades the player can buy right now, cheapest first
+ * @param {GameState} state
+ */
 export const availableUpgrades = (state) =>
   UPGRADES.filter((upgrade) => upgradeUnlocked(state, upgrade)).sort((left, right) => left.cost - right.cost)
 
@@ -82,7 +113,11 @@ export function earn(state, derived, amount) {
   state.fines += amount * BASE_FINE_RATE * derived.fineMult // a negative multiplier makes a rebate accrue instead
 }
 
-// One click on the big dollar. Returns the amount earned.
+/**
+ * One click on the big dollar. Returns the amount earned.
+ * @param {GameState} state
+ * @param {Derived} derived
+ */
 export function clickDollar(state, derived) {
   const amount = derived.clickPower
   earn(state, derived, amount)
@@ -91,8 +126,12 @@ export function clickDollar(state, derived) {
   return amount
 }
 
-// Advances the game to `now`, earning income and handling any deadlines crossed along the way
-// (including time spent away). Returns a list of events: { type: "survived", rebate } or { type: "bankrupt", ... }.
+/**
+ * Advances the game to `now`, earning income and handling any deadlines crossed along the way
+ * (including time spent away). Returns a list of events: { type: "survived", rebate } or { type: "bankrupt", ... }.
+ * @param {GameState} state
+ * @param {Derived} derived
+ */
 export function advance(state, derived, now) {
   const events = []
   for (let guard = 0; guard < 1000; guard++) {
@@ -108,7 +147,10 @@ export function advance(state, derived, now) {
   return events
 }
 
-// The deadline at time `deadlineTime` has arrived: a clean or negative ledger survives, unpaid fines mean bankruptcy.
+/**
+ * The deadline at time `deadlineTime` has arrived: a clean or negative ledger survives, unpaid fines mean bankruptcy.
+ * @param {GameState} state
+ */
 function settleDeadline(state, deadlineTime, now) {
   if (state.fines > 0) return goBankrupt(state, now, false)
   const rebate = -state.fines || 0 // "|| 0" turns -0 into 0
@@ -120,8 +162,11 @@ function settleDeadline(state, deadlineTime, now) {
   return { type: "survived", rebate }
 }
 
-// Wipes the current run (cash, industries, upgrades, lobbyists, fines) but keeps lifetime stats.
-// Changes state in place. Returns { type: "bankrupt", owed, lost, voluntary }.
+/**
+ * Wipes the current run (cash, industries, upgrades, lobbyists, fines) but keeps lifetime stats.
+ * Changes state in place. Returns { type: "bankrupt", owed, lost, voluntary }.
+ * @param {GameState} state
+ */
 export function goBankrupt(state, now, voluntary) {
   const owed = state.fines,
     lost = state.dollars
@@ -142,6 +187,7 @@ export function buyBuilding(state, i, count) {
   return true
 }
 
+/** @param {GameState} state */
 export function buyUpgrade(state, id) {
   const upgrade = UPG_BY_ID[id]
   if (!upgrade || !upgradeUnlocked(state, upgrade) || state.dollars < upgradeCost(upgrade)) return false
@@ -150,6 +196,7 @@ export function buyUpgrade(state, id) {
   return true
 }
 
+/** @param {GameState} state */
 export function hireTimerLobbyist(state) {
   const cost = timerLobbyCost(state)
   if (state.dollars < cost) return false
@@ -159,6 +206,7 @@ export function hireTimerLobbyist(state) {
   return true
 }
 
+/** @param {GameState} state */
 export function hirePenaltyLobbyist(state) {
   const cost = penaltyLobbyCost(state)
   if (state.dollars < cost) return false
@@ -167,7 +215,10 @@ export function hirePenaltyLobbyist(state) {
   return true
 }
 
-// Returns the severance paid, or false
+/**
+ * Returns the severance paid, or false
+ * @param {GameState} state
+ */
 export function fireTimerLobbyist(state, now) {
   const cost = timerFireCost(state)
   if (state.timerLobbyists < 1 || state.dollars < cost) return false
@@ -178,6 +229,7 @@ export function fireTimerLobbyist(state, now) {
   return cost
 }
 
+/** @param {GameState} state */
 export function firePenaltyLobbyist(state) {
   const cost = penaltyFireCost(state)
   if (state.penaltyLobbyists < 1 || state.dollars < cost) return false
@@ -188,10 +240,14 @@ export function firePenaltyLobbyist(state) {
 
 /* ---------- the regulatory panel button ---------- */
 
-// Pays the fines (or collects a rebate) early and restarts the clock.
-// Returns { type: "paid" | "rebate" | "filed", amount } or null if the player can't afford the fines.
-// If the deadline passed before the click was handled, it has already been settled: returns
-// { type: "deadline", events } with advance()'s events and doesn't pay anything.
+/**
+ * Pays the fines (or collects a rebate) early and restarts the clock.
+ * Returns { type: "paid" | "rebate" | "filed", amount } or null if the player can't afford the fines.
+ * If the deadline passed before the click was handled, it has already been settled: returns
+ * { type: "deadline", events } with advance()'s events and doesn't pay anything.
+ * @param {GameState} state
+ * @param {Derived} derived
+ */
 export function payFines(state, derived, now) {
   const events = advance(state, derived, now)
   if (events.length) return { type: "deadline", events }

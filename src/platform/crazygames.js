@@ -16,6 +16,7 @@ function call(callback) {
 
 export const crazyGamesPlatform = {
   async init() {
+    // @ts-ignore: the SDK script in index.html adds window.CrazyGames
     const found = window.CrazyGames && window.CrazyGames.SDK
     // CrazyGames always runs games in an iframe. Opened directly anywhere else, the SDK stalls for
     // several seconds before reporting "disabled", so skip it (localhost keeps it, for testing).

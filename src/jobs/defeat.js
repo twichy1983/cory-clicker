@@ -13,11 +13,14 @@ import {
 } from "./draw.js"
 import { jobAlert, jobStrike, endJob } from "./framework.js"
 
+/** @typedef {import("./framework.js").Minigame} Minigame */
+
 /* ---------------------------------------------------------
    JOB: DEFEAT DEVICE (Auto & Aero Works)
    Keep the car in BEAST mode on the road and CLEAN mode during tests.
    --------------------------------------------------------- */
 const DEFEAT_SWITCH = { x: 586, y: 790, width: 500, height: 110 }
+/** @type {Minigame} */
 const DefeatGame = {
   time: 30,
   strikes: 3,

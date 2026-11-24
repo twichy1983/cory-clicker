@@ -171,7 +171,8 @@ export function wireTooltips() {
     true
   )
   document.addEventListener("mouseover", (event) => {
-    const target = event.target.closest("[data-tooltip]")
+    /** @type {HTMLElement} */
+    const target = /** @type {HTMLElement} */ (event.target).closest("[data-tooltip]")
     if (!target) {
       hideTip()
       return

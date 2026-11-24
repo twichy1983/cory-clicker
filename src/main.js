@@ -74,7 +74,7 @@ function wire() {
     const button = event.target.closest("[data-job]")
     if (button) openJob(JOB_BY_ID[button.dataset.job])
   })
-  document.querySelectorAll(".buyAmt button").forEach((button) =>
+  document.querySelectorAll(".buyAmt button").forEach((/** @type {HTMLElement} */ button) =>
     button.addEventListener("click", () => {
       document
         .querySelectorAll(".buyAmt button")
@@ -129,7 +129,7 @@ function wire() {
   if (IS_CRAZYGAMES) {
     // Inside the CrazyGames iframe: keep arrow keys and space from scrolling the host page, and no right-click menu
     window.addEventListener("keydown", (event) => {
-      const typing = /^(INPUT|TEXTAREA|BUTTON)$/.test(event.target.tagName)
+      const typing = /^(INPUT|TEXTAREA|BUTTON)$/.test(/** @type {HTMLElement} */ (event.target).tagName)
       if (!typing && ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(event.key))
         event.preventDefault()
     })
@@ -199,6 +199,7 @@ async function boot() {
 }
 
 // A handle for the end-to-end tests (source builds only)
+// @ts-ignore: not a standard window property
 if (BUILD === "dev") window.__clickonomics = { game, tick, save, act }
 
 boot()

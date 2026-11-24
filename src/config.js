@@ -1,6 +1,6 @@
 // Which version of the game is running.
 // __BUILD__ is replaced by scripts/build.js ("crazygames"). Unbundled source (npm run dev, GitHub Pages) is "dev".
-/* global __BUILD__ */
+// @ts-ignore: __BUILD__ only exists in bundled builds
 export const BUILD = typeof __BUILD__ !== "undefined" ? __BUILD__ : "dev"
 export const IS_CRAZYGAMES = BUILD === "crazygames"
 

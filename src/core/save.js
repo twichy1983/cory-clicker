@@ -6,7 +6,12 @@ import { ACH_BY_ID } from "./achievements.js"
 import { JOB_BY_ID } from "./jobs.js"
 import { newState, MAX_COMPANY_NAME } from "./state.js"
 
-// Base64 of the JSON (UTF-8 safe, so company names with emoji survive)
+/** @typedef {import("./state.js").GameState} GameState */
+
+/**
+ * Base64 of the JSON (UTF-8 safe, so company names with emoji survive)
+ * @param {GameState} state
+ */
 export function encodeSave(state) {
   const bytes = new TextEncoder().encode(JSON.stringify(state))
   let bin = ""

@@ -9,7 +9,7 @@ export function toast(msg, kind) {
   $("toasts").appendChild(div)
   setTimeout(() => {
     div.style.transition = "opacity .5s"
-    div.style.opacity = 0
+    div.style.opacity = "0"
     setTimeout(() => div.remove(), 500)
   }, 5000)
   while ($("toasts").children.length > 5) $("toasts").firstChild.remove()

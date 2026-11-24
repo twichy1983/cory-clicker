@@ -1,6 +1,8 @@
 import { CANVAS_WIDTH, CANVAS_HEIGHT, pick, roundedRect, vgrad, INK, emoji, label } from "./draw.js"
 import { shift, floatText, burst, jobStrike, endJob } from "./framework.js"
 
+/** @typedef {import("./framework.js").Minigame} Minigame */
+
 /* ---------------------------------------------------------
    JOB: SURPRISE ACCOUNTS (Megabank Data Silo)
    Whack-a-mole: sign up customers, never the auditors.
@@ -10,6 +12,7 @@ const TELLERS = [0, 1, 2, 3].flatMap((i) => [
   { x: 300 + i * 357, y: 830 }
 ])
 const ACCT_GOAL = 25
+/** @type {Minigame} */
 const AccountsGame = {
   time: 30,
   strikes: 3,

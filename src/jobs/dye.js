@@ -13,6 +13,8 @@ import {
 } from "./draw.js"
 import { floatText, burst, endJob } from "./framework.js"
 
+/** @typedef {import("./framework.js").Minigame} Minigame */
+
 /* ---------------------------------------------------------
    JOB: NEON SNACK LAB (Additive Laboratory)
    Add dye drops until the batch matches the order card.
@@ -34,8 +36,9 @@ const DYE_ORDERS = [
   { name: "Cheese Dust", red: 0, yellow: 3, blue: 0 },
   { name: "Mystery Purple", red: 2, yellow: 0, blue: 1 }
 ]
-const DYE_GOAL = 5,
-  DYE_BOTTLE_Y = 610,
+/** @type {number} */
+const DYE_GOAL = 5
+const DYE_BOTTLE_Y = 610,
   DYE_FLUSH = { x: 1110, y: 690, width: 230, height: 110 }
 function dyeColor(amounts) {
   const total = amounts.red + amounts.yellow + amounts.blue
@@ -61,6 +64,7 @@ function dyeMatch(shift) {
     )
   )
 }
+/** @type {Minigame} */
 const DyeGame = {
   time: 35,
   meter: "FORMULAS SHIPPED",

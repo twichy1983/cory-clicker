@@ -7,8 +7,13 @@ import { newState } from "./core/state.js"
 import { derive } from "./core/economy.js"
 import { createMarket } from "./core/market.js"
 
+/** @typedef {import("./core/state.js").GameState} GameState */
+/** @typedef {import("./core/economy.js").Derived} Derived */
+
 export const game = {
+  /** @type {GameState} */
   state: newState(Date.now()),
+  /** @type {Derived} */
   derived: null,
   mkt: createMarket(),
   peakClickRate: 0

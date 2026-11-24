@@ -1,6 +1,8 @@
 import { CANVAS_WIDTH, CANVAS_HEIGHT, rand, pick, clamp, roundedRect, vgrad, hgrad, emoji } from "./draw.js"
 import { shift, floatText, jobAlert, jobStrike, endJob, jobImage, imgReady } from "./framework.js"
 
+/** @typedef {import("./framework.js").Minigame} Minigame */
+
 /* ---------------------------------------------------------
    JOB: WASTE DISPOSAL (Processing Plant)
    Pollute the lake to 100% by opening sludge valves and tossing toxic barrels,
@@ -92,6 +94,7 @@ function lakePath(ctx) {
 }
 const easeOutBack = (progress) => 1 + 2.4 * Math.pow(progress - 1, 3) + 1.4 * Math.pow(progress - 1, 2)
 
+/** @type {Minigame} */
 const WasteGame = {
   time: 30,
   strikes: 3,

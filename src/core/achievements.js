@@ -6,9 +6,14 @@ import { UPGRADES } from "./data/upgrades.js"
 import { pctChange } from "./market.js"
 import { fmt, money } from "./format.js"
 
+/** @typedef {import("./state.js").GameState} GameState */
+
+/** @param {GameState} state */
 const totalOwned = (state) => state.owned.reduce((sum, count) => sum + count, 0)
+/** @param {GameState} state */
 const scandalsOwned = (state) =>
   UPGRADES.filter((upgrade) => upgrade.type === "scandal" && state.upgrades[upgrade.id]).length
+/** @param {GameState} state */
 const upgradesOwned = (state) => Object.keys(state.upgrades).length
 const anyStock = (context, predicate) =>
   context.mkt.ind.some((history, i) => context.state.owned[i] > 0 && predicate(history, i))
@@ -134,13 +139,13 @@ addAchievement(
 )
 
 // Upgrades & scandals
-;[
+;/** @type {[threshold: number, icon: string, name: string][]} */ ([
   [1, "🛒", "First Acquisition"],
   [10, "📦", "Shopping Spree"],
   [25, "🏷️", "Bulk Discount"],
   [50, "🧾", "Expense Account"],
   [100, "💳", "Unlimited Corporate Card"]
-].forEach(([threshold, icon, name]) =>
+]).forEach(([threshold, icon, name]) =>
   addAchievement(
     "Upgrades",
     "upg_" + threshold,
@@ -158,12 +163,12 @@ addAchievement(
   "Buy every upgrade in the game.",
   (context) => upgradesOwned(context.state) >= UPGRADES.length
 )
-;[
+;/** @type {[threshold: number, icon: string, name: string][]} */ ([
   [1, "⚖️", "First Offense"],
   [10, "🚔", "Repeat Offender"],
   [50, "🕴️", "Career Criminal"],
   [100, "📜", "Rap Sheet Longer Than the Fine Print"]
-].forEach(([threshold, icon, name]) =>
+]).forEach(([threshold, icon, name]) =>
   addAchievement(
     "Upgrades",
     "scan_" + threshold,

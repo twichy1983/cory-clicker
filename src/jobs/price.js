@@ -17,6 +17,8 @@ import {
 import { floatText, burst, jobAlert, endJob, jobReward, payOut } from "./framework.js"
 import { money } from "../core/format.js"
 
+/** @typedef {import("./framework.js").Minigame} Minigame */
+
 /* ---------------------------------------------------------
    JOB: PRICE HIKE (Pharma Conglomerate)
    Hold to raise the price for revenue; keep public outrage below 100%.
@@ -52,6 +54,7 @@ const PRICE_NEWS = [
   "📰 CEO spotted buying third island",
   "📰 Nurses' union calls for boycott"
 ]
+/** @type {Minigame} */
 const PriceGame = {
   time: 30,
   meter: "QUARTERLY REVENUE",

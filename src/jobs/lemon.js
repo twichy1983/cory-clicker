@@ -14,6 +14,8 @@ import {
 } from "./draw.js"
 import { burst, jobStrike, endJob } from "./framework.js"
 
+/** @typedef {import("./framework.js").Minigame} Minigame */
+
 /* ---------------------------------------------------------
    JOB: SHORT POUR (Lemonade Stand)
    Hold to pour; stop at (or just above) the legal-minimum line.
@@ -27,6 +29,7 @@ const LEMON = {
   topW: 300,
   botW: 225
 }
+/** @type {Minigame} */
 const LemonGame = {
   time: 30,
   strikes: 3,

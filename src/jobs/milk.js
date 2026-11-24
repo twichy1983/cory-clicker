@@ -13,6 +13,8 @@ import {
 } from "./draw.js"
 import { burst, jobStrike, endJob } from "./framework.js"
 
+/** @typedef {import("./framework.js").Minigame} Minigame */
+
 /* ---------------------------------------------------------
    JOB: SCHOOL MILK CONTRACT (Ingredient Supplier), a rhythm game
    Jugs arrive on the beat. As each crosses the glowing line, hit the
@@ -59,6 +61,7 @@ const MILK_BTNS = CHEMS.map((_, i) => ({
   width: 450,
   height: 112
 }))
+/** @type {Minigame} */
 const MilkGame = {
   time: 30,
   strikes: 3,

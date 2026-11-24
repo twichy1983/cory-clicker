@@ -1,6 +1,8 @@
 import { CANVAS_WIDTH, CANVAS_HEIGHT, roundedRect, vgrad, INK, emoji, label } from "./draw.js"
 import { floatText, burst, jobAlert, jobStrike, endJob } from "./framework.js"
 
+/** @typedef {import("./framework.js").Minigame} Minigame */
+
 /* ---------------------------------------------------------
    JOB: FOLLOW THE MONEY (Offshore Shell Network)
    A shell game with literal shell companies.
@@ -8,6 +10,7 @@ import { floatText, burst, jobAlert, jobStrike, endJob } from "./framework.js"
 const SHELL_X = [486, 836, 1186],
   SHELL_Y = 640,
   SHELL_GOAL = 5
+/** @type {Minigame} */
 const ShellGame = {
   time: 40,
   strikes: 3,
