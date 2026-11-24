@@ -233,7 +233,7 @@ function showJobPanel(kind) {
 
 /* ---------- animation loop ---------- */
 
-function stepJob(dt) {
+export function stepJob(dt) {
   if (!shift) return
   for (const particle of shift.parts) {
     particle.vy += (particle.grav || 0) * dt

@@ -10,6 +10,8 @@ Both kinds of test use Node's built-in test runner (`node:test`) and `node:asser
 - Rules that use random numbers accept a `random` function, so tests can pass a fixed one: `sampleMarket(mkt, cps, () => 0.5)`.
 - Test mode switches (`rules.freePurchases`) are reset in `beforeEach`.
 
+`tests/unit/jobs.test.js` also covers the ten minigame rules in `src/jobs/` (the e2e suite only checks each one opens without crashing). It opens a real shift through the framework and steps it by hand: `tests/unit/helpers/fake-dom.js` installs quiet DOM and canvas stubs and a no-op `requestAnimationFrame` so `src/jobs/framework.js` imports and runs in Node, and `tests/unit/helpers/shift.js` opens the shift in the "play" phase and advances frames, so a test can drive a game's `step`/`down`/`up`/`key` and check `shift.strikes`, `shift.result` and the meters.
+
 A typical test:
 
 ```js
