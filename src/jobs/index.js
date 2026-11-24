@@ -28,4 +28,4 @@ for (const def of JOB_DEFS)
   if (!GAMES[def.id]) throw new Error(`No minigame for job "${def.id}": add it to GAMES in src/jobs/index.js`)
 
 export const JOBS = JOB_DEFS.map((def) => ({ ...def, game: GAMES[def.id] }))
-export const JOB_BY_ID = Object.fromEntries(JOBS.map((j) => [j.id, j]))
+export const JOB_BY_ID = Object.fromEntries(JOBS.map((job) => [job.id, job]))

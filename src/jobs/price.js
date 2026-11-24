@@ -7,10 +7,10 @@ import { money } from "../core/format.js"
    Hold to raise the price for revenue; keep public outrage below 100%.
    --------------------------------------------------------- */
 const PRICE_BTNS = {
-  hike: { x: 70, y: 760, w: 330, h: 120 },
-  cut: { x: 430, y: 760, w: 330, h: 120 },
-  spin: { x: 900, y: 760, w: 330, h: 120 },
-  bribe: { x: 1270, y: 760, w: 330, h: 120 }
+  hike: { x: 70, y: 760, width: 330, height: 120 },
+  cut: { x: 430, y: 760, width: 330, height: 120 },
+  spin: { x: 900, y: 760, width: 330, height: 120 },
+  bribe: { x: 1270, y: 760, width: 330, height: 120 }
 }
 const PRICE = {
   revRate: 4.6, // revenue % per second scales with log10(price/5 + 1)
@@ -59,8 +59,8 @@ const PriceGame = {
       "Outrage boiled over. You testified before Congress and smirked the whole time, which somehow made it worse.",
     time: "Time's up. Patients can still afford rent. You left money on the table."
   },
-  init(G) {
-    Object.assign(G, {
+  init(shift) {
+    Object.assign(shift, {
       price: 5,
       outrage: 0,
       hike: false,
@@ -77,55 +77,55 @@ const PriceGame = {
       paidProfit: 0
     })
   },
-  step(G, dt) {
-    if (G.hike) G.price = Math.min(99999, G.price * Math.pow(2.3, dt))
-    if (G.cut) G.price = Math.max(5, G.price * Math.pow(0.3, dt))
-    const gain = Math.log10(G.price / 5 + 1) * PRICE.revRate * dt
-    G.pct = Math.min(100, G.pct + gain)
-    G.profit += (gain / 100) * jobReward() * PRICE.profitShare // real cash, paid out when the shift ends
-    const heat = Math.max(0, Math.log10(G.price / 5))
-    G.outrage = clamp(G.outrage + (heat * heat * PRICE.heatK - PRICE.calm) * dt, 0, 100)
-    if (G.spins < PRICE.spinMax && (G.spinT += dt) >= PRICE.spinRecharge) {
-      G.spins++
-      G.spinT = 0
+  step(shift, dt) {
+    if (shift.hike) shift.price = Math.min(99999, shift.price * Math.pow(2.3, dt))
+    if (shift.cut) shift.price = Math.max(5, shift.price * Math.pow(0.3, dt))
+    const gain = Math.log10(shift.price / 5 + 1) * PRICE.revRate * dt
+    shift.pct = Math.min(100, shift.pct + gain)
+    shift.profit += (gain / 100) * jobReward() * PRICE.profitShare // real cash, paid out when the shift ends
+    const heat = Math.max(0, Math.log10(shift.price / 5))
+    shift.outrage = clamp(shift.outrage + (heat * heat * PRICE.heatK - PRICE.calm) * dt, 0, 100)
+    if (shift.spins < PRICE.spinMax && (shift.spinT += dt) >= PRICE.spinRecharge) {
+      shift.spins++
+      shift.spinT = 0
     }
-    G.bribeCd = Math.max(0, G.bribeCd - dt)
-    G.newsT = Math.max(0, G.newsT - dt)
-    if (G.t >= G.nextNews) {
+    shift.bribeCd = Math.max(0, shift.bribeCd - dt)
+    shift.newsT = Math.max(0, shift.newsT - dt)
+    if (shift.elapsed >= shift.nextNews) {
       // a viral story; worse when the price is already high
-      G.nextNews = G.t + rand(PRICE.viralMin, PRICE.viralMax)
+      shift.nextNews = shift.elapsed + rand(PRICE.viralMin, PRICE.viralMax)
       const hit = Math.round(PRICE.viralHit + heat * PRICE.viralHeat)
-      G.outrage = Math.min(100, G.outrage + hit)
-      G.news = pick(PRICE_NEWS)
-      G.newsT = 2.6
+      shift.outrage = Math.min(100, shift.outrage + hit)
+      shift.news = pick(PRICE_NEWS)
+      shift.newsT = 2.6
       floatText(`+${hit}% outrage`, 1565, 140, true)
       jobAlert("📰 GOING VIRAL!", "bad")
     }
-    if ((G.histT += dt) > 0.25) {
-      G.histT = 0
-      G.hist.push(G.price)
-      if (G.hist.length > 60) G.hist.shift()
+    if ((shift.histT += dt) > 0.25) {
+      shift.histT = 0
+      shift.hist.push(shift.price)
+      if (shift.hist.length > 60) shift.hist.shift()
     }
-    if (G.outrage >= 100) {
+    if (shift.outrage >= 100) {
       jobAlert("🏛️ CONGRESSIONAL HEARING!", "bad")
       endJob("busted")
-    } else if (G.pct >= 100) endJob("win")
+    } else if (shift.pct >= 100) endJob("win")
   },
-  extra(G) {
-    return `😠 ${Math.floor(G.outrage)}% · 💵 ${money(G.profit)}`
+  extra(shift) {
+    return `😠 ${Math.floor(shift.outrage)}% · 💵 ${money(shift.profit)}`
   },
-  resultNote(G, kind) {
-    return `💵 You keep ${money(G.paidProfit)} in price-gouging profits${kind === "win" ? "." : ", even though you lost. Capitalism."}`
+  resultNote(shift, kind) {
+    return `💵 You keep ${money(shift.paidProfit)} in price-gouging profits${kind === "win" ? "." : ", even though you lost. Capitalism."}`
   },
-  cursor(G, x, y) {
-    return Object.values(PRICE_BTNS).some((b) => inBox(x, y, b))
+  cursor(shift, x, y) {
+    return Object.values(PRICE_BTNS).some((box) => inBox(x, y, box))
   },
-  down(G, x, y) {
-    if (inBox(x, y, PRICE_BTNS.hike)) G.hike = true
-    else if (inBox(x, y, PRICE_BTNS.cut)) G.cut = true
-    else if (inBox(x, y, PRICE_BTNS.spin) && G.spins > 0) {
-      G.outrage = Math.max(0, G.outrage - PRICE.spin)
-      G.spins--
+  down(shift, x, y) {
+    if (inBox(x, y, PRICE_BTNS.hike)) shift.hike = true
+    else if (inBox(x, y, PRICE_BTNS.cut)) shift.cut = true
+    else if (inBox(x, y, PRICE_BTNS.spin) && shift.spins > 0) {
+      shift.outrage = Math.max(0, shift.outrage - PRICE.spin)
+      shift.spins--
       floatText(
         pick([
           "“Thoughts and prayers.”",
@@ -138,28 +138,28 @@ const PriceGame = {
         1065,
         700
       )
-    } else if (inBox(x, y, PRICE_BTNS.bribe) && G.bribeCd === 0) {
-      G.outrage = Math.max(0, G.outrage - PRICE.bribe)
-      G.bribeCd = PRICE.bribeCd
-      G.pct = Math.max(0, G.pct - PRICE.bribeCost)
+    } else if (inBox(x, y, PRICE_BTNS.bribe) && shift.bribeCd === 0) {
+      shift.outrage = Math.max(0, shift.outrage - PRICE.bribe)
+      shift.bribeCd = PRICE.bribeCd
+      shift.pct = Math.max(0, shift.pct - PRICE.bribeCost)
       floatText(`Senator bought! −${PRICE.bribeCost}% revenue`, 1300, 700)
       burst(1435, 760, "#7cfc7c", 16, 300)
     }
   },
-  up(G) {
-    G.hike = false
-    G.cut = false
+  up(shift) {
+    shift.hike = false
+    shift.cut = false
   },
-  stop(G) {
+  stop(shift) {
     // whatever happened, the gouging profits are paid out as real cash
-    G.hike = false
-    G.cut = false
-    if (G.profit > 0 && !G.paidProfit) {
-      G.paidProfit = G.profit
-      payOut(G.profit, `💵 You kept ${money(G.profit)} in price-gouging profits.`)
+    shift.hike = false
+    shift.cut = false
+    if (shift.profit > 0 && !shift.paidProfit) {
+      shift.paidProfit = shift.profit
+      payOut(shift.profit, `💵 You kept ${money(shift.profit)} in price-gouging profits.`)
     }
   },
-  draw(ctx, G, now) {
+  draw(ctx, shift, now) {
     ctx.fillStyle = vgrad(ctx, 0, JH, [
       [0, "#3b2418"],
       [1, "#24150e"]
@@ -168,42 +168,42 @@ const PriceGame = {
     ctx.fillStyle = "rgba(255,255,255,.04)"
     for (let x = 0; x < JW; x += 120) ctx.fillRect(x, 0, 60, 700)
     // wall screen with the price chart
-    const S0 = { x: 110, y: 110, w: 900, h: 560 }
-    rr(ctx, S0.x - 14, S0.y - 14, S0.w + 28, S0.h + 28, 18)
+    const chartBox = { x: 110, y: 110, width: 900, height: 560 }
+    rr(ctx, chartBox.x - 14, chartBox.y - 14, chartBox.width + 28, chartBox.height + 28, 18)
     ctx.fillStyle = "#121212"
     ctx.fill()
     ctx.lineWidth = 6
     ctx.strokeStyle = INK
     ctx.stroke()
     ctx.fillStyle = "#0d1b14"
-    ctx.fillRect(S0.x, S0.y, S0.w, S0.h)
+    ctx.fillRect(chartBox.x, chartBox.y, chartBox.width, chartBox.height)
     ctx.strokeStyle = "rgba(124,252,124,.12)"
     ctx.lineWidth = 2
     for (let i = 1; i < 6; i++) {
       ctx.beginPath()
-      ctx.moveTo(S0.x, S0.y + (i * S0.h) / 6)
-      ctx.lineTo(S0.x + S0.w, S0.y + (i * S0.h) / 6)
+      ctx.moveTo(chartBox.x, chartBox.y + (i * chartBox.height) / 6)
+      ctx.lineTo(chartBox.x + chartBox.width, chartBox.y + (i * chartBox.height) / 6)
       ctx.stroke()
     }
     const lo = Math.log10(5),
-      hi = Math.max(Math.log10(200), Math.log10(Math.max(...G.hist)) + 0.2)
+      hi = Math.max(Math.log10(200), Math.log10(Math.max(...shift.hist)) + 0.2)
     ctx.beginPath()
-    G.hist.forEach((p, i) => {
-      const x = S0.x + 30 + (i * (S0.w - 60)) / 59,
-        y = S0.y + S0.h - 40 - ((Math.log10(p) - lo) / (hi - lo)) * (S0.h - 120)
+    shift.hist.forEach((price, i) => {
+      const x = chartBox.x + 30 + (i * (chartBox.width - 60)) / 59,
+        y = chartBox.y + chartBox.height - 40 - ((Math.log10(price) - lo) / (hi - lo)) * (chartBox.height - 120)
       i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)
     })
     ctx.lineWidth = 8
     ctx.strokeStyle = "#ff4d4d"
     ctx.lineJoin = "round"
     ctx.stroke()
-    plainText(ctx, "LIFEPILL™ PRICE PER BOTTLE", S0.x + 30, S0.y + 40, 28, "#7cfc7c", "left", 900)
-    plainText(ctx, "cost to make: $1.20", S0.x + 30, S0.y + 76, 22, "rgba(124,252,124,.6)", "left", 700)
+    plainText(ctx, "LIFEPILL™ PRICE PER BOTTLE", chartBox.x + 30, chartBox.y + 40, 28, "#7cfc7c", "left", 900)
+    plainText(ctx, "cost to make: $1.20", chartBox.x + 30, chartBox.y + 76, 22, "rgba(124,252,124,.6)", "left", 700)
     label(
       ctx,
-      "$" + (G.price < 100 ? G.price.toFixed(2) : Math.round(G.price).toLocaleString("en-US")),
-      S0.x + S0.w - 30,
-      S0.y + 60,
+      "$" + (shift.price < 100 ? shift.price.toFixed(2) : Math.round(shift.price).toLocaleString("en-US")),
+      chartBox.x + chartBox.width - 30,
+      chartBox.y + 60,
       64,
       "#ff6b5b",
       "right"
@@ -244,7 +244,7 @@ const PriceGame = {
     ctx.stroke()
     plainText(
       ctx,
-      "$" + (G.price < 1000 ? Math.round(G.price) : Math.round(G.price / 1000) + "K"),
+      "$" + (shift.price < 1000 ? Math.round(shift.price) : Math.round(shift.price / 1000) + "K"),
       95,
       45,
       40,
@@ -260,12 +260,12 @@ const PriceGame = {
     ctx.lineWidth = 6
     ctx.strokeStyle = INK
     ctx.stroke()
-    const oh = (500 * G.outrage) / 100
+    const oh = (500 * shift.outrage) / 100
     rr(ctx, 1540, 620 - oh, 50, oh, 25)
-    ctx.fillStyle = G.outrage > 70 ? "#ff3b30" : G.outrage > 40 ? "#ff9f1c" : "#ffd23f"
+    ctx.fillStyle = shift.outrage > 70 ? "#ff3b30" : shift.outrage > 40 ? "#ff9f1c" : "#ffd23f"
     ctx.fill()
     plainText(ctx, "OUTRAGE", 1565, 670, 22, "#ffb3b3", "center", 900)
-    const crowd = Math.floor(G.outrage / 9)
+    const crowd = Math.floor(shift.outrage / 9)
     for (let i = 0; i < crowd; i++)
       emoji(
         ctx,
@@ -278,27 +278,36 @@ const PriceGame = {
       ctx,
       PRICE_BTNS.hike.x,
       PRICE_BTNS.hike.y,
-      PRICE_BTNS.hike.w,
-      PRICE_BTNS.hike.h,
+      PRICE_BTNS.hike.width,
+      PRICE_BTNS.hike.height,
       "📈 HIKE",
       "#2fb35a",
-      G.hike
+      shift.hike
     )
-    button(ctx, PRICE_BTNS.cut.x, PRICE_BTNS.cut.y, PRICE_BTNS.cut.w, PRICE_BTNS.cut.h, "📉 CUT", "#5c7cfa", G.cut)
+    button(
+      ctx,
+      PRICE_BTNS.cut.x,
+      PRICE_BTNS.cut.y,
+      PRICE_BTNS.cut.width,
+      PRICE_BTNS.cut.height,
+      "📉 CUT",
+      "#5c7cfa",
+      shift.cut
+    )
     button(
       ctx,
       PRICE_BTNS.spin.x,
       PRICE_BTNS.spin.y,
-      PRICE_BTNS.spin.w,
-      PRICE_BTNS.spin.h,
-      G.spins > 0 ? "🎤 PR SPIN" : `PR SPIN ${(PRICE.spinRecharge - G.spinT).toFixed(1)}s`,
+      PRICE_BTNS.spin.width,
+      PRICE_BTNS.spin.height,
+      shift.spins > 0 ? "🎤 PR SPIN" : `PR SPIN ${(PRICE.spinRecharge - shift.spinT).toFixed(1)}s`,
       "#e8590c",
       false,
-      G.spins === 0
+      shift.spins === 0
     )
     for (let i = 0; i < PRICE.spinMax; i++) {
       // charge pips, with the next one filling up
-      const cx = PRICE_BTNS.spin.x + PRICE_BTNS.spin.w / 2 + (i - 1) * 46,
+      const cx = PRICE_BTNS.spin.x + PRICE_BTNS.spin.width / 2 + (i - 1) * 46,
         cy = PRICE_BTNS.spin.y - 28
       ctx.beginPath()
       ctx.arc(cx, cy, 15, 0, Math.PI * 2)
@@ -307,15 +316,15 @@ const PriceGame = {
       ctx.lineWidth = 4
       ctx.strokeStyle = INK
       ctx.stroke()
-      if (i < G.spins) {
+      if (i < shift.spins) {
         ctx.beginPath()
         ctx.arc(cx, cy, 11, 0, Math.PI * 2)
         ctx.fillStyle = "#ff9f1c"
         ctx.fill()
-      } else if (i === G.spins) {
+      } else if (i === shift.spins) {
         ctx.beginPath()
         ctx.moveTo(cx, cy)
-        ctx.arc(cx, cy, 11, -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * G.spinT) / PRICE.spinRecharge)
+        ctx.arc(cx, cy, 11, -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * shift.spinT) / PRICE.spinRecharge)
         ctx.closePath()
         ctx.fillStyle = "rgba(255,159,28,.5)"
         ctx.fill()
@@ -325,56 +334,56 @@ const PriceGame = {
       ctx,
       PRICE_BTNS.bribe.x,
       PRICE_BTNS.bribe.y,
-      PRICE_BTNS.bribe.w,
-      PRICE_BTNS.bribe.h,
-      G.bribeCd > 0 ? `BRIBE ${Math.ceil(G.bribeCd)}s` : "💼 BRIBE",
+      PRICE_BTNS.bribe.width,
+      PRICE_BTNS.bribe.height,
+      shift.bribeCd > 0 ? `BRIBE ${Math.ceil(shift.bribeCd)}s` : "💼 BRIBE",
       "#7048e8",
       false,
-      G.bribeCd > 0
+      shift.bribeCd > 0
     )
     plainText(
       ctx,
       `−${PRICE.spin} outrage`,
-      PRICE_BTNS.spin.x + PRICE_BTNS.spin.w / 2,
-      PRICE_BTNS.spin.y + PRICE_BTNS.spin.h + 28,
+      PRICE_BTNS.spin.x + PRICE_BTNS.spin.width / 2,
+      PRICE_BTNS.spin.y + PRICE_BTNS.spin.height + 28,
       22,
       "#d9c2a8"
     )
     plainText(
       ctx,
       `−${PRICE.bribe} outrage, −${PRICE.bribeCost}% revenue`,
-      PRICE_BTNS.bribe.x + PRICE_BTNS.bribe.w / 2,
-      PRICE_BTNS.bribe.y + PRICE_BTNS.bribe.h + 28,
+      PRICE_BTNS.bribe.x + PRICE_BTNS.bribe.width / 2,
+      PRICE_BTNS.bribe.y + PRICE_BTNS.bribe.height + 28,
       22,
       "#d9c2a8"
     )
-    if (G.newsT > 0) {
+    if (shift.newsT > 0) {
       // breaking-news banner across the price screen
-      const a = Math.min(1, G.newsT * 2),
+      const alpha = Math.min(1, shift.newsT * 2),
         y0 = 600
       ctx.save()
-      ctx.globalAlpha = a
+      ctx.globalAlpha = alpha
       ctx.fillStyle = "#c92a2a"
       ctx.fillRect(110, y0, 900, 70)
       ctx.fillStyle = "#fff"
       ctx.fillRect(110, y0, 170, 70)
       plainText(ctx, "BREAKING", 195, y0 + 35, 30, "#c92a2a", "center", 900)
-      plainText(ctx, G.news.replace("📰 ", ""), 300, y0 + 35, 28, "#fff", "left", 800)
+      plainText(ctx, shift.news.replace("📰 ", ""), 300, y0 + 35, 28, "#fff", "left", 800)
       ctx.restore()
     }
     plainText(
       ctx,
       "hold",
-      PRICE_BTNS.hike.x + PRICE_BTNS.hike.w / 2,
-      PRICE_BTNS.hike.y + PRICE_BTNS.hike.h + 28,
+      PRICE_BTNS.hike.x + PRICE_BTNS.hike.width / 2,
+      PRICE_BTNS.hike.y + PRICE_BTNS.hike.height + 28,
       22,
       "#d9c2a8"
     )
     plainText(
       ctx,
       "hold",
-      PRICE_BTNS.cut.x + PRICE_BTNS.cut.w / 2,
-      PRICE_BTNS.cut.y + PRICE_BTNS.cut.h + 28,
+      PRICE_BTNS.cut.x + PRICE_BTNS.cut.width / 2,
+      PRICE_BTNS.cut.y + PRICE_BTNS.cut.height + 28,
       22,
       "#d9c2a8"
     )

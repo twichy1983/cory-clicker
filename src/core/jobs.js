@@ -81,45 +81,45 @@ export const JOB_DEFS = [
     blurb: "Stash the raided pension fund in offshore shell companies."
   }
 ]
-export const JOB_BY_ID = Object.fromEntries(JOB_DEFS.map((j) => [j.id, j]))
+export const JOB_BY_ID = Object.fromEntries(JOB_DEFS.map((job) => [job.id, job]))
 
-export const jobCooldown = (j) => rules.jobCooldown || j.cooldown || JOB_COOLDOWN
-export const jobPaySecs = (j) => j.paySecs || JOB_PAY_SECS
-export const jobPay = (D, j) => D.indCps[j.ind] * jobPaySecs(j)
-export const jobUnlocked = (S, j) => S.owned[j.ind] > 0
+export const jobCooldown = (job) => rules.jobCooldown || job.cooldown || JOB_COOLDOWN
+export const jobPaySecs = (job) => job.paySecs || JOB_PAY_SECS
+export const jobPay = (derived, job) => derived.indCps[job.ind] * jobPaySecs(job)
+export const jobUnlocked = (state, job) => state.owned[job.ind] > 0
 // ms until the job can be played again (0 = ready)
-export const jobTimeLeft = (S, j, now) => Math.max(0, (S.jobs[j.id] || 0) - now)
+export const jobTimeLeft = (state, job, now) => Math.max(0, (state.jobs[job.id] || 0) - now)
 
-export function startJobCooldown(S, j, now) {
-  S.jobs[j.id] = now + jobCooldown(j)
+export function startJobCooldown(state, job, now) {
+  state.jobs[job.id] = now + jobCooldown(job)
 }
 
-export function recordJobWin(S, j) {
-  S.jobWins[j.id] = (S.jobWins[j.id] || 0) + 1
+export function recordJobWin(state, job) {
+  state.jobWins[job.id] = (state.jobWins[job.id] || 0) + 1
 }
 
-export const totalJobWins = (S) => Object.values(S.jobWins).reduce((a, b) => a + b, 0)
+export const totalJobWins = (state) => Object.values(state.jobWins).reduce((sum, wins) => sum + wins, 0)
 
 // A won shift: pays the job's reward and counts the win. Returns { type: "jobWon", job, reward }.
-export function winJob(S, D, j) {
-  const reward = jobPay(D, j)
-  earn(S, D, reward)
-  recordJobWin(S, j)
-  return { type: "jobWon", job: j, reward }
+export function winJob(state, derived, job) {
+  const reward = jobPay(derived, job)
+  earn(state, derived, reward)
+  recordJobWin(state, job)
+  return { type: "jobWon", job, reward }
 }
 
 // Compares every job with how it was last time and returns what changed:
 // { type: "jobUnlocked", job } and { type: "jobReady", job } (ready again after a cooldown).
 // `seen` is the caller's memory between calls ({} to start); the first look at a job reports nothing.
-export function jobChanges(seen, S, now) {
+export function jobChanges(seen, state, now) {
   const events = []
-  for (const j of JOB_DEFS) {
-    const unlocked = jobUnlocked(S, j),
-      ready = unlocked && jobTimeLeft(S, j, now) === 0,
-      prev = seen[j.id]
-    if (prev && !prev.unlocked && unlocked) events.push({ type: "jobUnlocked", job: j })
-    if (prev && prev.unlocked && !prev.ready && ready) events.push({ type: "jobReady", job: j })
-    seen[j.id] = { unlocked, ready }
+  for (const job of JOB_DEFS) {
+    const unlocked = jobUnlocked(state, job),
+      ready = unlocked && jobTimeLeft(state, job, now) === 0,
+      prev = seen[job.id]
+    if (prev && !prev.unlocked && unlocked) events.push({ type: "jobUnlocked", job })
+    if (prev && prev.unlocked && !prev.ready && ready) events.push({ type: "jobReady", job })
+    seen[job.id] = { unlocked, ready }
   }
   return events
 }

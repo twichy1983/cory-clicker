@@ -1,4 +1,4 @@
-// The saved game state. Everything the game needs to remember lives in one plain object (S).
+// The saved game state. Everything the game needs to remember lives in one plain object (state).
 import { BASE_TIMER } from "./constants.js"
 import { INDUSTRIES } from "./data/industries.js"
 

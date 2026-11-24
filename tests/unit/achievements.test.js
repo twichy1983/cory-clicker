@@ -6,9 +6,9 @@ import { createMarket, sampleMarket, resetMarket } from "../../src/core/market.j
 import { ACH, ACH_BY_ID, checkAchievements } from "../../src/core/achievements.js"
 
 const T0 = 1_000_000_000_000
-const ctxFor = (S) => ({
-  S,
-  D: derive(S),
+const ctxFor = (state) => ({
+  state,
+  derived: derive(state),
   mkt: createMarket(),
   peakClickRate: 0
 })
@@ -23,42 +23,46 @@ test("a fresh game unlocks nothing", () => {
 })
 
 test("unlocks are stored with their time and only reported once", () => {
-  const S = newState(T0)
-  S.owned[0] = 1
-  const fresh = checkAchievements(ctxFor(S), T0 + 1).map((a) => a.id)
+  const state = newState(T0)
+  state.owned[0] = 1
+  const fresh = checkAchievements(ctxFor(state), T0 + 1).map((achievement) => achievement.id)
   assert.deepEqual(fresh, ["ind_lemon"])
-  assert.equal(S.achievements.ind_lemon, T0 + 1)
-  assert.deepEqual(checkAchievements(ctxFor(S), T0 + 2), [])
+  assert.equal(state.achievements.ind_lemon, T0 + 1)
+  assert.deepEqual(checkAchievements(ctxFor(state), T0 + 2), [])
 })
 
 test("click speed and income thresholds", () => {
-  const S = newState(T0)
-  S.owned[9] = 1 // 3.2 million per second
-  const ctx = ctxFor(S)
+  const state = newState(T0)
+  state.owned[9] = 1 // 3.2 million per second
+  const ctx = ctxFor(state)
   ctx.peakClickRate = 10
-  const ids = checkAchievements(ctx, T0).map((a) => a.id)
+  const ids = checkAchievements(ctx, T0).map((achievement) => achievement.id)
   for (const id of ["cspeed_5", "cspeed_10", "cps_10", "cps_1000", "cps_1000000"]) assert.ok(ids.includes(id), id)
   assert.ok(!ids.includes("cspeed_15"))
   assert.ok(!ids.includes("cps_1000000000"))
 })
 
 test("bug fix: going bankrupt doesn't unlock Black Monday", () => {
-  const S = newState(T0)
-  S.owned[0] = 50
+  const state = newState(T0)
+  state.owned[0] = 50
   const mkt = createMarket()
-  for (let i = 0; i < 30; i++) sampleMarket(mkt, derive(S).indCps, () => 0.5)
-  goBankrupt(S, T0, true)
-  const D = derive(S)
-  for (let i = 0; i < 30; i++) sampleMarket(mkt, D.indCps, () => 0.5) // index falls to $0
-  const ids = checkAchievements({ S, D, mkt, peakClickRate: 0 }, T0).map((a) => a.id)
+  for (let i = 0; i < 30; i++) sampleMarket(mkt, derive(state).indCps, () => 0.5)
+  goBankrupt(state, T0, true)
+  const derived = derive(state)
+  for (let i = 0; i < 30; i++) sampleMarket(mkt, derived.indCps, () => 0.5) // index falls to $0
+  const ids = checkAchievements({ state, derived, mkt, peakClickRate: 0 }, T0).map((achievement) => achievement.id)
   assert.ok(!ids.includes("mkt_crash"))
 })
 
 test("a real 90% crash while owning industries does unlock Black Monday", () => {
-  const S = newState(T0)
-  S.owned[0] = 100
+  const state = newState(T0)
+  state.owned[0] = 100
   const mkt = createMarket()
-  resetMarket(mkt, derive(S).indCps, () => 0.5)
+  resetMarket(mkt, derive(state).indCps, () => 0.5)
   mkt.idx.push(mkt.idx[0] * 0.05)
-  assert.ok(checkAchievements({ S, D: derive(S), mkt, peakClickRate: 0 }, T0).some((a) => a.id === "mkt_crash"))
+  assert.ok(
+    checkAchievements({ state, derived: derive(state), mkt, peakClickRate: 0 }, T0).some(
+      (achievement) => achievement.id === "mkt_crash"
+    )
+  )
 })

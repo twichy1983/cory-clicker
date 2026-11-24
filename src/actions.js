@@ -3,8 +3,8 @@
 import { game, refreshDerived } from "./game.js"
 import { HOUR, BASE_TIMER } from "./core/constants.js"
 import { UPG_BY_ID } from "./core/data/upgrades.js"
-import * as E from "./core/economy.js"
-import * as J from "./core/jobs.js"
+import * as economy from "./core/economy.js"
+import * as jobRules from "./core/jobs.js"
 import { newState, MAX_COMPANY_NAME } from "./core/state.js"
 import { decodeSave, encodeSave, sanitize } from "./core/save.js"
 import { checkAchievements, MAJOR_ACH } from "./core/achievements.js"
@@ -42,7 +42,7 @@ export function update() {
 const seenJobs = {}
 export function updateJobs(quiet) {
   renderJobs()
-  const events = J.jobChanges(seenJobs, game.S, Date.now())
+  const events = jobRules.jobChanges(seenJobs, game.state, Date.now())
   if (!quiet) handleEvents(events)
 }
 
@@ -61,8 +61,8 @@ function recordClick() {
 export function awardAchievements(quiet) {
   const fresh = checkAchievements(game, Date.now())
   if (fresh.length && !quiet) {
-    if (fresh.some((a) => MAJOR_ACH.has(a.id))) platform.happytime() // portal confetti, saved for big milestones
-    if (fresh.length <= 3) fresh.forEach((a) => toast(`🏆 Achievement unlocked: ${a.name}`, "gold"))
+    if (fresh.some((achievement) => MAJOR_ACH.has(achievement.id))) platform.happytime() // portal confetti, saved for big milestones
+    if (fresh.length <= 3) fresh.forEach((achievement) => toast(`🏆 Achievement unlocked: ${achievement.name}`, "gold"))
     else toast(`🏆 ${fresh.length} achievements unlocked!`, "gold")
   }
   renderAchievements()
@@ -96,14 +96,14 @@ function showBankruptcy({ owed, lost, voluntary }) {
   if (jobIsOpen()) closeJob()
   update()
   save()
-  const S = game.S
+  const state = game.state
   if (voluntary) {
     showModal(
       "📉 Chapter 11 Filed",
       `<p>You walked into bankruptcy court with <b>${money(lost)}</b> in cash and <b style="color:var(--red)">${money(Math.max(0, owed))}</b> in unpaid fines, and walked out with neither.</p>
        <p>Every industry has been dissolved, every upgrade voided and every lobbyist let go. The regulators' slate, and their clock, start fresh.</p>
        <p>Achievements, play time and lifetime stats are untouched.</p>
-       <p class="note">Bankruptcies so far: ${S.bankruptcies}.</p>`,
+       <p class="note">Bankruptcies so far: ${state.bankruptcies}.</p>`,
       [["Start the next venture", hideModal]],
       true
     )
@@ -114,7 +114,7 @@ function showBankruptcy({ owed, lost, voluntary }) {
     `<p>You failed to pay <b style="color:var(--red)">${money(owed)}</b> in regulatory fines before the deadline.</p>
      <p>Federal regulators have seized your <b>${money(lost)}</b> in cash, dissolved every industry, voided every upgrade and fired your lobbyists.</p>
      <p>Your CEO has received a $40 million severance package and a book deal.</p>
-     <p class="note">Bankruptcies so far: ${S.bankruptcies}. Start over. Pay your fines this time.</p>`,
+     <p class="note">Bankruptcies so far: ${state.bankruptcies}. Start over. Pay your fines this time.</p>`,
     [["Rebuild the empire", hideModal]],
     true
   )
@@ -123,56 +123,56 @@ function showBankruptcy({ owed, lost, voluntary }) {
 /* ---------- player actions ---------- */
 
 export function clickDollar(ev) {
-  const amount = E.clickDollar(game.S, game.D)
+  const amount = economy.clickDollar(game.state, game.derived)
   recordClick()
   showClickFeedback(amount, ev)
   render()
 }
 
 export function buyBuilding(i) {
-  if (E.buyBuilding(game.S, i, buyAmt)) update()
+  if (economy.buyBuilding(game.state, i, buyAmt)) update()
 }
 
 export function buyUpgrade(id) {
-  if (!E.buyUpgrade(game.S, id)) return
-  const u = UPG_BY_ID[id]
+  if (!economy.buyUpgrade(game.state, id)) return
+  const upgrade = UPG_BY_ID[id]
   hideTip() // the button disappears
   update()
-  if (u.type === "scandal") {
-    scandalShock(game.mkt, u.ind)
-    toast(`Scandal committed: “${u.name}” Regulatory fines +1%.`, true)
+  if (upgrade.type === "scandal") {
+    scandalShock(game.mkt, upgrade.ind)
+    toast(`Scandal committed: “${upgrade.name}” Regulatory fines +1%.`, true)
   }
 }
 
 export function hireTimerLobbyist() {
-  if (!E.hireTimerLobbyist(game.S)) return
+  if (!economy.hireTimerLobbyist(game.state)) return
   toast("A lobbyist bought you another hour. Deadline +1h.")
   update()
 }
 
 export function hirePenaltyLobbyist() {
-  if (!E.hirePenaltyLobbyist(game.S)) return
+  if (!economy.hirePenaltyLobbyist(game.state)) return
   update()
-  const m = game.D.fineMult
-  if (m < 0 && m > -0.011) toast("Fine multiplier is now NEGATIVE. The government now pays you to exist.")
+  const mult = game.derived.fineMult
+  if (mult < 0 && mult > -0.011) toast("Fine multiplier is now NEGATIVE. The government now pays you to exist.")
 }
 
 export function fireTimerLobbyist() {
-  const cost = E.fireTimerLobbyist(game.S, Date.now())
+  const cost = economy.fireTimerLobbyist(game.state, Date.now())
   if (cost === false) return
   toast(`Fired a Timer Lobbyist for ${money(cost)} in severance. Deadline −1h.`, true)
   update()
 }
 
 export function firePenaltyLobbyist() {
-  const cost = E.firePenaltyLobbyist(game.S)
+  const cost = economy.firePenaltyLobbyist(game.state)
   if (cost === false) return
   toast(`Fired a Penalty Lobbyist for ${money(cost)} in severance. Fines +1%.`, true)
   update()
 }
 
 export function payFines() {
-  const ev = E.payFines(game.S, game.D, Date.now())
+  const ev = economy.payFines(game.state, game.derived, Date.now())
   if (!ev) return
   if (ev.type === "deadline") {
     handleEvents(ev.events)
@@ -188,14 +188,14 @@ export function payFines() {
 /* ---------- job shifts (main.js connects these to the minigame window with setJobHooks) ---------- */
 
 export function startJob(job) {
-  J.startJobCooldown(game.S, job, Date.now()) // the cooldown starts with the shift, win or lose
+  jobRules.startJobCooldown(game.state, job, Date.now()) // the cooldown starts with the shift, win or lose
   save()
   updateJobs(true)
 }
 
 // Returns the reward, for the window's result screen
 export function winJob(job) {
-  const ev = J.winJob(game.S, game.D, job)
+  const ev = jobRules.winJob(game.state, game.derived, job)
   handleEvents([ev])
   save()
   return ev.reward
@@ -203,35 +203,35 @@ export function winJob(job) {
 
 // Extra cash a minigame pays on top of the reward (the price-gouging profits)
 export function jobPayOut(amount, text) {
-  E.earn(game.S, game.D, amount)
+  economy.earn(game.state, game.derived, amount)
   if (text) toast(text, "gold")
 }
 
 export function renameCompany(name) {
-  game.S.company = [...name.trim()].slice(0, MAX_COMPANY_NAME).join("") || "Unnamed Holdings"
+  game.state.company = [...name.trim()].slice(0, MAX_COMPANY_NAME).join("") || "Unnamed Holdings"
 }
 
 /* ---------- loading, importing and resetting ---------- */
 
 // Replaces the game with loaded data, catching up on time spent away
 function loadGame(data, isImport) {
-  game.S = sanitize(data, Date.now())
+  game.state = sanitize(data, Date.now())
   refreshDerived()
-  const S = game.S,
+  const state = game.state,
     now = Date.now(),
-    away = now - S.lastTick
-  const before = S.dollars,
-    finesBefore = S.fines
-  const events = E.advance(S, game.D, now)
-  $("companyName").value = S.company
+    away = now - state.lastTick
+  const before = state.dollars,
+    finesBefore = state.fines
+  const events = economy.advance(state, game.derived, now)
+  $("companyName").value = state.company
   update()
   handleEvents(events)
-  if (!events.some((e) => e.type === "bankrupt") && away > 60000 && !isImport) {
+  if (!events.some((event) => event.type === "bankrupt") && away > 60000 && !isImport) {
     showModal(
       "Welcome back",
       `<p>You were away for <b>${fmtDuration(away)}</b>.</p>
-       <p>Your industries earned <b style="color:var(--green)">${money(S.dollars - before)}</b> while you were gone.</p>
-       <p>Regulatory fines changed by <b style="color:var(--red)">${money(S.fines - finesBefore)}</b>. Time left to pay: <b>${fmtTime(S.deadline - now)}</b>.</p>`,
+       <p>Your industries earned <b style="color:var(--green)">${money(state.dollars - before)}</b> while you were gone.</p>
+       <p>Regulatory fines changed by <b style="color:var(--red)">${money(state.fines - finesBefore)}</b>. Time left to pay: <b>${fmtTime(state.deadline - now)}</b>.</p>`,
       [["Back to work", hideModal]]
     )
   }
@@ -249,15 +249,15 @@ export function loadSavedGame() {
   if (!raw) return
   try {
     loadGame(decodeSave(raw), false)
-  } catch (e) {
-    console.warn(e)
+  } catch (error) {
+    console.warn(error)
     toast("Couldn't read your save; starting fresh.", true)
   }
 }
 
 // After an import or hard reset: fresh charts, achievements re-checked quietly
 function afterReplace() {
-  resetMarket(game.mkt, game.D.indCps)
+  resetMarket(game.mkt, game.derived.indCps)
   resetTickers()
   drawMarket()
   awardAchievements(true)
@@ -270,14 +270,15 @@ export function exportSave() {
   save()
   showModal(
     "Export save",
-    `<p class="note" style="margin-top:0">Copy this text somewhere safe.</p><textarea id="exportTxt" readonly>${encodeSave(game.S)}</textarea>`,
+    `<p class="note" style="margin-top:0">Copy this text somewhere safe.</p><textarea id="exportTxt" readonly>${encodeSave(game.state)}</textarea>`,
     [
       [
         "Copy",
         () => {
-          const t = $("exportTxt")
-          t.select()
-          if (navigator.clipboard) navigator.clipboard.writeText(t.value).then(() => toast("Save copied to clipboard."))
+          const textarea = $("exportTxt")
+          textarea.select()
+          if (navigator.clipboard)
+            navigator.clipboard.writeText(textarea.value).then(() => toast("Save copied to clipboard."))
           else document.execCommand("copy")
         }
       ],
@@ -322,7 +323,7 @@ export function declareBankruptcy() {
         "File for bankruptcy",
         () => {
           hideModal()
-          handleEvents([E.goBankrupt(game.S, Date.now(), true)])
+          handleEvents([economy.goBankrupt(game.state, Date.now(), true)])
         },
         "danger"
       ],
@@ -340,10 +341,10 @@ export function hardReset() {
       [
         "Wipe it all",
         () => {
-          game.S = newState(Date.now())
+          game.state = newState(Date.now())
           game.peakClickRate = 0
           recentClicks.length = 0
-          $("companyName").value = game.S.company
+          $("companyName").value = game.state.company
           update()
           afterReplace()
           hideModal()

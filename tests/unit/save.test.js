@@ -7,24 +7,24 @@ const T0 = 1_000_000_000_000
 const HOUR_MS = 3600 * 1000
 
 test("save and load gives back the same game", () => {
-  const S = newState(T0)
-  S.dollars = 1234.5
-  S.owned[3] = 7
-  S.upgrades.s_food_0 = true
-  S.company = "Ünïcode Corp 💸"
-  S.achievements.own_10 = T0
-  S.jobs.waste = T0 + 5
-  S.jobWins.lemon = 2
-  const loaded = sanitize(decodeSave(encodeSave(S)), T0)
-  assert.deepEqual(loaded, S)
+  const state = newState(T0)
+  state.dollars = 1234.5
+  state.owned[3] = 7
+  state.upgrades.s_food_0 = true
+  state.company = "Ünïcode Corp 💸"
+  state.achievements.own_10 = T0
+  state.jobs.waste = T0 + 5
+  state.jobWins.lemon = 2
+  const loaded = sanitize(decodeSave(encodeSave(state)), T0)
+  assert.deepEqual(loaded, state)
 })
 
 test("saves made by the old single-file version still load", () => {
-  const S = newState(T0)
-  S.company = "Café ☕ Holdings"
-  const old = btoa(unescape(encodeURIComponent(JSON.stringify(S)))) // how the old version encoded saves
-  assert.equal(encodeSave(S), old)
-  assert.deepEqual(sanitize(decodeSave(old), T0), S)
+  const state = newState(T0)
+  state.company = "Café ☕ Holdings"
+  const old = btoa(unescape(encodeURIComponent(JSON.stringify(state)))) // how the old version encoded saves
+  assert.equal(encodeSave(state), old)
+  assert.deepEqual(sanitize(decodeSave(old), T0), state)
 })
 
 test("garbage is rejected", () => {
@@ -35,7 +35,7 @@ test("garbage is rejected", () => {
 })
 
 test("unknown and badly typed fields are dropped", () => {
-  const S = sanitize(
+  const state = sanitize(
     {
       dollars: "lots",
       owned: [5, -3, "x", 2.7],
@@ -47,13 +47,13 @@ test("unknown and badly typed fields are dropped", () => {
     },
     T0
   )
-  assert.equal(S.dollars, 0)
-  assert.deepEqual(S.owned.slice(0, 4), [5, 0, 0, 2])
-  assert.deepEqual(S.upgrades, { s_food_0: true })
-  assert.deepEqual(S.achievements, { own_10: 123 })
-  assert.deepEqual(S.jobs, { waste: 99 })
-  assert.equal(S.timerLobbyists, 0)
-  assert.equal("hacked" in S, false)
+  assert.equal(state.dollars, 0)
+  assert.deepEqual(state.owned.slice(0, 4), [5, 0, 0, 2])
+  assert.deepEqual(state.upgrades, { s_food_0: true })
+  assert.deepEqual(state.achievements, { own_10: 123 })
+  assert.deepEqual(state.jobs, { waste: 99 })
+  assert.equal(state.timerLobbyists, 0)
+  assert.equal("hacked" in state, false)
 })
 
 test("company names are trimmed and capped at 128 characters", () => {
@@ -64,11 +64,11 @@ test("company names are trimmed and capped at 128 characters", () => {
 })
 
 test("bad dates and negative stats are reset", () => {
-  const S = sanitize({ startedAt: Infinity, clicks: -5, bankruptcies: NaN, finesPaid: 1e400 }, T0)
-  assert.equal(S.startedAt, T0)
-  assert.equal(S.clicks, 0)
-  assert.equal(S.bankruptcies, 0)
-  assert.equal(S.finesPaid, 0)
+  const state = sanitize({ startedAt: Infinity, clicks: -5, bankruptcies: NaN, finesPaid: 1e400 }, T0)
+  assert.equal(state.startedAt, T0)
+  assert.equal(state.clicks, 0)
+  assert.equal(state.bankruptcies, 0)
+  assert.equal(state.finesPaid, 0)
   assert.equal(sanitize({ startedAt: T0 + HOUR_MS }, T0).startedAt, T0) // a start date in the future
   assert.equal(sanitize({ startedAt: T0 - 5 }, T0).startedAt, T0 - 5)
 })

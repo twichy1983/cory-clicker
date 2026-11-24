@@ -22,7 +22,7 @@ async function freshGame(path = "/") {
   await page.goto(server.url + path)
   page.errors.length = 0
 }
-const state = () => page.eval("window.__clickonomics.game.S")
+const readState = () => page.eval("window.__clickonomics.game.state")
 const tick = () => page.eval("window.__clickonomics.tick()")
 
 beforeEach(() => freshGame())
@@ -41,16 +41,16 @@ test("clicking the dollar earns money, and the save survives a reload", async ()
   assert.equal(await page.text("#dollars"), "$15")
   await page.click("#saveNow")
   await page.goto(server.url + "/")
-  assert.equal((await state()).clicks, 15)
+  assert.equal((await readState()).clicks, 15)
   assert.equal(await page.text("#dollars"), "$15")
 })
 
 test("buying an industry starts income and unlocks its job", async () => {
   for (let i = 0; i < 12; i++) await page.click("#bigDollar")
   await page.click(`[data-bld="0"]`)
-  const S = await state()
-  assert.equal(S.owned[0], 1)
-  assert.equal(S.dollars, 0)
+  const state = await readState()
+  assert.equal(state.owned[0], 1)
+  assert.equal(state.dollars, 0)
   assert.match(await page.text("#cps"), /0\.15/)
   assert.equal(await page.eval(`document.querySelector('[data-job="lemon"]').className`), "job ready")
 })
@@ -59,20 +59,20 @@ test("paying fines restarts the clock", async () => {
   for (let i = 0; i < 20; i++) await page.click("#bigDollar")
   assert.match(await page.text("#payBtn"), /^PAY \$2(\.0)? NOW$/)
   await page.click("#payBtn")
-  const S = await state()
-  assert.equal(S.fines, 0)
-  assert.ok(Math.abs(S.finesPaid - 2) < 1e-9)
+  const state = await readState()
+  assert.equal(state.fines, 0)
+  assert.ok(Math.abs(state.finesPaid - 2) < 1e-9)
 })
 
 test("unpaid fines at the deadline mean bankruptcy", async () => {
   await page.eval(
-    `(() => { const S = window.__clickonomics.game.S; S.owned[0] = 5; S.fines = 100; S.deadline = Date.now() - 1; })()`
+    `(() => { const state = window.__clickonomics.game.state; state.owned[0] = 5; state.fines = 100; state.deadline = Date.now() - 1; })()`
   )
   await tick()
   assert.match(await page.text("#modal h3"), /CEASE & DESIST/)
-  const S = await state()
-  assert.equal(S.bankruptcies, 1)
-  assert.equal(S.owned[0], 0)
+  const state = await readState()
+  assert.equal(state.bankruptcies, 1)
+  assert.equal(state.owned[0], 0)
 })
 
 test("export and import a save through the Save tab", async () => {
@@ -86,7 +86,7 @@ test("export and import a save through the Save tab", async () => {
   await page.click("#importBtn")
   await page.eval(`document.querySelector("#importTxt").value = ${JSON.stringify(saved)}`)
   await page.click("#modal .row button:first-child") // Load
-  assert.equal((await state()).clicks, 7)
+  assert.equal((await readState()).clicks, 7)
   assert.equal(await page.text("#dollars"), "$7")
 })
 
@@ -95,7 +95,7 @@ test("a bad import string is rejected without changing the game", async () => {
   await page.click("#importBtn")
   await page.eval(`document.querySelector("#importTxt").value = "definitely not a save"`)
   await page.click("#modal .row button:first-child")
-  assert.equal((await state()).clicks, 1)
+  assert.equal((await readState()).clicks, 1)
   assert.match(await page.text("#toasts"), /invalid/)
 })
 
@@ -104,15 +104,17 @@ test("test mode: free purchases, a separate save slot and the toolbar", async ()
   assert.equal(await page.eval("document.title"), "$0 · Clickonomics [TEST]")
   assert.equal(await page.eval(`!!document.querySelector("#testBar")`), true)
   await page.click(`[data-bld="9"]`)
-  assert.equal((await state()).owned[9], 1)
-  await page.click(`#testBar [data-t="cash"]`)
-  assert.ok((await state()).dollars >= 1e9)
+  assert.equal((await readState()).owned[9], 1)
+  await page.click(`#testBar [data-tool="cash"]`)
+  assert.ok((await readState()).dollars >= 1e9)
 })
 
 test("every minigame opens, plays and quits without errors", async () => {
   await freshGame("/?test")
   for (let i = 0; i < 10; i++) await page.click(`[data-bld="${i}"]`)
-  const jobs = await page.eval(`[...document.querySelectorAll("#jobList [data-job]")].map(b => b.dataset.job)`)
+  const jobs = await page.eval(
+    `[...document.querySelectorAll("#jobList [data-job]")].map(button => button.dataset.job)`
+  )
   assert.equal(jobs.length, 10)
   for (const id of jobs) {
     await page.click(`[data-job="${id}"]`)
@@ -120,13 +122,13 @@ test("every minigame opens, plays and quits without errors", async () => {
     await page.click(`#jobPanel [data-act="start"]`)
     // Random clicks, drags and keys across the canvas for about two seconds
     await page.eval(`(async () => {
-      const c = document.querySelector("#jobCanvas"), r = c.getBoundingClientRect();
-      const fire = (type, x, y) => c.dispatchEvent(new PointerEvent(type, { bubbles: true, clientX: r.left + x * r.width, clientY: r.top + y * r.height, pointerId: 1 }));
+      const canvas = document.querySelector("#jobCanvas"), rect = canvas.getBoundingClientRect();
+      const fire = (type, x, y) => canvas.dispatchEvent(new PointerEvent(type, { bubbles: true, clientX: rect.left + x * rect.width, clientY: rect.top + y * rect.height, pointerId: 1 }));
       for (let i = 0; i < 40; i++) {
         const x = Math.random(), y = Math.random();
         fire("pointerdown", x, y); fire("pointermove", x + 0.02, y); fire("pointerup", x + 0.02, y);
         document.dispatchEvent(new KeyboardEvent("keydown", { key: "123asdjkl"[i % 9], bubbles: true }));
-        await new Promise(r => setTimeout(r, 50));
+        await new Promise(resolve => setTimeout(resolve, 50));
       }
     })()`)
     await page.click("#jobClose") // quit (or close the result screen)
@@ -151,7 +153,7 @@ test(
       assert.equal(await page.eval("typeof window.__clickonomics"), "undefined") // no test hooks in the release
       // The SDK is blocked in tests, so the only allowed error is the failed SDK download
       assert.deepEqual(
-        page.errors.filter((e) => !/crazygames/i.test(e)),
+        page.errors.filter((error) => !/crazygames/i.test(error)),
         []
       )
     } finally {

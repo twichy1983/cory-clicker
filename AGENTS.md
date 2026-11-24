@@ -12,14 +12,20 @@ Clickonomics: an idle clicker game in plain HTML/CSS/JS ES modules. No framework
 - Before finishing a change, run `npm run format`, `npm test` and `npm run test:e2e`.
 - Scripts must stay cross-platform (Windows/macOS/Linux): write them in Node (`scripts/*.js`), never bash or sed.
 
+## Naming
+
+- Names must be clear and easy to read: `state`, `upgrade`, `radius`, `elapsed`, not `S`, `u`, `r`, `t`. This applies to variables, parameters, functions and object properties.
+- No single-letter names, except `i`/`j` as a plain loop index, `x`/`y` for coordinates, `_` for an unused parameter and the `$` DOM helper. Write `width`/`height`, never `w`/`h`, and `event`, not `e`.
+- The shared objects are `game.state` (saved), `game.derived` (worked out from it) and `shift` (the open minigame shift, from `src/jobs/framework.js`).
+
 ## Architecture rules
 
-- `src/core/` must not touch `document`, `window`, `localStorage`, `Date.now()` or `Math.random()`. Pass `S`, `D` and `now` in (random numbers come in as an optional `random` argument). It runs in Node for the unit tests.
+- `src/core/` must not touch `document`, `window`, `localStorage`, `Date.now()` or `Math.random()`. Pass `state`, `derived` and `now` in (random numbers come in as an optional `random` argument). It runs in Node for the unit tests.
 - Core rules return events (`{ type: "bankrupt", ... }`); `src/actions.js` shows toasts and dialogs. UI modules (`src/ui/`) only draw; buttons are wired in `src/main.js`, often through event delegation on `data-*` attributes.
-- The shared state is `game` in `src/game.js`. `game.S` is saved; `game.D` is derived. Call `refreshDerived()` (or `act.update()`) after changing ownership. Loading, importing and hard resetting replace `game.S` entirely, so never cache it.
+- The shared state is `game` in `src/game.js`. `game.state` is saved; `game.derived` is derived. Call `refreshDerived()` (or `act.update()`) after changing ownership. Loading, importing and hard resetting replace `game.state` entirely, so never cache it.
 - Test mode flips switches in `src/core/rules.js`; don't use `if (TEST_MODE)` inside core. `__BUILD__` is defined only by `scripts/build.js`; unbundled code is `"dev"`.
-- Minigames read the current shift state through the live `G` export from `src/jobs/framework.js`. The `key()` handler returns `true` for keys it uses (only those get `preventDefault`).
-- The job framework only runs the window. Shift effects (cooldown, pay, toasts, saving) go through `setJobHooks` (`onStart`, `onWin`, `onPayOut`, ...) to `src/actions.js`, which also avoids import cycles. Minigames never change `game.S` or toast; extra cash goes through `payOut(amount, text)`.
+- Minigames read the current shift state through the live `shift` export from `src/jobs/framework.js`. The `key()` handler returns `true` for keys it uses (only those get `preventDefault`).
+- The job framework only runs the window. Shift effects (cooldown, pay, toasts, saving) go through `setJobHooks` (`onStart`, `onWin`, `onPayOut`, ...) to `src/actions.js`, which also avoids import cycles. Minigames never change `game.state` or toast; extra cash goes through `payOut(amount, text)`.
 - UI modules only draw. Change detection (like jobs unlocking) is a core rule that returns events (`jobChanges()`), shown by `actions.handleEvents()`.
 
 ## Gotchas

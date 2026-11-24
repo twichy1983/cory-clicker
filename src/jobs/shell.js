@@ -26,8 +26,8 @@ const ShellGame = {
     busted: "You lost track of 40,000 people's pensions three times. The lawyers found it before you did.",
     time: "Time's up. The money is still out there somewhere, in a very nice climate."
   },
-  init(G) {
-    Object.assign(G, {
+  init(shift) {
+    Object.assign(shift, {
       slot: [0, 1, 2],
       money: 1,
       found: 0,
@@ -39,66 +39,66 @@ const ShellGame = {
       lift: [1, 1, 1],
       pickI: -1
     })
-    shellRound(G)
+    shellRound(shift)
   },
-  step(G, dt) {
-    G.st += dt
-    const liftTo = (i, v) => (G.lift[i] += (v - G.lift[i]) * Math.min(1, dt * 12))
-    if (G.stage === "show") {
-      G.lift.forEach((_, i) => liftTo(i, i === G.money ? 1 : 0))
-      if (G.st > 1.1) {
-        G.stage = "lower"
-        G.st = 0
+  step(shift, dt) {
+    shift.st += dt
+    const liftTo = (i, target) => (shift.lift[i] += (target - shift.lift[i]) * Math.min(1, dt * 12))
+    if (shift.stage === "show") {
+      shift.lift.forEach((_, i) => liftTo(i, i === shift.money ? 1 : 0))
+      if (shift.st > 1.1) {
+        shift.stage = "lower"
+        shift.st = 0
       }
-    } else if (G.stage === "lower") {
-      G.lift.forEach((_, i) => liftTo(i, 0))
-      if (G.st > 0.35) {
-        G.stage = "shuffle"
-        G.st = 0
-        shellNextSwap(G)
+    } else if (shift.stage === "lower") {
+      shift.lift.forEach((_, i) => liftTo(i, 0))
+      if (shift.st > 0.35) {
+        shift.stage = "shuffle"
+        shift.st = 0
+        shellNextSwap(shift)
       }
-    } else if (G.stage === "shuffle") {
-      if (G.st >= G.swap.dur) {
-        const { a, b } = G.swap
-        ;[G.slot[a], G.slot[b]] = [G.slot[b], G.slot[a]]
-        if (--G.swapsLeft > 0) {
-          G.st = 0
-          shellNextSwap(G)
+    } else if (shift.stage === "shuffle") {
+      if (shift.st >= shift.swap.dur) {
+        const { indexA, indexB } = shift.swap
+        ;[shift.slot[indexA], shift.slot[indexB]] = [shift.slot[indexB], shift.slot[indexA]]
+        if (--shift.swapsLeft > 0) {
+          shift.st = 0
+          shellNextSwap(shift)
         } else {
-          G.stage = "pick"
-          G.st = 0
-          G.swap = null
+          shift.stage = "pick"
+          shift.st = 0
+          shift.swap = null
           jobAlert("Where's the money?", "warn")
         }
       }
-    } else if (G.stage === "reveal") {
-      G.lift.forEach((_, i) => liftTo(i, 1))
-      if (G.st > 1.1) {
-        if (G.found >= SHELL_GOAL) endJob("win")
-        else shellRound(G)
+    } else if (shift.stage === "reveal") {
+      shift.lift.forEach((_, i) => liftTo(i, 1))
+      if (shift.st > 1.1) {
+        if (shift.found >= SHELL_GOAL) endJob("win")
+        else shellRound(shift)
       }
     }
-    G.pct = (G.found / SHELL_GOAL) * 100
-    G.meterText = `${G.found} / ${SHELL_GOAL}`
+    shift.pct = (shift.found / SHELL_GOAL) * 100
+    shift.meterText = `${shift.found} / ${SHELL_GOAL}`
   },
-  cursor(G, x, y) {
-    return G.stage === "pick" && shellAt(G, x, y) >= 0
+  cursor(shift, x, y) {
+    return shift.stage === "pick" && shellAt(shift, x, y) >= 0
   },
-  down(G, x, y) {
-    if (G.stage !== "pick") return
-    const i = shellAt(G, x, y)
+  down(shift, x, y) {
+    if (shift.stage !== "pick") return
+    const i = shellAt(shift, x, y)
     if (i < 0) return
-    G.pickI = i
-    G.stage = "reveal"
-    G.st = 0
-    const p = shellPos(G, i)
-    if (i === G.money) {
-      G.found++
-      floatText("Found it! 💰", p.x, SHELL_Y - 260)
-      burst(p.x, SHELL_Y - 60, "#ffd23f", 18)
-    } else jobStrike("Wrong shell!", p.x, SHELL_Y - 260)
+    shift.pickI = i
+    shift.stage = "reveal"
+    shift.st = 0
+    const pos = shellPos(shift, i)
+    if (i === shift.money) {
+      shift.found++
+      floatText("Found it! 💰", pos.x, SHELL_Y - 260)
+      burst(pos.x, SHELL_Y - 60, "#ffd23f", 18)
+    } else jobStrike("Wrong shell!", pos.x, SHELL_Y - 260)
   },
-  draw(ctx, G, now) {
+  draw(ctx, shift, now) {
     ctx.fillStyle = vgrad(ctx, 0, 520, [
       [0, "#0b1d3a"],
       [1, "#3c2a6b"]
@@ -141,51 +141,51 @@ const ShellGame = {
     rr(ctx, 1272, SHELL_Y + 60, 40, 200, 8)
     ctx.fill()
     ctx.stroke()
-    const mp = shellPos(G, G.money)
-    if (G.lift[G.money] > 0.05) {
+    const mp = shellPos(shift, shift.money)
+    if (shift.lift[shift.money] > 0.05) {
       emoji(ctx, "💰", mp.x, SHELL_Y - 40, 110)
       label(ctx, "PENSIONS", mp.x, SHELL_Y + 26, 24, "#ffe066")
     }
     ;[0, 1, 2].forEach((i) => {
-      const p = shellPos(G, i)
+      const pos = shellPos(shift, i)
       drawShell(
         ctx,
-        p.x,
-        SHELL_Y - G.lift[i] * 170 - p.lift,
-        G.stage === "pick" && G.phase === "play" ? Math.sin(now * 6 + i) * 0.03 : 0
+        pos.x,
+        SHELL_Y - shift.lift[i] * 170 - pos.lift,
+        shift.stage === "pick" && shift.phase === "play" ? Math.sin(now * 6 + i) * 0.03 : 0
       )
     })
   }
 }
-function shellRound(G) {
-  G.round++
-  G.money = Math.floor(Math.random() * 3)
-  G.stage = "show"
-  G.st = 0
-  G.swapsLeft = 3 + G.round * 2
-  G.lift = [0, 0, 0]
+function shellRound(shift) {
+  shift.round++
+  shift.money = Math.floor(Math.random() * 3)
+  shift.stage = "show"
+  shift.st = 0
+  shift.swapsLeft = 3 + shift.round * 2
+  shift.lift = [0, 0, 0]
 }
-function shellNextSwap(G) {
-  let a = Math.floor(Math.random() * 3),
-    b = (a + 1 + Math.floor(Math.random() * 2)) % 3
-  G.swap = { a, b, dur: Math.max(0.2, 0.52 - G.round * 0.06) }
+function shellNextSwap(shift) {
+  let indexA = Math.floor(Math.random() * 3),
+    indexB = (indexA + 1 + Math.floor(Math.random() * 2)) % 3
+  shift.swap = { indexA, indexB, dur: Math.max(0.2, 0.52 - shift.round * 0.06) }
 }
-function shellPos(G, i) {
-  let x = SHELL_X[G.slot[i]],
+function shellPos(shift, i) {
+  let x = SHELL_X[shift.slot[i]],
     lift = 0
-  if (G.stage === "shuffle" && G.swap && (i === G.swap.a || i === G.swap.b)) {
-    const k = Math.min(1, G.st / G.swap.dur),
-      e = k * k * (3 - 2 * k),
-      other = i === G.swap.a ? G.swap.b : G.swap.a
-    x = SHELL_X[G.slot[i]] + (SHELL_X[G.slot[other]] - SHELL_X[G.slot[i]]) * e
-    lift = Math.sin(Math.PI * k) * (i === G.swap.a ? 60 : -30)
+  if (shift.stage === "shuffle" && shift.swap && (i === shift.swap.indexA || i === shift.swap.indexB)) {
+    const progress = Math.min(1, shift.st / shift.swap.dur),
+      eased = progress * progress * (3 - 2 * progress),
+      other = i === shift.swap.indexA ? shift.swap.indexB : shift.swap.indexA
+    x = SHELL_X[shift.slot[i]] + (SHELL_X[shift.slot[other]] - SHELL_X[shift.slot[i]]) * eased
+    lift = Math.sin(Math.PI * progress) * (i === shift.swap.indexA ? 60 : -30)
   }
   return { x, lift }
 }
-function shellAt(G, x, y) {
+function shellAt(shift, x, y) {
   for (let i = 0; i < 3; i++) {
-    const p = shellPos(G, i)
-    if (Math.abs(x - p.x) < 150 && y > SHELL_Y - 250 && y < SHELL_Y + 40) return i
+    const pos = shellPos(shift, i)
+    if (Math.abs(x - pos.x) < 150 && y > SHELL_Y - 250 && y < SHELL_Y + 40) return i
   }
   return -1
 }

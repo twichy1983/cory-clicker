@@ -22,11 +22,11 @@ const server = await serve(".")
 const page = await launch()
 try {
   await page.goto(server.url + "/")
-  for (const [w, h] of SIZES) {
-    await page.resize(w, h)
+  for (const [width, height] of SIZES) {
+    await page.resize(width, height)
     await page.wait(300)
-    writeFileSync(`screenshots/${w}x${h}.png`, await page.screenshot())
-    console.log(`screenshots/${w}x${h}.png`)
+    writeFileSync(`screenshots/${width}x${height}.png`, await page.screenshot())
+    console.log(`screenshots/${width}x${height}.png`)
   }
 } finally {
   await page.close()

@@ -12,9 +12,9 @@ function listFiles(dir) {
 
 // Zips every file inside `dir` (paths inside the zip are relative to `dir`) into `outFile`.
 export function zipFolder(dir, outFile) {
-  const d = new Date()
-  const dosTime = (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1)
-  const dosDate = ((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate()
+  const date = new Date()
+  const dosTime = (date.getHours() << 11) | (date.getMinutes() << 5) | (date.getSeconds() >> 1)
+  const dosDate = ((date.getFullYear() - 1980) << 9) | ((date.getMonth() + 1) << 5) | date.getDate()
   const locals = [],
     centrals = []
   let offset = 0
@@ -56,7 +56,7 @@ export function zipFolder(dir, outFile) {
     offset += local.length + name.length + packed.length
   }
 
-  const centralSize = centrals.reduce((n, b) => n + b.length, 0)
+  const centralSize = centrals.reduce((sum, buffer) => sum + buffer.length, 0)
   const end = Buffer.alloc(22)
   end.writeUInt32LE(0x06054b50, 0)
   end.writeUInt16LE(centrals.length / 2, 8)

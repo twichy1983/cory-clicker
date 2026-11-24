@@ -9,54 +9,54 @@ import { $, esc } from "./dom.js"
 export const tabVisible = (name) => !$("tab-" + name).hidden
 
 export function renderStats() {
-  const { S, D } = game
+  const { state, derived } = game
   const rows = [
-    ["Company", esc(S.company)],
-    ["Cash on hand", money(S.dollars)],
-    ["Earned this run", money(S.runEarned)],
-    ["Earned all time", money(S.allTimeEarned)],
-    ["Income per second", money(D.cps)],
-    ["Dollar clicks", fmt(S.clicks)],
-    ["Earned by clicking", money(S.clickEarned)],
-    ["Industries owned", fmt(S.owned.reduce((a, b) => a + b, 0))],
-    ["Upgrades owned", `${Object.keys(S.upgrades).length} / ${UPGRADES.length}`],
-    ["Scandals committed", `${D.scandals} / ${UPGRADES.filter((u) => u.type === "scandal").length}`],
-    ["Fine multiplier", (D.fineMult * 100).toFixed(0) + "%"],
-    ["Timer lobbyists", S.timerLobbyists],
-    ["Penalty lobbyists", S.penaltyLobbyists],
-    ["Fines paid (all time)", money(S.finesPaid)],
-    ["Rebates collected", money(S.rebatesCollected)],
-    ["Deadlines survived", S.cyclesSurvived],
-    ["Bankruptcies", S.bankruptcies],
-    ["Achievements", `${Object.keys(S.achievements).length} / ${ACH.length}`],
-    ["Play time", fmtDuration(S.playTime * 1000)],
-    ["Jobs completed", totalJobWins(S)],
-    ["Playing since", new Date(S.startedAt).toLocaleString()]
+    ["Company", esc(state.company)],
+    ["Cash on hand", money(state.dollars)],
+    ["Earned this run", money(state.runEarned)],
+    ["Earned all time", money(state.allTimeEarned)],
+    ["Income per second", money(derived.cps)],
+    ["Dollar clicks", fmt(state.clicks)],
+    ["Earned by clicking", money(state.clickEarned)],
+    ["Industries owned", fmt(state.owned.reduce((sum, count) => sum + count, 0))],
+    ["Upgrades owned", `${Object.keys(state.upgrades).length} / ${UPGRADES.length}`],
+    ["Scandals committed", `${derived.scandals} / ${UPGRADES.filter((upgrade) => upgrade.type === "scandal").length}`],
+    ["Fine multiplier", (derived.fineMult * 100).toFixed(0) + "%"],
+    ["Timer lobbyists", state.timerLobbyists],
+    ["Penalty lobbyists", state.penaltyLobbyists],
+    ["Fines paid (all time)", money(state.finesPaid)],
+    ["Rebates collected", money(state.rebatesCollected)],
+    ["Deadlines survived", state.cyclesSurvived],
+    ["Bankruptcies", state.bankruptcies],
+    ["Achievements", `${Object.keys(state.achievements).length} / ${ACH.length}`],
+    ["Play time", fmtDuration(state.playTime * 1000)],
+    ["Jobs completed", totalJobWins(state)],
+    ["Playing since", new Date(state.startedAt).toLocaleString()]
   ]
-  $("stats").innerHTML = rows.map(([a, b]) => `<div><span>${a}</span><span>${b}</span></div>`).join("")
+  $("stats").innerHTML = rows.map(([label, value]) => `<div><span>${label}</span><span>${value}</span></div>`).join("")
 }
 
 let lastAchKey = ""
 
 // Redraws the trophy grid when the unlocked set changes (or always, with force)
 export function renderAchievements(force) {
-  const S = game.S,
-    got = Object.keys(S.achievements).length
+  const state = game.state,
+    got = Object.keys(state.achievements).length
   $("achTabCount").textContent = got + "/" + ACH.length
-  const key = Object.keys(S.achievements).sort().join(",")
+  const key = Object.keys(state.achievements).sort().join(",")
   if (!force && key === lastAchKey && $("achievements").childElementCount) return
   lastAchKey = key
   let html = `<div class="achHead"><span>Achievements</span><span>${got} / ${ACH.length}</span></div>
     <div class="achBar"><div style="width:${((got / ACH.length) * 100).toFixed(1)}%"></div></div>`
   for (const cat of ACH_CATS) {
-    const list = ACH.filter((a) => a.cat === cat),
-      n = list.filter((a) => S.achievements[a.id]).length
+    const list = ACH.filter((achievement) => achievement.cat === cat),
+      count = list.filter((achievement) => state.achievements[achievement.id]).length
     html +=
-      `<div class="achCat">${esc(cat)}<span>${n}/${list.length}</span></div><div class="achGrid">` +
+      `<div class="achCat">${esc(cat)}<span>${count}/${list.length}</span></div><div class="achGrid">` +
       list
         .map(
-          (a) =>
-            `<div class="ach${S.achievements[a.id] ? "" : " locked"}" data-tt="ach:${a.id}">${S.achievements[a.id] ? a.icon : "🔒"}</div>`
+          (achievement) =>
+            `<div class="ach${state.achievements[achievement.id] ? "" : " locked"}" data-tt="ach:${achievement.id}">${state.achievements[achievement.id] ? achievement.icon : "🔒"}</div>`
         )
         .join("") +
       `</div>`
@@ -65,14 +65,14 @@ export function renderAchievements(force) {
 }
 
 export function wireTabs() {
-  document.querySelectorAll(".tab").forEach((b) =>
-    b.addEventListener("click", () => {
-      document.querySelectorAll(".tab").forEach((x) => x.classList.toggle("on", x === b))
-      document.querySelectorAll(".tabBody").forEach((x) => {
-        x.hidden = x.id !== "tab-" + b.dataset.tab
+  document.querySelectorAll(".tab").forEach((tab) =>
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".tab").forEach((otherTab) => otherTab.classList.toggle("on", otherTab === tab))
+      document.querySelectorAll(".tabBody").forEach((panel) => {
+        panel.hidden = panel.id !== "tab-" + tab.dataset.tab
       })
-      if (b.dataset.tab === "stats") renderStats()
-      if (b.dataset.tab === "ach") renderAchievements()
+      if (tab.dataset.tab === "stats") renderStats()
+      if (tab.dataset.tab === "ach") renderAchievements()
     })
   )
 }

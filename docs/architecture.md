@@ -19,17 +19,17 @@ Clickonomics is a static web page. `index.html` loads `src/main.js` as an ES mod
 
 The arrow points from the importer to the imported: `ui/` reads the job list from `jobs/`. Apart from that, `ui/modal.js` reports dialogs to `platform/` as breaks in play. Everything else that changes the game, saves or talks to the portal goes through `actions.js`.
 
-| Folder or file    | Job                                                                                                                  | May use                                                                                                                |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `src/core/`       | Game data and rules (see below)                                                                                      | Only other `core/` files. **Never** `document`, `window`, `localStorage`, `Date.now()` or `Math.random()`.             |
-| `src/ui/`         | Draws the page from the game state. Reads `game.S` but doesn't change it (except the test-mode toolbar's shortcuts). | `core/`, `game.js`, `config.js`, `jobs/index.js` (the job list), `platform/` (dialogs report breaks in play), the page |
-| `src/jobs/`       | The minigame window and the ten minigames. Reads `game.S`; changes to it go through the hooks (see Minigames).       | `core/`, `game.js`, `ui/dom.js`, the page, canvas                                                                      |
-| `src/platform/`   | Where saves go and which portal events to send                                                                       | Browser storage, the CrazyGames SDK                                                                                    |
-| `src/game.js`     | The shared `game` object and `refreshDerived()`                                                                      | `core/`                                                                                                                |
-| `src/config.js`   | Which version is running, the save key and the title                                                                 | Nothing                                                                                                                |
-| `src/saveload.js` | `save()` and `readSave()`: the save string through the platform                                                      | `game.js`, `config.js`, `core/save.js`, `platform/`                                                                    |
-| `src/actions.js`  | Player actions: call a `core/` rule, then toast, show a dialog or redraw                                             | Everything above                                                                                                       |
-| `src/main.js`     | Starts the game, connects buttons to actions, runs the loop                                                          | Everything                                                                                                             |
+| Folder or file    | Job                                                                                                                      | May use                                                                                                                |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| `src/core/`       | Game data and rules (see below)                                                                                          | Only other `core/` files. **Never** `document`, `window`, `localStorage`, `Date.now()` or `Math.random()`.             |
+| `src/ui/`         | Draws the page from the game state. Reads `game.state` but doesn't change it (except the test-mode toolbar's shortcuts). | `core/`, `game.js`, `config.js`, `jobs/index.js` (the job list), `platform/` (dialogs report breaks in play), the page |
+| `src/jobs/`       | The minigame window and the ten minigames. Reads `game.state`; changes to it go through the hooks (see Minigames).       | `core/`, `game.js`, `ui/dom.js`, the page, canvas                                                                      |
+| `src/platform/`   | Where saves go and which portal events to send                                                                           | Browser storage, the CrazyGames SDK                                                                                    |
+| `src/game.js`     | The shared `game` object and `refreshDerived()`                                                                          | `core/`                                                                                                                |
+| `src/config.js`   | Which version is running, the save key and the title                                                                     | Nothing                                                                                                                |
+| `src/saveload.js` | `save()` and `readSave()`: the save string through the platform                                                          | `game.js`, `config.js`, `core/save.js`, `platform/`                                                                    |
+| `src/actions.js`  | Player actions: call a `core/` rule, then toast, show a dialog or redraw                                                 | Everything above                                                                                                       |
+| `src/main.js`     | Starts the game, connects buttons to actions, runs the loop                                                              | Everything                                                                                                             |
 
 Outside `src/`: `tests/unit/` (Node, `core/` only), `tests/e2e/` (a real browser) and `scripts/` (dev server, build, zip, screenshots). See `docs/testing.md` and `docs/releasing.md`.
 
@@ -55,23 +55,23 @@ Outside `src/`: `tests/unit/` (Node, `core/` only), `tests/e2e/` (a real browser
 
 Everything lives in one object, `game` (from `src/game.js`):
 
-| Field                | What                                                                                                                                                                                           | Saved? |
-| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| `game.S`             | The game state: cash, industries owned, upgrades, fines, deadline, stats. Created by `newState()` in `core/state.js`.                                                                          | Yes    |
-| `game.D`             | Values worked out from `S`: income per second, click power, fine multiplier. Recompute with `refreshDerived()` (or `act.update()`, which also redraws) after `S` changes what the player owns. | No     |
-| `game.mkt`           | Stock market history for the charts                                                                                                                                                            | No     |
-| `game.peakClickRate` | Fastest clicking seen, for the click-speed achievements                                                                                                                                        | No     |
+| Field                | What                                                                                                                                                                                                   | Saved? |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
+| `game.state`         | The game state: cash, industries owned, upgrades, fines, deadline, stats. Created by `newState()` in `core/state.js`.                                                                                  | Yes    |
+| `game.derived`       | Values worked out from `state`: income per second, click power, fine multiplier. Recompute with `refreshDerived()` (or `act.update()`, which also redraws) after `state` changes what the player owns. | No     |
+| `game.mkt`           | Stock market history for the charts                                                                                                                                                                    | No     |
+| `game.peakClickRate` | Fastest clicking seen, for the click-speed achievements                                                                                                                                                | No     |
 
-Loading, importing and hard resetting **replace `game.S` with a new object**. Always read `game.S` when you need it; never keep a reference to it in a variable that outlives the call.
+Loading, importing and hard resetting **replace `game.state` with a new object**. Always read `game.state` when you need it; never keep a reference to it in a variable that outlives the call.
 
-Rules in `core/` take these as parameters (`buyBuilding(S, i, n)`), and so does anything that depends on the time (`advance(S, D, now)`). That's what makes them testable.
+Rules in `core/` take these as parameters (`buyBuilding(state, i, count)`), and so does anything that depends on the time (`advance(state, derived, now)`). That's what makes them testable.
 
 ## How a click flows through the code
 
 1. `main.js` connects `#payBtn` to `act.payFines`.
-2. `actions.js → payFines()` calls `core/economy.js → payFines(S, D, now)`, which changes `S` and returns what happened: `{ type: "paid" | "rebate" | "filed", amount }`, `null` if the player can't afford it, or `{ type: "deadline", events }` if a deadline passed first.
+2. `actions.js → payFines()` calls `core/economy.js → payFines(state, derived, now)`, which changes `state` and returns what happened: `{ type: "paid" | "rebate" | "filed", amount }`, `null` if the player can't afford it, or `{ type: "deadline", events }` if a deadline passed first.
 3. `actions.js` shows a toast (or hands the deadline events to `handleEvents()`) and calls `render()`.
-4. `render()` asks `ui/hud.js` and `ui/store.js` to redraw from the new `S`.
+4. `render()` asks `ui/hud.js` and `ui/store.js` to redraw from the new `state`.
 
 Rules **return what happened** (events); they never show anything themselves. `actions.handleEvents()` turns events into toasts and dialogs:
 
@@ -96,7 +96,7 @@ Buttons that are rebuilt as the game changes (industries, upgrades, jobs) are wi
 ## Minigames (`src/jobs/`)
 
 - `framework.js` runs the shared window: intro card, timer, progress meter, strikes, result screens, animation loop and input. See the comment at the top for the fields a game can define.
-- The current shift's state is the live export `G` (`null` when no job is open). Minigames import it and read it; they don't receive their own copy.
+- The current shift's state is the live export `shift` (`null` when no job is open). Minigames import it and read it; they don't receive their own copy.
 - A game's `key()` handler returns `true` for keys it uses; only those get `preventDefault()`.
 - The framework only runs the window. What a shift does to the game happens in `actions.js`, which `main.js` connects with `setJobHooks()` (hooks also avoid an import cycle):
 
@@ -108,7 +108,7 @@ Buttons that are rebuilt as the game changes (industries, upgrades, jobs) are wi
   | `onPayOut(amount, text)` | A minigame pays extra cash | `act.jobPayOut`: earns the cash and toasts `text`                                           |
   | `onClose()`              | The window closes          | `act.updateJobs(true)`                                                                      |
 
-- Minigames don't touch `game.S`, toasts or the platform. A game that pays something extra (like the price-gouging profits in `price.js`) calls `payOut(amount, text)` from `framework.js`.
+- Minigames don't touch `game.state`, toasts or the platform. A game that pays something extra (like the price-gouging profits in `price.js`) calls `payOut(amount, text)` from `framework.js`.
 - `draw.js` has drawing helpers (rounded boxes, labels, emoji, speech bubbles). Every game draws on the same 1672×941 canvas.
 - Each game (`lemon.js`, `milk.js`, ...) exports one object.
 - `index.js` pairs each job definition from `core/jobs.js` with its game, and throws at startup if a job has no game.

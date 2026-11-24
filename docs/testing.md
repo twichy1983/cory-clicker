@@ -14,9 +14,9 @@ A typical test:
 
 ```js
 test("unpaid fines at the deadline cause bankruptcy", () => {
-  const S = newState(T0)
-  S.fines = 50
-  const events = advance(S, derive(S), S.deadline + 1000)
+  const state = newState(T0)
+  state.fines = 50
+  const events = advance(state, derive(state), state.deadline + 1000)
   assert.equal(events[0].type, "bankrupt")
 })
 ```
@@ -32,7 +32,7 @@ test("unpaid fines at the deadline cause bankruptcy", () => {
   - Windows PowerShell: `$env:BROWSER_PATH="C:\path\to\chrome.exe"; npm run test:e2e`
 - **Watching the tests:** `npm run test:e2e:headed` opens a visible browser window instead of running headless (or set `HEADED=1` when running anything that uses `scripts/browser.js`). Keep your hands off it while it runs.
 - **Fresh state:** each test starts a new game with a fresh browser profile and cleared storage.
-- **Test hook:** source builds expose `window.__clickonomics` (`game`, `tick`, `save`, `act`) so tests can set up situations, for example `S.deadline = Date.now() - 1`, then `tick()`. The CrazyGames build doesn't include it.
+- **Test hook:** source builds expose `window.__clickonomics` (`game`, `tick`, `save`, `act`) so tests can set up situations, for example `state.deadline = Date.now() - 1`, then `tick()`. The CrazyGames build doesn't include it.
 - **No network:** the CrazyGames SDK is blocked during tests, so they run offline.
 - **Errors fail tests:** any uncaught error or `console.error` in the page is collected in `page.errors`, and tests check it's empty.
 

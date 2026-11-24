@@ -14,8 +14,8 @@ export function createMarket() {
   }
 }
 
-function pushCap(arr, v) {
-  arr.push(v)
+function pushCap(arr, value) {
+  arr.push(value)
   if (arr.length > MKT_LEN) arr.shift()
 }
 
@@ -23,13 +23,13 @@ function pushCap(arr, v) {
 export function sampleMarket(mkt, indCps, random = Math.random) {
   let total = 0
   INDUSTRIES.forEach((_, i) => {
-    let m = mkt.mood[i]
-    m += (1 - m) * 0.06 + (random() - 0.5) * 0.05
-    m = Math.min(1.35, Math.max(0.65, m))
-    mkt.mood[i] = m
-    const v = (indCps[i] || 0) * m
-    pushCap(mkt.ind[i], v)
-    total += v
+    let mood = mkt.mood[i]
+    mood += (1 - mood) * 0.06 + (random() - 0.5) * 0.05
+    mood = Math.min(1.35, Math.max(0.65, mood))
+    mkt.mood[i] = mood
+    const value = (indCps[i] || 0) * mood
+    pushCap(mkt.ind[i], value)
+    total += value
   })
   pushCap(mkt.idx, total)
 }
@@ -37,11 +37,11 @@ export function sampleMarket(mkt, indCps, random = Math.random) {
 // Fresh history (new game, import, bankruptcy) seeded with a minute of samples so charts aren't empty
 export function resetMarket(mkt, indCps, random = Math.random) {
   mkt.idx.length = 0
-  mkt.ind.forEach((h) => {
-    h.length = 0
+  mkt.ind.forEach((history) => {
+    history.length = 0
   })
   mkt.mood.fill(1)
-  for (let k = 0; k < 60; k++) sampleMarket(mkt, indCps, random)
+  for (let i = 0; i < 60; i++) sampleMarket(mkt, indCps, random)
 }
 
 // Bad press from a scandal spooks investors for a while
@@ -50,9 +50,9 @@ export function scandalShock(mkt, ind) {
 }
 
 // % change from the first non-zero sample to the latest, or null if there isn't one
-export function pctChange(h) {
-  const first = h.find((v) => v > 0),
-    last = h[h.length - 1]
+export function pctChange(history) {
+  const first = history.find((value) => value > 0),
+    last = history[history.length - 1]
   if (!first || !last) return null
   return (last / first - 1) * 100
 }

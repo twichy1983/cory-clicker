@@ -21,19 +21,20 @@ const NEWS = [
 ]
 
 // Picks a headline that fits the current situation
-export function newsLine(S, D, now, random = Math.random) {
-  const left = S.deadline - now
-  if (S.fines > 0 && left < HOUR) return "BREAKING: Federal marshals are warming up the padlock truck. PAY YOUR FINES."
-  if (S.fines > 0 && S.dollars < S.fines && random() < 0.4)
+export function newsLine(state, derived, now, random = Math.random) {
+  const left = state.deadline - now
+  if (state.fines > 0 && left < HOUR)
+    return "BREAKING: Federal marshals are warming up the padlock truck. PAY YOUR FINES."
+  if (state.fines > 0 && state.dollars < state.fines && random() < 0.4)
     return "Auditors note that your fines now exceed your cash. Someone in accounting is sweating."
-  if (D.fineMult < 0 && random() < 0.4)
+  if (derived.fineMult < 0 && random() < 0.4)
     return "Regulators issue a refund check to you and thank you for your continued patronage."
-  if (S.bankruptcies > 0 && random() < 0.15)
-    return `Business press notes this is your company's ${ordinal(S.bankruptcies + 1)} incarnation.`
-  if (D.scandals > 0 && random() < 0.3) {
-    const owned = UPGRADES.filter((u) => u.type === "scandal" && S.upgrades[u.id])
-    const u = owned[Math.floor(random() * owned.length)]
-    return `Op-ed: "${u.name}" called "a bold business decision" by people who own your stock.`
+  if (state.bankruptcies > 0 && random() < 0.15)
+    return `Business press notes this is your company's ${ordinal(state.bankruptcies + 1)} incarnation.`
+  if (derived.scandals > 0 && random() < 0.3) {
+    const owned = UPGRADES.filter((upgrade) => upgrade.type === "scandal" && state.upgrades[upgrade.id])
+    const upgrade = owned[Math.floor(random() * owned.length)]
+    return `Op-ed: "${upgrade.name}" called "a bold business decision" by people who own your stock.`
   }
   return NEWS[Math.floor(random() * NEWS.length)]
 }

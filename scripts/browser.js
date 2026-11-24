@@ -8,7 +8,7 @@ import { tmpdir } from "node:os"
 import { delimiter, join } from "node:path"
 import * as esbuild from "esbuild"
 
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 export function findBrowser() {
   if (process.env.BROWSER_PATH) return process.env.BROWSER_PATH
@@ -31,7 +31,7 @@ export function findBrowser() {
     ["google-chrome", "google-chrome-stable", "chromium", "chromium-browser", "microsoft-edge"].flatMap((name) =>
       (env.PATH || "").split(delimiter).map((dir) => join(dir, name))
     )
-  const found = candidates.find((p) => p && existsSync(p))
+  const found = candidates.find((path) => path && existsSync(path))
   if (!found) throw new Error("No Chrome or Edge found. Install one, or set BROWSER_PATH to its executable.")
   return found
 }
@@ -86,7 +86,7 @@ export async function launch({ width = 1400, height = 900 } = {}) {
   await sleep(100)
   const port = readFileSync(portFile, "utf8").split("\n")[0].trim()
   const targets = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json()
-  const ws = new WebSocket(targets.find((t) => t.type === "page").webSocketDebuggerUrl)
+  const ws = new WebSocket(targets.find((target) => target.type === "page").webSocketDebuggerUrl)
   await new Promise((ok, fail) => {
     ws.onopen = ok
     ws.onerror = fail
@@ -97,12 +97,12 @@ export async function launch({ width = 1400, height = 900 } = {}) {
     listeners = [],
     errors = []
   ws.onmessage = (msg) => {
-    const m = JSON.parse(msg.data)
-    if (m.id && pending.has(m.id)) {
-      const { ok, fail } = pending.get(m.id)
-      pending.delete(m.id)
-      m.error ? fail(new Error(m.error.message)) : ok(m.result)
-    } else if (m.method) listeners.forEach((fn) => fn(m))
+    const message = JSON.parse(msg.data)
+    if (message.id && pending.has(message.id)) {
+      const { ok, fail } = pending.get(message.id)
+      pending.delete(message.id)
+      message.error ? fail(new Error(message.error.message)) : ok(message.result)
+    } else if (message.method) listeners.forEach((fn) => fn(message))
   }
   const send = (method, params = {}) =>
     new Promise((ok, fail) => {
@@ -112,23 +112,23 @@ export async function launch({ width = 1400, height = 900 } = {}) {
     })
   const once = (method) =>
     new Promise((ok) => {
-      const fn = (m) => {
-        if (m.method === method) {
+      const fn = (message) => {
+        if (message.method === method) {
           listeners.splice(listeners.indexOf(fn), 1)
-          ok(m.params)
+          ok(message.params)
         }
       }
       listeners.push(fn)
     })
 
   // Collect uncaught errors and console.error calls so tests can assert there were none
-  listeners.push((m) => {
-    if (m.method === "Runtime.exceptionThrown") {
-      const d = m.params.exceptionDetails
-      errors.push((d.exception && d.exception.description) || d.text)
+  listeners.push((message) => {
+    if (message.method === "Runtime.exceptionThrown") {
+      const details = message.params.exceptionDetails
+      errors.push((details.exception && details.exception.description) || details.text)
     }
-    if (m.method === "Runtime.consoleAPICalled" && m.params.type === "error")
-      errors.push(m.params.args.map((a) => a.value ?? a.description).join(" "))
+    if (message.method === "Runtime.consoleAPICalled" && message.params.type === "error")
+      errors.push(message.params.args.map((arg) => arg.value ?? arg.description).join(" "))
   })
   await send("Runtime.enable")
   await send("Page.enable")
@@ -152,13 +152,14 @@ export async function launch({ width = 1400, height = 900 } = {}) {
     },
     // Runs `expression` in the page and returns its (JSON-serialisable) value. Promises are awaited.
     async eval(expression) {
-      const r = await send("Runtime.evaluate", {
+      const response = await send("Runtime.evaluate", {
         expression,
         awaitPromise: true,
         returnByValue: true
       })
-      if (r.exceptionDetails) throw new Error(r.exceptionDetails.exception?.description || r.exceptionDetails.text)
-      return r.result.value
+      if (response.exceptionDetails)
+        throw new Error(response.exceptionDetails.exception?.description || response.exceptionDetails.text)
+      return response.result.value
     },
     // Wipes saved data for a site (leaves the page first, so its save-on-close can't write it back)
     async clearStorage(origin) {
@@ -172,10 +173,10 @@ export async function launch({ width = 1400, height = 900 } = {}) {
       if (!ok) throw new Error(`click: no element matches ${selector}`)
     },
     text: (selector) => page.eval(`document.querySelector(${JSON.stringify(selector)})?.textContent ?? null`),
-    async resize(w, h) {
+    async resize(width, height) {
       await send("Emulation.setDeviceMetricsOverride", {
-        width: w,
-        height: h,
+        width,
+        height,
         deviceScaleFactor: 1,
         mobile: false
       })

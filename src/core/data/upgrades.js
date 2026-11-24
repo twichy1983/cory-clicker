@@ -73,4 +73,4 @@ CLICKS.forEach(([id, name, desc, cost, kind]) => {
     icon: kind === "x2" ? "🖱️" : "👆"
   })
 })
-export const UPG_BY_ID = Object.fromEntries(UPGRADES.map((u) => [u.id, u]))
+export const UPG_BY_ID = Object.fromEntries(UPGRADES.map((upgrade) => [upgrade.id, upgrade]))

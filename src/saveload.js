@@ -7,10 +7,10 @@ import { $ } from "./ui/dom.js"
 
 export function save() {
   try {
-    platform.setItem(SAVE_KEY, encodeSave(game.S))
+    platform.setItem(SAVE_KEY, encodeSave(game.state))
     $("saveNote").textContent = "Saved at " + new Date().toLocaleTimeString() + ". Autosaves every 30 seconds."
-  } catch (e) {
-    $("saveNote").textContent = "Save failed: " + e.message
+  } catch (error) {
+    $("saveNote").textContent = "Save failed: " + error.message
   }
 }
 

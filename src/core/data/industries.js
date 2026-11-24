@@ -92,7 +92,7 @@ export const INDUSTRIES = [
     flavor: "A mailbox on an island that owns a mailbox on another island."
   }
 ]
-export const IND_INDEX = Object.fromEntries(INDUSTRIES.map((d, i) => [d.key, i]))
+export const IND_INDEX = Object.fromEntries(INDUSTRIES.map((industry, i) => [industry.key, i]))
 
 // Stock ticker symbol for each industry, in the same order
 export const TICKERS = ["LMON", "GRAN", "PROC", "ADTV", "GOOD", "PHRM", "BOOM", "CRSH", "DATA", "SHEL"]

@@ -58,26 +58,28 @@ function wire() {
   $("penaltyFireBtn").addEventListener("click", act.firePenaltyLobbyist)
 
   // Buttons that are rebuilt as the game changes, so listen on their containers
-  $("buildings").addEventListener("click", (e) => {
-    const b = e.target.closest("[data-bld]")
-    if (b && !b.classList.contains("mystery")) act.buyBuilding(+b.dataset.bld)
+  $("buildings").addEventListener("click", (event) => {
+    const button = event.target.closest("[data-bld]")
+    if (button && !button.classList.contains("mystery")) act.buyBuilding(+button.dataset.bld)
   })
-  $("upgrades").addEventListener("click", (e) => {
-    const b = e.target.closest(".upg, .upgMore")
-    if (!b) return
-    if (b.classList.contains("upgMore")) {
+  $("upgrades").addEventListener("click", (event) => {
+    const button = event.target.closest(".upg, .upgMore")
+    if (!button) return
+    if (button.classList.contains("upgMore")) {
       toggleShowAllUpgrades()
       act.render()
-    } else act.buyUpgrade(b.dataset.id)
+    } else act.buyUpgrade(button.dataset.id)
   })
-  $("jobList").addEventListener("click", (e) => {
-    const b = e.target.closest("[data-job]")
-    if (b) openJob(JOB_BY_ID[b.dataset.job])
+  $("jobList").addEventListener("click", (event) => {
+    const button = event.target.closest("[data-job]")
+    if (button) openJob(JOB_BY_ID[button.dataset.job])
   })
-  document.querySelectorAll(".buyAmt button").forEach((b) =>
-    b.addEventListener("click", () => {
-      document.querySelectorAll(".buyAmt button").forEach((x) => x.classList.toggle("on", x === b))
-      setBuyAmt(+b.dataset.amt)
+  document.querySelectorAll(".buyAmt button").forEach((button) =>
+    button.addEventListener("click", () => {
+      document
+        .querySelectorAll(".buyAmt button")
+        .forEach((otherButton) => otherButton.classList.toggle("on", otherButton === button))
+      setBuyAmt(+button.dataset.amt)
       act.render()
       refreshTip()
     })
@@ -97,21 +99,21 @@ function wire() {
   const name = $("companyName")
   let nameBeforeEdit = ""
   name.addEventListener("focus", () => {
-    nameBeforeEdit = game.S.company
+    nameBeforeEdit = game.state.company
   })
-  name.addEventListener("input", (e) => act.renameCompany(e.target.value))
-  name.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") e.target.blur()
-    if (e.key === "Escape") {
-      game.S.company = nameBeforeEdit
-      e.target.value = nameBeforeEdit
-      e.target.blur()
+  name.addEventListener("input", (event) => act.renameCompany(event.target.value))
+  name.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") event.target.blur()
+    if (event.key === "Escape") {
+      game.state.company = nameBeforeEdit
+      event.target.value = nameBeforeEdit
+      event.target.blur()
     }
   })
-  name.addEventListener("change", (e) => {
-    e.target.value = game.S.company
+  name.addEventListener("change", (event) => {
+    event.target.value = game.state.company
     save()
-    toast(`Company renamed to ${game.S.company}.`)
+    toast(`Company renamed to ${game.state.company}.`)
   })
   $("editName").addEventListener("click", () => {
     name.focus()
@@ -126,11 +128,12 @@ function wire() {
 
   if (IS_CRAZYGAMES) {
     // Inside the CrazyGames iframe: keep arrow keys and space from scrolling the host page, and no right-click menu
-    window.addEventListener("keydown", (e) => {
-      const typing = /^(INPUT|TEXTAREA|BUTTON)$/.test(e.target.tagName)
-      if (!typing && ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(e.key)) e.preventDefault()
+    window.addEventListener("keydown", (event) => {
+      const typing = /^(INPUT|TEXTAREA|BUTTON)$/.test(event.target.tagName)
+      if (!typing && ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(event.key))
+        event.preventDefault()
     })
-    document.addEventListener("contextmenu", (e) => e.preventDefault())
+    document.addEventListener("contextmenu", (event) => event.preventDefault())
   }
 }
 
@@ -141,16 +144,16 @@ let tickCount = 0,
 
 function tick() {
   const now = Date.now()
-  act.handleEvents(advance(game.S, game.D, now))
+  act.handleEvents(advance(game.state, game.derived, now))
   act.render()
   // Play time only counts while the game is visible
-  if (!document.hidden) game.S.playTime += Math.min(1, Math.max(0, (now - lastTick) / 1000))
+  if (!document.hidden) game.state.playTime += Math.min(1, Math.max(0, (now - lastTick) / 1000))
   lastTick = now
 
   if (++tickCount % 10 === 0) {
     // once a second
     act.updateJobs()
-    sampleMarket(game.mkt, game.D.indCps)
+    sampleMarket(game.mkt, game.derived.indCps)
     drawMarket()
     act.awardAchievements()
     if (tabVisible("stats")) renderStats()
@@ -165,16 +168,16 @@ async function boot() {
   platform.loadingStart()
   try {
     await platform.init()
-  } catch (e) {
-    console.warn("Platform init failed; continuing with local saves.", e)
+  } catch (error) {
+    console.warn("Platform init failed; continuing with local saves.", error)
   }
 
-  $("companyName").value = game.S.company
+  $("companyName").value = game.state.company
   act.loadSavedGame()
   act.update()
   act.updateJobs(true)
   setNews()
-  for (let k = 0; k < 60; k++) sampleMarket(game.mkt, game.D.indCps) // a minute of history so the charts aren't empty
+  for (let sample = 0; sample < 60; sample++) sampleMarket(game.mkt, game.derived.indCps) // a minute of history so the charts aren't empty
   drawMarket()
   act.awardAchievements(true) // quietly award anything an older save already qualifies for
   renderAchievements(true)
@@ -184,8 +187,8 @@ async function boot() {
   if (!isModalOpen()) platform.gameplayStart()
   if (TEST_MODE)
     addTestToolbar({
-      getState: () => game.S,
-      earn: (amount) => earn(game.S, game.D, amount),
+      getState: () => game.state,
+      earn: (amount) => earn(game.state, game.derived, amount),
       refresh: act.update
     })
 

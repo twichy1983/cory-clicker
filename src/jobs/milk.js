@@ -41,11 +41,11 @@ const CHEMS = [
     keys: ["3", "d", "l"]
   }
 ]
-const MILK_BTNS = CHEMS.map((c, i) => ({
+const MILK_BTNS = CHEMS.map((_, i) => ({
   x: 120 + i * 490,
   y: 800,
-  w: 450,
-  h: 112
+  width: 450,
+  height: 112
 }))
 const MilkGame = {
   time: 30,
@@ -68,8 +68,8 @@ const MilkGame = {
       "The lunch lady tasted formaldehyde where the chalk should be, three times. She called the school board, a reporter, and her cousin the lawyer.",
     time: "The song ended and too much real milk reached the cafeteria. The shareholders are livid."
   },
-  init(G) {
-    Object.assign(G, {
+  init(shift) {
+    Object.assign(shift, {
       jugs: milkChart(),
       done: 0,
       combo: 0,
@@ -83,45 +83,45 @@ const MilkGame = {
       ladyT: 0
     })
   },
-  step(G, dt) {
-    G.judgeT = Math.max(0, G.judgeT - dt)
-    G.ladyT = Math.max(0, G.ladyT - dt)
-    G.press = G.press.map((p) => Math.max(0, p - dt))
-    if (G.squirt && (G.squirt.t -= dt) <= 0) G.squirt = null
-    for (const j of G.jugs)
-      if (!j.res && G.t - j.t > MILK.good) {
+  step(shift, dt) {
+    shift.judgeT = Math.max(0, shift.judgeT - dt)
+    shift.ladyT = Math.max(0, shift.ladyT - dt)
+    shift.press = shift.press.map((cooldown) => Math.max(0, cooldown - dt))
+    if (shift.squirt && (shift.squirt.timer -= dt) <= 0) shift.squirt = null
+    for (const jug of shift.jugs)
+      if (!jug.res && shift.elapsed - jug.hitTime > MILK.good) {
         // sailed past the line undosed
-        j.res = "miss"
-        G.combo = 0
-        milkJudge(G, "MISS", false)
-        G.ladySay = pick(["Real milk? Weird.", "This one's… actual milk?", "Huh. Tastes like a cow."])
-        G.ladyT = 0.9
+        jug.res = "miss"
+        shift.combo = 0
+        milkJudge(shift, "MISS", false)
+        shift.ladySay = pick(["Real milk? Weird.", "This one's… actual milk?", "Huh. Tastes like a cow."])
+        shift.ladyT = 0.9
       }
-    G.pct = (G.done / MILK.goal) * 100
-    G.meterText = `${G.done} / ${MILK.goal}`
+    shift.pct = (shift.done / MILK.goal) * 100
+    shift.meterText = `${shift.done} / ${MILK.goal}`
   },
-  extra(G) {
+  extra(shift) {
     return (
       "🚨 " +
-      Array.from({ length: this.strikes }, (_, i) => (i < G.strikes ? "●" : "○")).join(" ") +
-      `  ·  🔥 x${G.combo}`
+      Array.from({ length: this.strikes }, (_, i) => (i < shift.strikes ? "●" : "○")).join(" ") +
+      `  ·  🔥 x${shift.combo}`
     )
   },
-  cursor(G, x, y) {
-    return MILK_BTNS.some((b) => inBox(x, y, b))
+  cursor(shift, x, y) {
+    return MILK_BTNS.some((button) => inBox(x, y, button))
   },
-  down(G, x, y) {
-    const i = MILK_BTNS.findIndex((b) => inBox(x, y, b))
-    if (i >= 0) milkPress(G, i)
+  down(shift, x, y) {
+    const i = MILK_BTNS.findIndex((button) => inBox(x, y, button))
+    if (i >= 0) milkPress(shift, i)
   },
-  key(G, k) {
-    const i = CHEMS.findIndex((c) => c.keys.includes(k.toLowerCase()))
+  key(shift, pressedKey) {
+    const i = CHEMS.findIndex((chem) => chem.keys.includes(pressedKey.toLowerCase()))
     if (i < 0) return false
-    milkPress(G, i)
+    milkPress(shift, i)
     return true
   },
-  draw(ctx, G, now) {
-    const ph = ((((G.t - MILK.first) / MILK_BEAT) % 1) + 1) % 1,
+  draw(ctx, shift, now) {
+    const ph = ((((shift.elapsed - MILK.first) / MILK_BEAT) % 1) + 1) % 1,
       pulse = 1 - ph // beat phase: 0 on the beat
     // dairy plant wall
     ctx.fillStyle = vgrad(ctx, 0, MILK.belt, [
@@ -152,10 +152,10 @@ const MilkGame = {
     label(ctx, "🐄 FRESH FOR GROWING KIDS 🐄", 460, 80, 44, "#fff")
     plainText(ctx, "District #12 Official Supplier · Lowest bid since 2009", 460, 160, 24, "#4a6378", "center", 800)
     // chemical tanks feeding one nozzle over the line
-    CHEMS.forEach((c, i) => {
+    CHEMS.forEach((chem, i) => {
       const tx = MILK.hitX - 200 + i * 200,
         ty = 210,
-        hit = G.press[i] > 0
+        hit = shift.press[i] > 0
       ctx.strokeStyle = INK
       ctx.lineWidth = 16
       ctx.beginPath()
@@ -166,13 +166,13 @@ const MilkGame = {
       ctx.lineWidth = 9
       ctx.stroke()
       rr(ctx, tx - 70, ty - 20 + (hit ? 6 : 0), 140, 150, 22)
-      ctx.fillStyle = c.color
+      ctx.fillStyle = chem.color
       ctx.fill()
       ctx.lineWidth = 6
       ctx.strokeStyle = INK
       ctx.stroke()
-      emoji(ctx, c.icon, tx, ty + 30 + (hit ? 6 : 0), 54)
-      plainText(ctx, c.name, tx, ty + 95 + (hit ? 6 : 0), c.name.length > 9 ? 15 : 19, c.ink, "center", 900)
+      emoji(ctx, chem.icon, tx, ty + 30 + (hit ? 6 : 0), 54)
+      plainText(ctx, chem.name, tx, ty + 95 + (hit ? 6 : 0), chem.name.length > 9 ? 15 : 19, chem.ink, "center", 900)
     })
     rr(ctx, MILK.hitX - 36, 385, 72, 48, 12)
     ctx.fillStyle = "#6b757d"
@@ -204,7 +204,7 @@ const MilkGame = {
     ctx.stroke()
     ctx.strokeStyle = "#475057"
     ctx.lineWidth = 8
-    const off = (G.t * MILK.speed) % 80
+    const off = (shift.elapsed * MILK.speed) % 80
     for (let x = -off; x < JW; x += 80) {
       ctx.beginPath()
       ctx.moveTo(x, MILK.belt + 4)
@@ -213,14 +213,14 @@ const MilkGame = {
       ctx.stroke()
     }
     // jugs
-    for (const j of G.jugs) {
-      const x = MILK.hitX - (j.t - G.t) * MILK.speed
-      if (x > -120 && x < JW + 120) drawRhythmJug(ctx, x, j)
+    for (const jug of shift.jugs) {
+      const x = MILK.hitX - (jug.hitTime - shift.elapsed) * MILK.speed
+      if (x > -120 && x < JW + 120) drawRhythmJug(ctx, x, jug)
     }
     // squirt from the nozzle into the jug on the line
-    if (G.squirt) {
-      const c = CHEMS[G.squirt.c]
-      ctx.strokeStyle = c.color
+    if (shift.squirt) {
+      const chem = CHEMS[shift.squirt.chemIndex]
+      ctx.strokeStyle = chem.color
       ctx.lineWidth = 18
       ctx.lineCap = "round"
       ctx.beginPath()
@@ -241,19 +241,19 @@ const MilkGame = {
     ctx.stroke()
     label(ctx, "CAFETERIA", MILK.exit + 130, 560, 28, "#2f80ed")
     emoji(ctx, "👩‍🍳", MILK.exit + 130, 440 - pulse * 14, 160)
-    if (G.ladyT > 0) bubble(ctx, G.ladySay, MILK.exit + 90, 330, 28)
-    if (G.combo >= 3) label(ctx, `🔥 ${G.combo} COMBO`, MILK.exit + 130, 620 + 0 * pulse, 30, "#ffd23f")
+    if (shift.ladyT > 0) bubble(ctx, shift.ladySay, MILK.exit + 90, 330, 28)
+    if (shift.combo >= 3) label(ctx, `🔥 ${shift.combo} COMBO`, MILK.exit + 130, 620 + 0 * pulse, 30, "#ffd23f")
     // judgement
-    if (G.judgeT > 0) {
+    if (shift.judgeT > 0) {
       ctx.save()
-      ctx.globalAlpha = Math.min(1, G.judgeT * 3)
-      label(ctx, G.judge, MILK.hitX, 300 - (1 - G.judgeT) * 30, 62, G.judgeOk ? "#9dff6a" : "#ff5c5c")
+      ctx.globalAlpha = Math.min(1, shift.judgeT * 3)
+      label(ctx, shift.judge, MILK.hitX, 300 - (1 - shift.judgeT) * 30, 62, shift.judgeOk ? "#9dff6a" : "#ff5c5c")
       ctx.restore()
     }
     // beat counter (visual metronome)
     for (let i = 0; i < 4; i++) {
-      const beatNo = Math.floor((G.t - MILK.first) / MILK_BEAT),
-        on = G.t >= MILK.first - 0.001 && ((beatNo % 4) + 4) % 4 === i
+      const beatNo = Math.floor((shift.elapsed - MILK.first) / MILK_BEAT),
+        on = shift.elapsed >= MILK.first - 0.001 && ((beatNo % 4) + 4) % 4 === i
       ctx.beginPath()
       ctx.arc(1180 + i * 44, 80, on ? 16 : 12, 0, Math.PI * 2)
       ctx.fillStyle = on ? "#ff4d8d" : "rgba(0,0,0,.25)"
@@ -261,110 +261,110 @@ const MilkGame = {
     }
     plainText(ctx, `♪ ${MILK.bpm} BPM`, 1246, 125, 22, "#4a6378", "center", 900)
     // chemical buttons
-    CHEMS.forEach((c, i) => {
-      const b = MILK_BTNS[i],
-        down = G.press[i] > 0
-      rr(ctx, b.x, b.y + (down ? 6 : 0), b.w, b.h, 24)
-      ctx.fillStyle = c.color
+    CHEMS.forEach((chem, i) => {
+      const button = MILK_BTNS[i],
+        down = shift.press[i] > 0
+      rr(ctx, button.x, button.y + (down ? 6 : 0), button.width, button.height, 24)
+      ctx.fillStyle = chem.color
       ctx.fill()
       ctx.lineWidth = 6
       ctx.strokeStyle = INK
       ctx.stroke()
-      emoji(ctx, c.icon, b.x + 70, b.y + b.h / 2 + (down ? 6 : 0), 58)
+      emoji(ctx, chem.icon, button.x + 70, button.y + button.height / 2 + (down ? 6 : 0), 58)
       plainText(
         ctx,
-        c.name,
-        b.x + b.w / 2 + 30,
-        b.y + 46 + (down ? 6 : 0),
-        c.name.length > 9 ? 30 : 36,
-        c.ink,
+        chem.name,
+        button.x + button.width / 2 + 30,
+        button.y + 46 + (down ? 6 : 0),
+        chem.name.length > 9 ? 30 : 36,
+        chem.ink,
         "center",
         900
       )
       plainText(
         ctx,
-        `key ${c.keys[0]} · ${c.keys[1].toUpperCase()} · ${c.keys[2].toUpperCase()}`,
-        b.x + b.w / 2 + 30,
-        b.y + 84 + (down ? 6 : 0),
+        `key ${chem.keys[0]} · ${chem.keys[1].toUpperCase()} · ${chem.keys[2].toUpperCase()}`,
+        button.x + button.width / 2 + 30,
+        button.y + 84 + (down ? 6 : 0),
         20,
-        c.ink === "#fff" ? "rgba(255,255,255,.8)" : "#555",
+        chem.ink === "#fff" ? "rgba(255,255,255,.8)" : "#555",
         "center",
         800
       )
     })
-    if (G.phase === "play" && G.t < MILK.first)
-      label(ctx, G.t < MILK.first - 1.2 ? "READY…" : "HERE THEY COME!", JW / 2, 470, 64, "#fff")
+    if (shift.phase === "play" && shift.elapsed < MILK.first)
+      label(ctx, shift.elapsed < MILK.first - 1.2 ? "READY…" : "HERE THEY COME!", JW / 2, 470, 64, "#fff")
   }
 }
 function milkChart() {
   const out = []
-  let t = MILK.first
-  while (t < MilkGame.time - 0.3) {
-    if (Math.random() < Math.min(0.85, 0.55 + (t - MILK.first) * 0.013)) {
-      out.push({ t, chem: Math.floor(Math.random() * 3), res: null })
-      if (t > 12 && Math.random() < 0.22)
+  let hitTime = MILK.first
+  while (hitTime < MilkGame.time - 0.3) {
+    if (Math.random() < Math.min(0.85, 0.55 + (hitTime - MILK.first) * 0.013)) {
+      out.push({ hitTime, chem: Math.floor(Math.random() * 3), res: null })
+      if (hitTime > 12 && Math.random() < 0.22)
         out.push({
-          t: t + MILK_BEAT / 2,
+          hitTime: hitTime + MILK_BEAT / 2,
           chem: Math.floor(Math.random() * 3),
           res: null
         }) // off-beat jug
     }
-    t += MILK_BEAT
+    hitTime += MILK_BEAT
   }
   return out
 }
-function milkJudge(G, text, ok) {
-  G.judge = text
-  G.judgeOk = ok
-  G.judgeT = 0.55
+function milkJudge(shift, text, ok) {
+  shift.judge = text
+  shift.judgeOk = ok
+  shift.judgeT = 0.55
 }
-function milkPress(G, ci) {
-  G.press[ci] = 0.12
-  G.squirt = { c: ci, t: 0.18 }
+function milkPress(shift, ci) {
+  shift.press[ci] = 0.12
+  shift.squirt = { chemIndex: ci, timer: 0.18 }
   let best = null,
     bd = Infinity
-  for (const j of G.jugs)
-    if (!j.res) {
-      const d = Math.abs(G.t - j.t)
-      if (d < bd) {
-        bd = d
-        best = j
+  for (const jug of shift.jugs)
+    if (!jug.res) {
+      const diff = Math.abs(shift.elapsed - jug.hitTime)
+      if (diff < bd) {
+        bd = diff
+        best = jug
       }
     }
   if (!best || bd > MILK.good) {
-    G.combo = 0
-    milkJudge(G, "OFF BEAT", false)
+    shift.combo = 0
+    milkJudge(shift, "OFF BEAT", false)
     return
   }
   if (best.chem !== ci) {
     best.res = "wrong"
-    G.combo = 0
-    milkJudge(G, "WRONG!", false)
-    G.ladySay = pick(["That's not chalk!", "Is this… embalming fluid?", "BLECH!"])
-    G.ladyT = 1
+    shift.combo = 0
+    milkJudge(shift, "WRONG!", false)
+    shift.ladySay = pick(["That's not chalk!", "Is this… embalming fluid?", "BLECH!"])
+    shift.ladyT = 1
     jobStrike("Wrong chemical!", MILK.exit + 130, 330)
     return
   }
   best.res = bd <= MILK.perfect ? "perfect" : "good"
-  G.done++
-  G.combo++
-  G.best = Math.max(G.best, G.combo)
-  milkJudge(G, best.res === "perfect" ? "PERFECT!" : "GOOD", true)
+  shift.done++
+  shift.combo++
+  shift.best = Math.max(shift.best, shift.combo)
+  milkJudge(shift, best.res === "perfect" ? "PERFECT!" : "GOOD", true)
   burst(MILK.hitX, MILK.belt - 200, CHEMS[ci].color, 12, 280)
-  if (G.done >= MILK.goal) endJob("win")
+  if (shift.done >= MILK.goal) endJob("win")
 }
-function drawRhythmJug(ctx, x, j) {
-  const c = CHEMS[j.chem],
+function drawRhythmJug(ctx, x, jug) {
+  const chem = CHEMS[jug.chem],
     base = MILK.belt - 6,
-    w = 112,
-    h = 178,
-    top = base - h
-  const dosed = j.res === "perfect" || j.res === "good"
+    width = 112,
+    height = 178,
+    top = base - height
+  const dosed = jug.res === "perfect" || jug.res === "good"
   ctx.save()
-  const body = dosed ? "#eef6ff" : j.res === "wrong" ? "#dff3c8" : "#fff"
+  const body = dosed ? "#eef6ff" : jug.res === "wrong" ? "#dff3c8" : "#fff"
   ctx.lineWidth = 6
   ctx.strokeStyle = INK
-  rr(ctx, x - w / 2, top + 40, w, h - 40, 26)
+  rr(ctx, x - width / 2, top + 40, width, height - 40, 26)
   ctx.fillStyle = body
   ctx.fill()
   ctx.stroke()
@@ -373,24 +373,33 @@ function drawRhythmJug(ctx, x, j) {
   ctx.fill()
   ctx.stroke()
   rr(ctx, x - 30, top - 14, 60, 26, 8)
-  ctx.fillStyle = c.color
+  ctx.fillStyle = chem.color
   ctx.fill()
   ctx.stroke() // cap = the chemical it needs
   ctx.beginPath()
-  ctx.arc(x + w / 2 - 6, top + 92, 28, -1.3, 1.3)
+  ctx.arc(x + width / 2 - 6, top + 92, 28, -1.3, 1.3)
   ctx.lineWidth = 12
   ctx.stroke()
   ctx.lineWidth = 6
-  rr(ctx, x - w / 2 + 10, top + 70, w - 20, 92, 10)
-  ctx.fillStyle = c.color
+  rr(ctx, x - width / 2 + 10, top + 70, width - 20, 92, 10)
+  ctx.fillStyle = chem.color
   ctx.fill()
   ctx.lineWidth = 4
   ctx.stroke() // label = the chemical it needs
-  emoji(ctx, c.icon, x, top + 100, 40)
-  plainText(ctx, c.name, x, top + 142, c.name.length > 11 ? 11 : c.name.length > 7 ? 13 : 16, c.ink, "center", 900)
+  emoji(ctx, chem.icon, x, top + 100, 40)
+  plainText(
+    ctx,
+    chem.name,
+    x,
+    top + 142,
+    chem.name.length > 11 ? 11 : chem.name.length > 7 ? 13 : 16,
+    chem.ink,
+    "center",
+    900
+  )
   if (dosed) emoji(ctx, "✅", x + 40, top - 6, 34)
-  else if (j.res === "wrong") emoji(ctx, "🤢", x + 40, top - 6, 40)
-  else if (j.res === "miss") label(ctx, "REAL MILK", x, top - 20, 20, "#9fd8ff")
+  else if (jug.res === "wrong") emoji(ctx, "🤢", x + 40, top - 6, 40)
+  else if (jug.res === "miss") label(ctx, "REAL MILK", x, top - 20, 20, "#9fd8ff")
   ctx.restore()
 }
 

@@ -8,56 +8,58 @@ import { GAME_TITLE } from "../config.js"
 import { $ } from "./dom.js"
 
 export function renderHud() {
-  const { S, D } = game,
+  const { state, derived } = game,
     now = Date.now()
-  $("dollars").textContent = money(S.dollars)
-  $("cps").textContent = "per second: " + money(D.cps)
-  $("clickInfo").textContent = "+" + money(D.clickPower) + " per click"
+  $("dollars").textContent = money(state.dollars)
+  $("cps").textContent = "per second: " + money(derived.cps)
+  $("clickInfo").textContent = "+" + money(derived.clickPower) + " per click"
 
   // Regulatory panel
-  const left = S.deadline - now,
-    rebate = S.fines < 0,
-    urgent = !rebate && S.fines > 0 && left < HOUR
+  const left = state.deadline - now,
+    rebate = state.fines < 0,
+    urgent = !rebate && state.fines > 0 && left < HOUR
   const reg = $("reg")
-  reg.classList.toggle("rebate", rebate || (S.fines === 0 && D.fineMult < 0))
+  reg.classList.toggle("rebate", rebate || (state.fines === 0 && derived.fineMult < 0))
   reg.classList.toggle("urgent", urgent)
   $("regHead").textContent = rebate ? "✔ REGULATORY CAPTURE ACHIEVED ✔" : "⚠ FEDERAL REGULATORY ENFORCEMENT ⚠"
   $("regLabel").textContent = rebate ? "REBATE OWED TO YOU" : "FINES OWED"
-  $("fineAmt").textContent = money(Math.abs(S.fines))
+  $("fineAmt").textContent = money(Math.abs(state.fines))
   $("timerLabel").firstChild.textContent = rebate ? "PAYOUT IN" : "PAYMENT DUE IN"
   $("fineTimer").textContent = fmtTime(left)
-  $("fineBar").style.width = Math.max(0, Math.min(100, (left / maxTimer(S)) * 100)) + "%"
-  const pct = (D.fineMult * 100).toFixed(0)
+  $("fineBar").style.width = Math.max(0, Math.min(100, (left / maxTimer(state)) * 100)) + "%"
+  const pct = (derived.fineMult * 100).toFixed(0)
   $("fineInfo").innerHTML =
     `Fines accrue at ${(BASE_FINE_RATE * 100).toFixed(0)}% of all revenue × <b>${pct}%</b> multiplier ` +
-    `(+${D.scandals}% scandals, −${S.penaltyLobbyists}% lobbyists)<br>` +
-    `${rebate || D.fineMult < 0 ? "Currently accruing rebate" : "Currently accruing"}: <b>${money(Math.abs(D.cps * BASE_FINE_RATE * D.fineMult))}/s</b> · Deadline window: ${maxTimer(S) / HOUR}h`
+    `(+${derived.scandals}% scandals, −${state.penaltyLobbyists}% lobbyists)<br>` +
+    `${rebate || derived.fineMult < 0 ? "Currently accruing rebate" : "Currently accruing"}: <b>${money(Math.abs(derived.cps * BASE_FINE_RATE * derived.fineMult))}/s</b> · Deadline window: ${maxTimer(state) / HOUR}h`
   const pay = $("payBtn")
-  if (S.fines > 0) {
-    pay.disabled = S.dollars < S.fines
-    pay.textContent = pay.disabled ? `SHORT ${money(S.fines - S.dollars)} — CAN'T PAY` : `PAY ${money(S.fines)} NOW`
+  if (state.fines > 0) {
+    pay.disabled = state.dollars < state.fines
+    pay.textContent = pay.disabled
+      ? `SHORT ${money(state.fines - state.dollars)} — CAN'T PAY`
+      : `PAY ${money(state.fines)} NOW`
   } else {
     pay.disabled = false
-    pay.textContent = rebate ? `COLLECT ${money(-S.fines)} REBATE` : "FILE COMPLIANCE REPORT"
+    pay.textContent = rebate ? `COLLECT ${money(-state.fines)} REBATE` : "FILE COMPLIANCE REPORT"
   }
   document.body.classList.toggle("danger", urgent)
-  document.title = urgent ? `⚠ ${fmtTime(left)} FINES DUE ⚠` : `${money(S.dollars)} · ${GAME_TITLE}`
+  document.title = urgent ? `⚠ ${fmtTime(left)} FINES DUE ⚠` : `${money(state.dollars)} · ${GAME_TITLE}`
 
   // Lobbyists
-  const tc = timerLobbyCost(S),
-    pc = penaltyLobbyCost(S),
-    tf = timerFireCost(S),
-    pf = penaltyFireCost(S)
-  $("timerLobbyN").textContent = S.timerLobbyists
+  const tc = timerLobbyCost(state),
+    pc = penaltyLobbyCost(state),
+    tf = timerFireCost(state),
+    pf = penaltyFireCost(state)
+  $("timerLobbyN").textContent = state.timerLobbyists
   $("timerLobbyC").textContent = money(tc)
-  $("timerLobbyBtn").classList.toggle("cant", S.dollars < tc)
-  $("penaltyLobbyN").textContent = S.penaltyLobbyists
+  $("timerLobbyBtn").classList.toggle("cant", state.dollars < tc)
+  $("penaltyLobbyN").textContent = state.penaltyLobbyists
   $("penaltyLobbyC").textContent = money(pc)
-  $("penaltyLobbyBtn").classList.toggle("cant", S.dollars < pc)
-  $("timerFireC").textContent = S.timerLobbyists ? money(tf) : "none hired"
-  $("timerFireBtn").disabled = !S.timerLobbyists || S.dollars < tf
-  $("penaltyFireC").textContent = S.penaltyLobbyists ? money(pf) : "none hired"
-  $("penaltyFireBtn").disabled = !S.penaltyLobbyists || S.dollars < pf
+  $("penaltyLobbyBtn").classList.toggle("cant", state.dollars < pc)
+  $("timerFireC").textContent = state.timerLobbyists ? money(tf) : "none hired"
+  $("timerFireBtn").disabled = !state.timerLobbyists || state.dollars < tf
+  $("penaltyFireC").textContent = state.penaltyLobbyists ? money(pf) : "none hired"
+  $("penaltyFireBtn").disabled = !state.penaltyLobbyists || state.dollars < pf
 }
 
 // The pop animation and floating "+$5" after a click on the big dollar
@@ -66,28 +68,28 @@ export function showClickFeedback(amount, ev) {
   btn.classList.remove("pop")
   void btn.offsetWidth // restart the CSS animation
   btn.classList.add("pop")
-  const r = btn.getBoundingClientRect()
-  const x = ev && ev.clientX ? ev.clientX : r.left + r.width / 2
-  const y = ev && ev.clientY ? ev.clientY : r.top + r.height / 2
-  const f = document.createElement("div")
-  f.className = "floater"
-  f.textContent = "+" + money(amount)
-  f.style.left = x - 20 + (Math.random() * 30 - 15) + "px"
-  f.style.top = y - 30 + "px"
-  document.body.appendChild(f)
-  setTimeout(() => f.remove(), 1000)
+  const rect = btn.getBoundingClientRect()
+  const x = ev && ev.clientX ? ev.clientX : rect.left + rect.width / 2
+  const y = ev && ev.clientY ? ev.clientY : rect.top + rect.height / 2
+  const floater = document.createElement("div")
+  floater.className = "floater"
+  floater.textContent = "+" + money(amount)
+  floater.style.left = x - 20 + (Math.random() * 30 - 15) + "px"
+  floater.style.top = y - 30 + "px"
+  document.body.appendChild(floater)
+  setTimeout(() => floater.remove(), 1000)
 }
 
 export function setNews() {
-  $("tickerText").textContent = newsLine(game.S, game.D, Date.now())
+  $("tickerText").textContent = newsLine(game.state, game.derived, Date.now())
 }
 
 // Fades the ticker out, swaps the headline, fades back in
 export function rotateNews() {
-  const t = $("ticker")
-  t.style.opacity = 0
+  const ticker = $("ticker")
+  ticker.style.opacity = 0
   setTimeout(() => {
     setNews()
-    t.style.opacity = 1
+    ticker.style.opacity = 1
   }, 400)
 }

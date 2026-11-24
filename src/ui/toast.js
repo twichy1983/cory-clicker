@@ -3,14 +3,14 @@
 import { $ } from "./dom.js"
 
 export function toast(msg, kind) {
-  const t = document.createElement("div")
-  t.className = "toast" + (kind === "gold" ? " gold" : kind ? " bad" : "")
-  t.textContent = msg
-  $("toasts").appendChild(t)
+  const div = document.createElement("div")
+  div.className = "toast" + (kind === "gold" ? " gold" : kind ? " bad" : "")
+  div.textContent = msg
+  $("toasts").appendChild(div)
   setTimeout(() => {
-    t.style.transition = "opacity .5s"
-    t.style.opacity = 0
-    setTimeout(() => t.remove(), 500)
+    div.style.transition = "opacity .5s"
+    div.style.opacity = 0
+    setTimeout(() => div.remove(), 500)
   }, 5000)
   while ($("toasts").children.length > 5) $("toasts").firstChild.remove()
 }

@@ -33,32 +33,32 @@ const LemonGame = {
     busted: "Three customers found someone else's gum in their cup. The health department is on its way, with gloves.",
     time: "The line moved on. Somewhere, a stand with clean cups is thriving, and it makes you sick."
   },
-  init(G) {
-    Object.assign(G, { served: 0, speed: 0.34, msg: "", msgOk: true, msgT: 0 })
-    lemonNext(G)
+  init(shift) {
+    Object.assign(shift, { served: 0, speed: 0.34, msg: "", msgOk: true, msgT: 0 })
+    lemonNext(shift)
   },
-  step(G, dt) {
-    if (G.state === "pour") {
-      G.level = Math.min(1, G.level + G.speed * dt)
-      if (G.level >= 1) lemonJudge(G)
-    } else if (G.state === "judged" && (G.wait -= dt) <= 0) lemonNext(G)
-    G.msgT = Math.max(0, G.msgT - dt)
-    G.pct = (G.served / LEMON.goal) * 100
-    G.meterText = `${G.served} / ${LEMON.goal}`
+  step(shift, dt) {
+    if (shift.state === "pour") {
+      shift.level = Math.min(1, shift.level + shift.speed * dt)
+      if (shift.level >= 1) lemonJudge(shift)
+    } else if (shift.state === "judged" && (shift.wait -= dt) <= 0) lemonNext(shift)
+    shift.msgT = Math.max(0, shift.msgT - dt)
+    shift.pct = (shift.served / LEMON.goal) * 100
+    shift.meterText = `${shift.served} / ${LEMON.goal}`
   },
-  down(G) {
-    if (G.state === "ready") G.state = "pour"
+  down(shift) {
+    if (shift.state === "ready") shift.state = "pour"
   },
-  up(G) {
-    if (G.state === "pour") lemonJudge(G)
+  up(shift) {
+    if (shift.state === "pour") lemonJudge(shift)
   },
-  stop(G) {
-    if (G.state === "pour") G.state = "judged"
+  stop(shift) {
+    if (shift.state === "pour") shift.state = "judged"
   },
   cursor() {
     return true
   },
-  draw(ctx, G, now) {
+  draw(ctx, shift, now) {
     ctx.fillStyle = vgrad(ctx, 0, 640, [
       [0, "#6cc6ff"],
       [1, "#dff4ff"]
@@ -79,7 +79,7 @@ const LemonGame = {
       [520, 120, 1],
       [1250, 90, 1.2],
       [1500, 200, 0.8]
-    ].forEach(([x, y, s]) => cloud(ctx, x, y, s))
+    ].forEach(([x, y, scale]) => cloud(ctx, x, y, scale))
     ctx.fillStyle = "#8fd463"
     ctx.beginPath()
     ctx.ellipse(300, 650, 520, 140, 0, Math.PI, 0)
@@ -157,25 +157,25 @@ const LemonGame = {
     label(ctx, "$5", 1090, 700, 52, "#ffe34d")
     plainText(ctx, "*previously", 1090, 760, 22, "rgba(60,30,10,.85)", "center", 700)
     // customer
-    emoji(ctx, G.cust, 1400, 520, 230)
-    bubble(ctx, G.state === "judged" ? G.reaction : G.order, 1400, 360, 34)
+    emoji(ctx, shift.cust, 1400, 520, 230)
+    bubble(ctx, shift.state === "judged" ? shift.reaction : shift.order, 1400, 360, 34)
     // cup + liquid
-    const L = LEMON,
-      h = L.cupBot - L.cupTop,
-      lvlY = L.cupBot - G.level * h,
-      lineY = L.cupBot - G.line * h,
-      zoneY = L.cupBot - (G.line + L.zone) * h
+    const cup = LEMON,
+      height = cup.cupBot - cup.cupTop,
+      lvlY = cup.cupBot - shift.level * height,
+      lineY = cup.cupBot - shift.line * height,
+      zoneY = cup.cupBot - (shift.line + cup.zone) * height
     const cupPath = () => {
       ctx.beginPath()
-      ctx.moveTo(L.cupX - L.topW / 2, L.cupTop)
-      ctx.lineTo(L.cupX + L.topW / 2, L.cupTop)
-      ctx.lineTo(L.cupX + L.botW / 2, L.cupBot)
-      ctx.lineTo(L.cupX - L.botW / 2, L.cupBot)
+      ctx.moveTo(cup.cupX - cup.topW / 2, cup.cupTop)
+      ctx.lineTo(cup.cupX + cup.topW / 2, cup.cupTop)
+      ctx.lineTo(cup.cupX + cup.botW / 2, cup.cupBot)
+      ctx.lineTo(cup.cupX - cup.botW / 2, cup.cupBot)
       ctx.closePath()
     }
     ctx.fillStyle = "rgba(0,0,0,.18)"
     ctx.beginPath()
-    ctx.ellipse(L.cupX, L.cupBot + 8, 150, 20, 0, 0, Math.PI * 2)
+    ctx.ellipse(cup.cupX, cup.cupBot + 8, 150, 20, 0, 0, Math.PI * 2)
     ctx.fill()
     cupPath()
     ctx.fillStyle = "rgba(235,250,255,.55)"
@@ -185,19 +185,19 @@ const LemonGame = {
     ctx.clip()
     ctx.fillStyle = "rgba(120,220,120,.35)"
     ctx.fillRect(0, zoneY, JW, lineY - zoneY)
-    ctx.fillStyle = vgrad(ctx, lvlY, L.cupBot, [
+    ctx.fillStyle = vgrad(ctx, lvlY, cup.cupBot, [
       [0, "#fff27a"],
       [1, "#ffc928"]
     ])
-    ctx.fillRect(0, lvlY, JW, L.cupBot - lvlY)
-    if (G.level > 0.08) {
+    ctx.fillRect(0, lvlY, JW, cup.cupBot - lvlY)
+    if (shift.level > 0.08) {
       ;[
         [-60, 0],
         [40, 18],
         [-5, 34]
       ].forEach(([dx, dy], i) => {
-        const cy = Math.max(lvlY + 18 + dy, L.cupTop + 20)
-        rr(ctx, L.cupX + dx - 26, cy, 52, 46, 9)
+        const cy = Math.max(lvlY + 18 + dy, cup.cupTop + 20)
+        rr(ctx, cup.cupX + dx - 26, cy, 52, 46, 9)
         ctx.fillStyle = "rgba(255,255,255,.55)"
         ctx.fill()
         ctx.strokeStyle = "rgba(255,255,255,.9)"
@@ -206,33 +206,33 @@ const LemonGame = {
       })
     }
     for (let i = 0; i < 7; i++) {
-      const by = L.cupBot - ((now * 60 + i * 67) % Math.max(1, L.cupBot - lvlY))
+      const by = cup.cupBot - ((now * 60 + i * 67) % Math.max(1, cup.cupBot - lvlY))
       if (by > lvlY) {
         ctx.fillStyle = "rgba(255,255,255,.6)"
         ctx.beginPath()
-        ctx.arc(L.cupX - 80 + i * 26, by, 5, 0, Math.PI * 2)
+        ctx.arc(cup.cupX - 80 + i * 26, by, 5, 0, Math.PI * 2)
         ctx.fill()
       }
     }
-    if (G.level > 0.12) {
+    if (shift.level > 0.12) {
       // previously-enjoyed floaters: a hair, some gum, a mystery crumb
       const fy = lvlY + 14
       ctx.strokeStyle = "#3b2a1a"
       ctx.lineWidth = 3
       ctx.beginPath()
-      ctx.moveTo(L.cupX - 70, fy + 6)
-      ctx.bezierCurveTo(L.cupX - 40, fy - 12, L.cupX - 10, fy + 22, L.cupX + 20, fy + 4)
+      ctx.moveTo(cup.cupX - 70, fy + 6)
+      ctx.bezierCurveTo(cup.cupX - 40, fy - 12, cup.cupX - 10, fy + 22, cup.cupX + 20, fy + 4)
       ctx.stroke()
       ctx.fillStyle = "#ff8fc0"
       ctx.beginPath()
-      ctx.ellipse(L.cupX + 60, fy + 10, 16, 9, 0.3, 0, Math.PI * 2)
+      ctx.ellipse(cup.cupX + 60, fy + 10, 16, 9, 0.3, 0, Math.PI * 2)
       ctx.fill()
       ctx.lineWidth = 3
       ctx.strokeStyle = INK
       ctx.stroke()
       ctx.fillStyle = "#6b4a2a"
       ctx.beginPath()
-      ctx.arc(L.cupX - 20, fy + 40, 6, 0, Math.PI * 2)
+      ctx.arc(cup.cupX - 20, fy + 40, 6, 0, Math.PI * 2)
       ctx.fill()
     }
     ctx.restore()
@@ -240,31 +240,31 @@ const LemonGame = {
     ctx.lineWidth = 9
     ctx.lineCap = "round" // a stranger's lipstick on the rim
     ctx.beginPath()
-    ctx.arc(L.cupX - 70, L.cupTop + 4, 26, 0.2, Math.PI - 0.2)
+    ctx.arc(cup.cupX - 70, cup.cupTop + 4, 26, 0.2, Math.PI - 0.2)
     ctx.stroke()
     ctx.lineCap = "butt"
     ctx.setLineDash([18, 12])
     ctx.strokeStyle = "#e3241b"
     ctx.lineWidth = 6
     ctx.beginPath()
-    ctx.moveTo(L.cupX - L.topW / 2 - 30, lineY)
-    ctx.lineTo(L.cupX + L.topW / 2 + 30, lineY)
+    ctx.moveTo(cup.cupX - cup.topW / 2 - 30, lineY)
+    ctx.lineTo(cup.cupX + cup.topW / 2 + 30, lineY)
     ctx.stroke()
     ctx.setLineDash([])
-    label(ctx, "LEGAL MIN", L.cupX - L.topW / 2 - 40, lineY, 28, "#ff6b5b", "right")
+    label(ctx, "LEGAL MIN", cup.cupX - cup.topW / 2 - 40, lineY, 28, "#ff6b5b", "right")
     cupPath()
     ctx.lineWidth = 7
     ctx.strokeStyle = INK
     ctx.stroke()
     ctx.fillStyle = "rgba(255,255,255,.35)"
     ctx.beginPath()
-    ctx.moveTo(L.cupX - L.topW / 2 + 26, L.cupTop + 20)
-    ctx.lineTo(L.cupX - L.botW / 2 + 22, L.cupBot - 20)
-    ctx.lineTo(L.cupX - L.botW / 2 + 40, L.cupBot - 20)
-    ctx.lineTo(L.cupX - L.topW / 2 + 48, L.cupTop + 20)
+    ctx.moveTo(cup.cupX - cup.topW / 2 + 26, cup.cupTop + 20)
+    ctx.lineTo(cup.cupX - cup.botW / 2 + 22, cup.cupBot - 20)
+    ctx.lineTo(cup.cupX - cup.botW / 2 + 40, cup.cupBot - 20)
+    ctx.lineTo(cup.cupX - cup.topW / 2 + 48, cup.cupTop + 20)
     ctx.fill()
     // pitcher (tilts while pouring)
-    const tilt = G.state === "pour" ? -0.85 : -0.15,
+    const tilt = shift.state === "pour" ? -0.85 : -0.15,
       px = 1010,
       py = 330
     ctx.save()
@@ -298,7 +298,7 @@ const LemonGame = {
     ctx.stroke()
     plainText(ctx, "♻ BACKWASH", 0, -76, 20, "#2f9e44", "center", 900)
     ctx.restore()
-    if (G.state === "pour") {
+    if (shift.state === "pour") {
       const sx = px - 120,
         sy = py - 40,
         wob = Math.sin(now * 30) * 4
@@ -307,12 +307,12 @@ const LemonGame = {
       ctx.lineCap = "round"
       ctx.beginPath()
       ctx.moveTo(sx, sy)
-      ctx.quadraticCurveTo(sx - 20 + wob, sy + 60, L.cupX + 30, lvlY)
+      ctx.quadraticCurveTo(sx - 20 + wob, sy + 60, cup.cupX + 30, lvlY)
       ctx.stroke()
       ctx.lineCap = "butt"
     }
     ctx.save()
-    ctx.translate(L.cupX + L.topW / 2 - 20, L.cupTop)
+    ctx.translate(cup.cupX + cup.topW / 2 - 20, cup.cupTop)
     ctx.fillStyle = "#ffe34d"
     ctx.beginPath()
     ctx.arc(0, 0, 46, 0, Math.PI * 2)
@@ -329,12 +329,12 @@ const LemonGame = {
       ctx.stroke()
     }
     ctx.restore()
-    if (G.state === "ready" && G.phase === "play") label(ctx, "HOLD TO POUR", L.cupX, 420, 40, "#fff")
-    if (G.msgT > 0) label(ctx, G.msg, L.cupX, 380, 48, G.msgOk ? "#9dff6a" : "#ff6b5b")
+    if (shift.state === "ready" && shift.phase === "play") label(ctx, "HOLD TO POUR", cup.cupX, 420, 40, "#fff")
+    if (shift.msgT > 0) label(ctx, shift.msg, cup.cupX, 380, 48, shift.msgOk ? "#9dff6a" : "#ff6b5b")
   }
 }
-function lemonNext(G) {
-  Object.assign(G, {
+function lemonNext(shift) {
+  Object.assign(shift, {
     level: 0,
     line: rand(0.42, 0.76),
     state: "ready",
@@ -342,28 +342,28 @@ function lemonNext(G) {
     order: pick(["Is it fresh?", "Fresh-squeezed, right?", "A large, please!", "Why is it cloudy?", "Extra lemony!"])
   })
 }
-function lemonJudge(G) {
-  const d = G.level - G.line
-  G.state = "judged"
-  G.wait = 0.75
-  G.msgT = 0.75
-  if (d < 0) {
-    G.msg = "Not full enough!"
-    G.msgOk = false
-    G.reaction = pick(["Half a cup?! And is that GUM?", "There's a HAIR in this!"])
+function lemonJudge(shift) {
+  const diff = shift.level - shift.line
+  shift.state = "judged"
+  shift.wait = 0.75
+  shift.msgT = 0.75
+  if (diff < 0) {
+    shift.msg = "Not full enough!"
+    shift.msgOk = false
+    shift.reaction = pick(["Half a cup?! And is that GUM?", "There's a HAIR in this!"])
     jobStrike("Complaint!", LEMON.cupX, 300)
-  } else if (d <= LEMON.zone) {
-    G.served++
-    G.speed = Math.min(0.8, G.speed + 0.055)
-    G.msg = "Resold!"
-    G.msgOk = true
-    G.reaction = pick(["Tastes… familiar?", "Mmm, chewy!", "Why is it warm?", "Thanks, I guess!"])
+  } else if (diff <= LEMON.zone) {
+    shift.served++
+    shift.speed = Math.min(0.8, shift.speed + 0.055)
+    shift.msg = "Resold!"
+    shift.msgOk = true
+    shift.reaction = pick(["Tastes… familiar?", "Mmm, chewy!", "Why is it warm?", "Thanks, I guess!"])
     burst(LEMON.cupX, LEMON.cupTop, "#ffe34d", 16)
-    if (G.served >= LEMON.goal) endJob("win")
+    if (shift.served >= LEMON.goal) endJob("win")
   } else {
-    G.msg = "Wasted backwash!"
-    G.msgOk = false
-    G.reaction = pick(["Wow, a full cup!", "So generous!"])
+    shift.msg = "Wasted backwash!"
+    shift.msgOk = false
+    shift.reaction = pick(["Wow, a full cup!", "So generous!"])
   }
 }
 

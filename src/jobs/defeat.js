@@ -5,7 +5,7 @@ import { jobAlert, jobStrike, endJob } from "./framework.js"
    JOB: DEFEAT DEVICE (Auto & Aero Works)
    Keep the car in BEAST mode on the road and CLEAN mode during tests.
    --------------------------------------------------------- */
-const DEFEAT_SWITCH = { x: 586, y: 790, w: 500, h: 110 }
+const DEFEAT_SWITCH = { x: 586, y: 790, width: 500, height: 110 }
 const DefeatGame = {
   time: 30,
   strikes: 3,
@@ -26,8 +26,8 @@ const DefeatGame = {
       "Caught three times on the test rig. Executives are 'shocked and appalled' and blaming two junior engineers.",
     time: "Time's up. The car spent too long being well-behaved. Marketing is horrified."
   },
-  init(G) {
-    Object.assign(G, {
+  init(shift) {
+    Object.assign(shift, {
       mode: "clean",
       env: "road",
       envT: 0,
@@ -38,60 +38,60 @@ const DefeatGame = {
       wheel: 0
     })
   },
-  step(G, dt) {
-    G.envT += dt
-    if (G.env === "road") {
-      G.road += (G.mode === "beast" ? 900 : 380) * dt
-      G.wheel += (G.mode === "beast" ? 14 : 6) * dt
-      if (G.mode === "beast") {
-        G.pct = Math.min(100, G.pct + 12 * dt)
+  step(shift, dt) {
+    shift.envT += dt
+    if (shift.env === "road") {
+      shift.road += (shift.mode === "beast" ? 900 : 380) * dt
+      shift.wheel += (shift.mode === "beast" ? 14 : 6) * dt
+      if (shift.mode === "beast") {
+        shift.pct = Math.min(100, shift.pct + 12 * dt)
         if (Math.random() < dt * 25)
-          G.parts.push({
+          shift.parts.push({
             x: 360,
             y: 610,
             vx: rand(-260, -120),
             vy: rand(-60, 10),
             life: 0.9,
             color: "rgba(60,60,60,.55)",
-            r: rand(18, 30),
+            radius: rand(18, 30),
             grav: -30
           })
       }
-      if (!G.warned && G.envT >= G.next - 1) {
-        G.warned = true
+      if (!shift.warned && shift.envT >= shift.next - 1) {
+        shift.warned = true
         jobAlert("⚠️ TEST INCOMING!", "warn")
       }
-      if (G.envT >= G.next) {
-        G.env = "test"
-        G.envT = 0
-        G.next = rand(1.8, 2.8)
-        G.caught = false
+      if (shift.envT >= shift.next) {
+        shift.env = "test"
+        shift.envT = 0
+        shift.next = rand(1.8, 2.8)
+        shift.caught = false
         jobAlert("🧪 EMISSIONS TEST", "bad")
       }
     } else {
-      if (G.mode === "beast" && !G.caught) {
-        G.caught = true
+      if (shift.mode === "beast" && !shift.caught) {
+        shift.caught = true
         jobStrike("Caught on the test rig!", 836, 300)
       }
-      if (G.envT >= G.next) {
-        G.env = "road"
-        G.envT = 0
-        G.next = Math.max(1.8, rand(2.6, 4.2) - G.t * 0.03)
-        G.warned = false
+      if (shift.envT >= shift.next) {
+        shift.env = "road"
+        shift.envT = 0
+        shift.next = Math.max(1.8, rand(2.6, 4.2) - shift.elapsed * 0.03)
+        shift.warned = false
         jobAlert("🛣️ Back on the road", "warn")
       }
     }
-    if (G.pct >= 100) endJob("win")
+    if (shift.pct >= 100) endJob("win")
   },
-  cursor(G, x, y) {
+  cursor(shift, x, y) {
     return inBox(x, y, DEFEAT_SWITCH) || (x > 380 && x < 1300 && y > 380 && y < 720)
   },
-  down(G, x, y) {
+  down(shift, x, y) {
     if (inBox(x, y, DEFEAT_SWITCH) || (x > 380 && x < 1300 && y > 380 && y < 720))
-      G.mode = G.mode === "beast" ? "clean" : "beast"
+      shift.mode = shift.mode === "beast" ? "clean" : "beast"
   },
-  draw(ctx, G, now) {
-    const road = G.env === "road"
+  draw(ctx, shift, now) {
+    const road = shift.env === "road"
     if (road) {
       ctx.fillStyle = vgrad(ctx, 0, 520, [
         [0, "#64c3ff"],
@@ -99,21 +99,21 @@ const DefeatGame = {
       ])
       ctx.fillRect(0, 0, JW, 520)
       ;[
-        [300 - ((G.road * 0.05) % 1900), 120, 1.1],
-        [1100 - ((G.road * 0.05) % 1900), 80, 0.9],
-        [1900 - ((G.road * 0.05) % 1900), 160, 1]
-      ].forEach(([x, y, s]) => cloud(ctx, (((x % 1900) + 1900) % 1900) - 150, y, s))
+        [300 - ((shift.road * 0.05) % 1900), 120, 1.1],
+        [1100 - ((shift.road * 0.05) % 1900), 80, 0.9],
+        [1900 - ((shift.road * 0.05) % 1900), 160, 1]
+      ].forEach(([x, y, scale]) => cloud(ctx, (((x % 1900) + 1900) % 1900) - 150, y, scale))
       ctx.fillStyle = "#7cc65a"
       ctx.beginPath()
       for (let i = -1; i < 6; i++) {
-        const hx = i * 400 - ((G.road * 0.2) % 400)
+        const hx = i * 400 - ((shift.road * 0.2) % 400)
         ctx.ellipse(hx, 520, 260, 120, 0, Math.PI, 0)
       }
       ctx.fill()
       ctx.fillStyle = "#4f5359"
       ctx.fillRect(0, 520, JW, JH - 520)
       ctx.fillStyle = "#ffd23f"
-      for (let x = -(G.road % 220); x < JW; x += 220) ctx.fillRect(x, 700, 120, 16)
+      for (let x = -(shift.road % 220); x < JW; x += 220) ctx.fillRect(x, 700, 120, 16)
       ctx.fillStyle = "#3d9a3d"
       ctx.fillRect(0, 500, JW, 26)
     } else {
@@ -148,13 +148,13 @@ const DefeatGame = {
       ctx.fillStyle = "#555"
       ctx.fill()
       ctx.stroke()
-      if (G.mode === "beast") emoji(ctx, "😱", 1420, 300, 80)
+      if (shift.mode === "beast") emoji(ctx, "😱", 1420, 300, 80)
     }
-    drawCar(ctx, 836, road ? 600 + Math.sin(now * 20) * 3 : 605, G.wheel, G.mode === "beast")
-    if (G.mode === "clean")
+    drawCar(ctx, 836, road ? 600 + Math.sin(now * 20) * 3 : 605, shift.wheel, shift.mode === "beast")
+    if (shift.mode === "clean")
       for (let i = 0; i < 3; i++) emoji(ctx, "🌱", 330 - i * 60, 600 - ((now * 60 + i * 30) % 80), 34, 0.8)
     const sign = road ? ["🛣️ ON THE ROAD", "#2fb35a"] : ["🧪 EMISSIONS TEST", "#e03131"]
-    const warnFlash = road && G.warned && Math.sin(now * 18) > 0
+    const warnFlash = road && shift.warned && Math.sin(now * 18) > 0
     rr(ctx, 1240, 60, 380, 90, 18)
     ctx.fillStyle = warnFlash ? "#ffd23f" : sign[1]
     ctx.fill()
@@ -163,19 +163,40 @@ const DefeatGame = {
     ctx.stroke()
     label(ctx, warnFlash ? "⚠️ TEST SOON" : sign[0], 1430, 105, 36, "#fff")
     // mode switch
-    const S1 = DEFEAT_SWITCH,
-      beast = G.mode === "beast"
-    rr(ctx, S1.x, S1.y, S1.w, S1.h, 55)
+    const switchBox = DEFEAT_SWITCH,
+      beast = shift.mode === "beast"
+    rr(ctx, switchBox.x, switchBox.y, switchBox.width, switchBox.height, 55)
     ctx.fillStyle = "#1b1f23"
     ctx.fill()
     ctx.lineWidth = 6
     ctx.strokeStyle = INK
     ctx.stroke()
-    rr(ctx, S1.x + (beast ? S1.w / 2 : 6), S1.y + 6, S1.w / 2 - 6, S1.h - 12, 50)
+    rr(
+      ctx,
+      switchBox.x + (beast ? switchBox.width / 2 : 6),
+      switchBox.y + 6,
+      switchBox.width / 2 - 6,
+      switchBox.height - 12,
+      50
+    )
     ctx.fillStyle = beast ? "#e8590c" : "#2fb35a"
     ctx.fill()
-    label(ctx, "🌱 CLEAN", S1.x + S1.w / 4, S1.y + S1.h / 2, 38, beast ? "#888" : "#fff")
-    label(ctx, "💨 BEAST", S1.x + S1.w * 0.75, S1.y + S1.h / 2, 38, beast ? "#fff" : "#888")
+    label(
+      ctx,
+      "🌱 CLEAN",
+      switchBox.x + switchBox.width / 4,
+      switchBox.y + switchBox.height / 2,
+      38,
+      beast ? "#888" : "#fff"
+    )
+    label(
+      ctx,
+      "💨 BEAST",
+      switchBox.x + switchBox.width * 0.75,
+      switchBox.y + switchBox.height / 2,
+      38,
+      beast ? "#fff" : "#888"
+    )
   }
 }
 function drawCar(ctx, x, y, wheel, beast) {
