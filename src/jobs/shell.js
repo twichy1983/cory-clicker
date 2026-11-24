@@ -43,7 +43,9 @@ const ShellGame = {
   },
   step(shift, dt) {
     shift.stageTimer += dt
-    const liftTo = (i, target) => (shift.lift[i] += (target - shift.lift[i]) * Math.min(1, dt * 12))
+    const liftTo = (i, target) => {
+      shift.lift[i] += (target - shift.lift[i]) * Math.min(1, dt * 12)
+    }
     if (shift.stage === "show") {
       shift.lift.forEach((_, i) => liftTo(i, i === shift.money ? 1 : 0))
       if (shift.stageTimer > 1.1) {
@@ -61,7 +63,8 @@ const ShellGame = {
       if (shift.stageTimer >= shift.swap.dur) {
         const { indexA, indexB } = shift.swap
         ;[shift.slot[indexA], shift.slot[indexB]] = [shift.slot[indexB], shift.slot[indexA]]
-        if (--shift.swapsLeft > 0) {
+        shift.swapsLeft--
+        if (shift.swapsLeft > 0) {
           shift.stageTimer = 0
           shellNextSwap(shift)
         } else {

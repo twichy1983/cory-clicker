@@ -56,7 +56,8 @@ const ShredGame = {
     Object.assign(shift, { letters: [], spawn: 0.3, shredded: 0 })
   },
   step(shift, dt) {
-    if ((shift.spawn -= dt) <= 0) {
+    shift.spawn -= dt
+    if (shift.spawn <= 0) {
       const keep = Math.random() < SHRED.keepChance,
         src = keep ? SHRED_KEEP : SHRED_EVIDENCE
       shift.letters.push({

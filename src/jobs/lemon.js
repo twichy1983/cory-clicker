@@ -54,7 +54,10 @@ const LemonGame = {
     if (shift.state === "pour") {
       shift.level = Math.min(1, shift.level + shift.speed * dt)
       if (shift.level >= 1) lemonJudge(shift)
-    } else if (shift.state === "judged" && (shift.wait -= dt) <= 0) lemonNext(shift)
+    } else if (shift.state === "judged") {
+      shift.wait -= dt
+      if (shift.wait <= 0) lemonNext(shift)
+    }
     shift.msgT = Math.max(0, shift.msgT - dt)
     shift.pct = (shift.served / LEMON.goal) * 100
     shift.meterText = `${shift.served} / ${LEMON.goal}`

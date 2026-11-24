@@ -192,15 +192,22 @@ function showJobPanel(kind) {
 
 function stepJob(dt) {
   if (!shift) return
-  shift.parts = shift.parts.filter(
-    (particle) =>
-      ((particle.vy += (particle.grav || 0) * dt),
-      (particle.x += particle.vx * dt),
-      (particle.y += particle.vy * dt),
-      (particle.life -= dt)) > 0
-  )
-  shift.floats = shift.floats.filter((float) => ((float.y -= 45 * dt), (float.life -= dt)) > 0)
-  if (shift.alertT > 0 && (shift.alertT -= dt) <= 0) $("jobAlert").className = ""
+  for (const particle of shift.parts) {
+    particle.vy += (particle.grav || 0) * dt
+    particle.x += particle.vx * dt
+    particle.y += particle.vy * dt
+    particle.life -= dt
+  }
+  shift.parts = shift.parts.filter((particle) => particle.life > 0)
+  for (const float of shift.floats) {
+    float.y -= 45 * dt
+    float.life -= dt
+  }
+  shift.floats = shift.floats.filter((float) => float.life > 0)
+  if (shift.alertT > 0) {
+    shift.alertT -= dt
+    if (shift.alertT <= 0) $("jobAlert").className = ""
+  }
   shift.game.ambient?.(shift, dt)
   if (shift.phase === "play") {
     shift.elapsed += dt

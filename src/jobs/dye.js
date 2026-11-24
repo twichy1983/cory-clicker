@@ -100,7 +100,8 @@ const DyeGame = {
     })
     shift.splashT = Math.max(0, (shift.splashT || 0) - dt)
     if (shift.shipT > 0) {
-      if ((shift.shipT -= dt) <= 0) {
+      shift.shipT -= dt
+      if (shift.shipT <= 0) {
         shift.shipped++
         if (shift.shipped >= DYE_GOAL) endJob("win")
         else dyeNewOrder(shift)

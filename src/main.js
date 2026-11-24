@@ -150,7 +150,8 @@ function tick() {
   if (!document.hidden) game.state.playTime += Math.min(1, Math.max(0, (now - lastTick) / 1000))
   lastTick = now
 
-  if (++tickCount % 10 === 0) {
+  tickCount++
+  if (tickCount % 10 === 0) {
     // once a second
     act.updateJobs()
     sampleMarket(game.mkt, game.derived.indCps)

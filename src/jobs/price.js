@@ -100,9 +100,12 @@ const PriceGame = {
     shift.profit += (gain / 100) * jobReward() * PRICE.profitShare // real cash, paid out when the shift ends
     const heat = Math.max(0, Math.log10(shift.price / 5))
     shift.outrage = clamp(shift.outrage + (heat * heat * PRICE.heatK - PRICE.calm) * dt, 0, 100)
-    if (shift.spins < PRICE.spinMax && (shift.spinT += dt) >= PRICE.spinRecharge) {
-      shift.spins++
-      shift.spinT = 0
+    if (shift.spins < PRICE.spinMax) {
+      shift.spinT += dt
+      if (shift.spinT >= PRICE.spinRecharge) {
+        shift.spins++
+        shift.spinT = 0
+      }
     }
     shift.bribeCd = Math.max(0, shift.bribeCd - dt)
     shift.newsT = Math.max(0, shift.newsT - dt)
@@ -116,7 +119,8 @@ const PriceGame = {
       floatText(`+${hit}% outrage`, 1565, 140, true)
       jobAlert("📰 GOING VIRAL!", "bad")
     }
-    if ((shift.histT += dt) > 0.25) {
+    shift.histT += dt
+    if (shift.histT > 0.25) {
       shift.histT = 0
       shift.hist.push(shift.price)
       if (shift.hist.length > 60) shift.hist.shift()

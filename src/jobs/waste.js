@@ -147,10 +147,18 @@ const WasteGame = {
       blob.vy *= 0.995
       blob.phase += dt
     })
-    shift.drops = shift.drops.filter(
-      (drop) => ((drop.vy += 900 * dt), (drop.x += drop.vx * dt), (drop.y += drop.vy * dt), (drop.life -= dt)) > 0
-    )
-    shift.rings = shift.rings.filter((ring) => ((ring.radius += 70 * dt), (ring.life -= dt)) > 0)
+    for (const drop of shift.drops) {
+      drop.vy += 900 * dt
+      drop.x += drop.vx * dt
+      drop.y += drop.vy * dt
+      drop.life -= dt
+    }
+    shift.drops = shift.drops.filter((drop) => drop.life > 0)
+    for (const ring of shift.rings) {
+      ring.radius += 70 * dt
+      ring.life -= dt
+    }
+    shift.rings = shift.rings.filter((ring) => ring.life > 0)
     shift.valves.forEach((valve) => {
       if (valve.open) valve.spin += dt * 9
     })
@@ -161,7 +169,8 @@ const WasteGame = {
       if (valve.open) {
         valve.openT += dt
         delta += WASTE.valveRate * dt
-        if ((valve.blobT -= dt) <= 0) {
+        valve.blobT -= dt
+        if (valve.blobT <= 0) {
           valve.blobT = 0.18
           wasteBlob(valve.x + rand(-30, 30), valve.y + 70 * OUT_SCALE + rand(0, 30), rand(28, 42), 62)
         }
@@ -180,7 +189,8 @@ const WasteGame = {
         }
       } else if (valve.cool > 0) valve.cool = Math.max(0, valve.cool - dt)
     }
-    if ((shift.nextBarrel -= dt) <= 0) {
+    shift.nextBarrel -= dt
+    if (shift.nextBarrel <= 0) {
       shift.nextBarrel = WASTE.barrelEvery
       const free = BARREL_SPOTS.filter((spot) => !shift.barrels.some((barrel) => barrel.spot === spot))
       if (free.length && shift.barrels.length < WASTE.maxBarrels) {

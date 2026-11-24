@@ -99,7 +99,10 @@ const MilkGame = {
     shift.judgeT = Math.max(0, shift.judgeT - dt)
     shift.ladyT = Math.max(0, shift.ladyT - dt)
     shift.press = shift.press.map((cooldown) => Math.max(0, cooldown - dt))
-    if (shift.squirt && (shift.squirt.timer -= dt) <= 0) shift.squirt = null
+    if (shift.squirt) {
+      shift.squirt.timer -= dt
+      if (shift.squirt.timer <= 0) shift.squirt = null
+    }
     for (const jug of shift.jugs)
       if (!jug.res && shift.elapsed - jug.hitTime > MILK.good) {
         // sailed past the line undosed

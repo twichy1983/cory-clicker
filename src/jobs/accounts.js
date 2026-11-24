@@ -41,7 +41,8 @@ const AccountsGame = {
         slot.age += dt
         if (slot.age >= slot.life) slot.who = null
       }
-    if ((shift.spawn -= dt) <= 0) {
+    shift.spawn -= dt
+    if (shift.spawn <= 0) {
       const free = shift.slots.filter((slot) => !slot.who)
       if (free.length) {
         const slot = pick(free),
