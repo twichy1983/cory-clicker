@@ -38,9 +38,25 @@ import { CANVAS_WIDTH, CANVAS_HEIGHT, rand, label } from "./draw.js"
  */
 
 /**
+ * A particle, drawn as a circle (radius) or a spinning confetti rectangle (width, height, rot).
+ * @typedef {object} Particle
+ * @property {number} x
+ * @property {number} y
+ * @property {number} vx
+ * @property {number} vy
+ * @property {number} life  seconds left
+ * @property {string} color
+ * @property {number} [radius]
+ * @property {number} [width]
+ * @property {number} [height]
+ * @property {number} [rot]  rotation in radians
+ * @property {number} [grav]  gravity, in pixels per second squared
+ */
+
+/**
  * The state of the shift in progress. Each minigame adds its own fields in init().
  * @typedef {object} ShiftCommon
- * @property {object} job  the job definition (see core/jobs.js and jobs/index.js)
+ * @property {any} job  the job definition (see JOB_DEFS in core/jobs.js)
  * @property {Minigame} game
  * @property {"intro" | "play" | "over"} phase
  * @property {number} elapsed  seconds since the shift started
@@ -48,7 +64,7 @@ import { CANVAS_WIDTH, CANVAS_HEIGHT, rand, label } from "./draw.js"
  * @property {number} strikes
  * @property {number} alertT  seconds left to show the alert banner
  * @property {{ text: string, x: number, y: number, life: number, bad?: boolean }[]} floats  floating texts
- * @property {object[]} parts  particles (see burst())
+ * @property {Particle[]} parts  particles (see burst())
  * @property {string | null} meterText  replaces the progress meter's text when set
  * @property {string} [result]  how the shift ended
  * @property {number} [reward]  pay for a won shift
