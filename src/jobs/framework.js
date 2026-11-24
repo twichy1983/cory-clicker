@@ -170,7 +170,7 @@ function showJobPanel(kind) {
       <h3>${job.icon} ${job.name}</h3><p>${minigame.tagline}</p>
       <ul>${minigame.rules.map((rule) => `<li>${rule}</li>`).join("")}</ul>
       <p class="reward">Reward: ${money(jobReward())} (${jobPaySecs(job) / 60} minutes of ${esc(INDUSTRIES[job.ind].name)} income)</p>
-      <p style="color:var(--muted);font-size:.85em">Starting the shift uses this job for the next ${cdText}, win or lose.</p>
+      <p class="muted small">Starting the shift uses this job for the next ${cdText}, win or lose.</p>
       <div class="row"><button class="alt" data-act="close">Not now</button><button class="go" data-act="start">Start shift</button></div></div>`
   } else if (kind === "win") {
     html = `<div class="jobCardBig"><h3>${minigame.winTitle}</h3><p>${minigame.winText}</p>
@@ -181,7 +181,7 @@ function showJobPanel(kind) {
       kind === "quit" ? "You walked off the job." : (minigame.lose && minigame.lose[kind]) || "The shift is over."
     const title = kind === "busted" ? "Busted!" : kind === "quit" ? "Shift abandoned" : "Shift over"
     html = `<div class="jobCardBig bad"><h3>${title}</h3><p>${why}</p>${note}
-      <p style="color:var(--muted)">No job payout. This job is available again in ${mmss(jobTimeLeft(game.state, job, Date.now()))}.</p>
+      <p class="muted">No job payout. This job is available again in ${mmss(jobTimeLeft(game.state, job, Date.now()))}.</p>
       <div class="row"><button class="go" data-act="close">Back to the office</button></div></div>`
   }
   panel.hidden = false

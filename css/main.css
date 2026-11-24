@@ -608,6 +608,21 @@ body.danger #dangerOverlay {
   margin-top: 10px;
   line-height: 1.5;
 }
+.note.first {
+  margin-top: 0;
+}
+.gain {
+  color: var(--green);
+}
+.loss {
+  color: var(--red);
+}
+.muted {
+  color: var(--muted);
+}
+.small {
+  font-size: 0.85em;
+}
 
 /* ---------- CENTER: stock market ---------- */
 .mkt {

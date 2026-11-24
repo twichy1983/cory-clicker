@@ -138,7 +138,7 @@ function renderRapSheet() {
     return
   }
   element.innerHTML =
-    `<div class="note" style="margin-top:0">${owned.length} scandal${owned.length > 1 ? "s" : ""} on record. Click one to read the charges.</div>` +
+    `<div class="note first">${owned.length} scandal${owned.length > 1 ? "s" : ""} on record. Click one to read the charges.</div>` +
     owned
       .map(
         (upgrade) =>

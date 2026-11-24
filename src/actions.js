@@ -100,7 +100,7 @@ function showBankruptcy({ owed, lost, voluntary }) {
   if (voluntary) {
     showModal(
       "📉 Chapter 11 Filed",
-      `<p>You walked into bankruptcy court with <b>${money(lost)}</b> in cash and <b style="color:var(--red)">${money(Math.max(0, owed))}</b> in unpaid fines, and walked out with neither.</p>
+      `<p>You walked into bankruptcy court with <b>${money(lost)}</b> in cash and <b class="loss">${money(Math.max(0, owed))}</b> in unpaid fines, and walked out with neither.</p>
        <p>Every industry has been dissolved, every upgrade voided and every lobbyist let go. The regulators' slate, and their clock, start fresh.</p>
        <p>Achievements, play time and lifetime stats are untouched.</p>
        <p class="note">Bankruptcies so far: ${state.bankruptcies}.</p>`,
@@ -111,7 +111,7 @@ function showBankruptcy({ owed, lost, voluntary }) {
   }
   showModal(
     "🚨 CEASE & DESIST 🚨",
-    `<p>You failed to pay <b style="color:var(--red)">${money(owed)}</b> in regulatory fines before the deadline.</p>
+    `<p>You failed to pay <b class="loss">${money(owed)}</b> in regulatory fines before the deadline.</p>
      <p>Federal regulators have seized your <b>${money(lost)}</b> in cash, dissolved every industry, voided every upgrade and fired your lobbyists.</p>
      <p>Your CEO has received a $40 million severance package and a book deal.</p>
      <p class="note">Bankruptcies so far: ${state.bankruptcies}. Start over. Pay your fines this time.</p>`,
@@ -230,8 +230,8 @@ function loadGame(data, isImport) {
     showModal(
       "Welcome back",
       `<p>You were away for <b>${fmtDuration(away)}</b>.</p>
-       <p>Your industries earned <b style="color:var(--green)">${money(state.dollars - before)}</b> while you were gone.</p>
-       <p>Regulatory fines changed by <b style="color:var(--red)">${money(state.fines - finesBefore)}</b>. Time left to pay: <b>${fmtTime(state.deadline - now)}</b>.</p>`,
+       <p>Your industries earned <b class="gain">${money(state.dollars - before)}</b> while you were gone.</p>
+       <p>Regulatory fines changed by <b class="loss">${money(state.fines - finesBefore)}</b>. Time left to pay: <b>${fmtTime(state.deadline - now)}</b>.</p>`,
       [["Back to work", hideModal]]
     )
   }
@@ -270,7 +270,7 @@ export function exportSave() {
   save()
   showModal(
     "Export save",
-    `<p class="note" style="margin-top:0">Copy this text somewhere safe.</p><textarea id="exportTxt" readonly>${encodeSave(game.state)}</textarea>`,
+    `<p class="note first">Copy this text somewhere safe.</p><textarea id="exportTxt" readonly>${encodeSave(game.state)}</textarea>`,
     [
       [
         "Copy",
@@ -290,7 +290,7 @@ export function exportSave() {
 export function importSave() {
   showModal(
     "Import save",
-    `<p class="note" style="margin-top:0">Paste a save string. This replaces your current game.</p><textarea id="importTxt" placeholder="Paste save here..."></textarea>`,
+    `<p class="note first">Paste a save string. This replaces your current game.</p><textarea id="importTxt" placeholder="Paste save here..."></textarea>`,
     [
       [
         "Load",

@@ -96,7 +96,7 @@ function achievementTip(id) {
   const when = game.state.achievements[id]
   return `<div class="tn">${when ? achievement.icon : "🔒"} ${esc(achievement.name)}</div><div class="ts">${esc(achievement.cat)}</div>
     <div class="td">${esc(achievement.desc)}</div>
-    ${when ? `<div class="tb">Unlocked ${new Date(when).toLocaleString()}</div>` : `<div style="color:var(--muted)">Locked</div>`}`
+    ${when ? `<div class="tb">Unlocked ${new Date(when).toLocaleString()}</div>` : `<div class="muted">Locked</div>`}`
 }
 
 function stockTip(i) {
