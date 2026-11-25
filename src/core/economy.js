@@ -2,6 +2,7 @@
 // Every function takes the `state` and, where needed, the `derived` values and the current time.
 // Nothing here touches the page: functions return what happened and the UI decides how to show it.
 import { HOUR, BASE_TIMER, BASE_FINE_RATE, COST_GROWTH, TIMER_LOBBY, PENALTY_LOBBY } from "./constants.js"
+import { SCANDAL_MULT, DOUBLER_MULT, GLOBAL_MULT, ACHIEVEMENT_BONUS } from "./constants.js"
 import { INDUSTRIES } from "./data/industries.js"
 import { UPGRADES, UPG_BY_ID } from "./data/upgrades.js"
 import { freshRun } from "./state.js"
@@ -15,7 +16,10 @@ import { rules } from "./rules.js"
  * Values worked out from the state (`game.derived`). Never saved; call refreshDerived() after changing ownership.
  * @typedef {object} Derived
  * @property {number} cps  total income in dollars per second
- * @property {number[]} indMult  income multiplier of each industry (scandals and doublers)
+ * @property {number[]} indMult  income multiplier of each industry (its scandals and doublers, times allMult)
+ * @property {number} allMult  company-wide income multiplier (company-wide upgrades and achievements)
+ * @property {number} globalMult  the part of allMult from company-wide upgrades
+ * @property {number} achievementMult  the part of allMult from achievements (1.25 = +25%)
  * @property {number[]} indCps  income per second of each industry
  * @property {number} scandals  scandals committed
  * @property {number} clickPct  share of income added to each click (0.01 = 1%)
@@ -33,7 +37,8 @@ export function derive(state) {
     doublersIn = INDUSTRIES.map(() => 0)
   let clickX = 1,
     clickPct = 0,
-    scandals = 0
+    scandals = 0,
+    globals = 0
   for (const id in state.upgrades) {
     const upgrade = UPG_BY_ID[id]
     if (!upgrade) continue
@@ -41,17 +46,27 @@ export function derive(state) {
       scandalsIn[upgrade.ind]++
       scandals++
     } else if (upgrade.type === "mult") doublersIn[upgrade.ind]++
+    else if (upgrade.type === "global") globals++
     else if (upgrade.type === "click") {
       if (upgrade.kind === "x2") clickX *= 2
       else clickPct += 0.01
     }
   }
-  const indMult = INDUSTRIES.map((_, i) => (1 + 0.1 * scandalsIn[i]) * Math.pow(2, doublersIn[i]))
+  // Like most clickers, upgrades multiply rather than add, so income grows exponentially as you buy them.
+  const globalMult = Math.pow(GLOBAL_MULT, globals)
+  const achievementMult = 1 + ACHIEVEMENT_BONUS * Object.keys(state.achievements || {}).length
+  const allMult = globalMult * achievementMult
+  const indMult = INDUSTRIES.map(
+    (_, i) => Math.pow(SCANDAL_MULT, scandalsIn[i]) * Math.pow(DOUBLER_MULT, doublersIn[i]) * allMult
+  )
   const indCps = INDUSTRIES.map((ind, i) => state.owned[i] * ind.cps * indMult[i])
   const cps = indCps.reduce((sum, value) => sum + value, 0)
   return {
     cps,
     indMult,
+    allMult,
+    globalMult,
+    achievementMult,
     indCps,
     scandals,
     clickPct,
@@ -92,7 +107,8 @@ export const upgradeCost = (upgrade) => (rules.freePurchases ? 0 : upgrade.cost)
 /** @param {GameState} state */
 function upgradeUnlocked(state, upgrade) {
   if (state.upgrades[upgrade.id]) return false
-  if (upgrade.type === "click") return rules.freePurchases || state.runEarned >= upgrade.unlockAt
+  if (upgrade.type === "click" || upgrade.type === "global")
+    return rules.freePurchases || state.runEarned >= upgrade.unlockAt
   return state.owned[upgrade.ind] >= upgrade.req
 }
 

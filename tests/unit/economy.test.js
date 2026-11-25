@@ -4,6 +4,7 @@ import { HOUR, BASE_TIMER } from "../../src/core/constants.js"
 import { newState } from "../../src/core/state.js"
 import { rules } from "../../src/core/rules.js"
 import * as economy from "../../src/core/economy.js"
+import { UPGRADES } from "../../src/core/data/upgrades.js"
 
 const START_TIME = 1_000_000_000_000 // a fixed "now" so tests never depend on the real clock
 
@@ -52,17 +53,55 @@ test("buying an industry needs enough cash", () => {
   assert.equal(economy.derive(state).cps, 0.15)
 })
 
-test("scandals add 10% income and 1% fines; doublers double", () => {
+test("scandals multiply income by 1.5 each and add 1% fines; doublers double", () => {
   const state = newState(START_TIME)
   state.owned[1] = 10
   state.upgrades.s_food_0 = true
   let derived = economy.derive(state)
-  assert.ok(Math.abs(derived.indCps[1] - 10 * 1.2 * 1.1) < 1e-9)
+  assert.ok(Math.abs(derived.indCps[1] - 10 * 1.2 * 1.5) < 1e-9)
   assert.ok(Math.abs(derived.fineMult - 1.01) < 1e-9)
+  state.upgrades.s_food_1 = true
+  derived = economy.derive(state)
+  assert.ok(Math.abs(derived.indCps[1] - 10 * 1.2 * 1.5 * 1.5) < 1e-9) // they stack multiplicatively
+  assert.ok(Math.abs(derived.fineMult - 1.02) < 1e-9)
   state.owned[0] = 1
   state.upgrades.d_lemon_0 = true
   derived = economy.derive(state)
   assert.ok(Math.abs(derived.indCps[0] - 0.3) < 1e-9)
+})
+
+test("company-wide upgrades double all income and achievements add 1% each", () => {
+  const state = newState(START_TIME)
+  state.owned[0] = 10
+  state.owned[1] = 10
+  const before = economy.derive(state).cps
+  state.upgrades.g0 = true
+  assert.ok(Math.abs(economy.derive(state).cps - before * 2) < 1e-9)
+  state.achievements = { ind_lemon: 1, own_10: 1, clicks_100: 1 }
+  const derived = economy.derive(state)
+  assert.ok(Math.abs(derived.achievementMult - 1.03) < 1e-9)
+  assert.ok(Math.abs(derived.allMult - 2 * 1.03) < 1e-9)
+  assert.ok(Math.abs(derived.cps - before * 2 * 1.03) < 1e-9)
+})
+
+test("company-wide upgrades unlock from this run's earnings", () => {
+  const state = newState(START_TIME)
+  state.dollars = 1e9
+  assert.equal(economy.buyUpgrade(state, "g0"), false) // needs $40 million earned this run
+  state.runEarned = 4e7
+  assert.equal(economy.buyUpgrade(state, "g0"), true)
+})
+
+test("an early scandal now beats buying more of that industry once you own a few", () => {
+  // At 25 owned the 25-threshold scandal adds half the industry's output for 6× one building's price,
+  // which pays back faster than one more building does.
+  const state = newState(START_TIME)
+  state.owned[5] = 25
+  const derived = economy.derive(state)
+  const scandal = UPGRADES.find((upgrade) => upgrade.id === "s_pharma_3")
+  const scandalGain = derived.indCps[5] * 0.5
+  const buildingGain = derived.indCps[5] / 25
+  assert.ok(scandalGain / scandal.cost > buildingGain / economy.buildingCost(state, 5, 1))
 })
 
 test("locked upgrades can't be bought", () => {

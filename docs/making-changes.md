@@ -4,12 +4,13 @@ Recipes for the most common changes. After any of them, run `npm test` and play 
 
 ## Change a price, an income or a balance number
 
-| What                                                      | Where                                                                                      |
-| --------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| An industry's price or income                             | `src/core/data/industries.js` (`base` = first one's price, `cps` = income per second each) |
-| Price growth, fine rate, deadline length, lobbyist prices | `src/core/constants.js`                                                                    |
-| Scandal bonus (+10%) or fine penalty (+1%)                | `derive()` in `src/core/economy.js`                                                        |
-| Job pay and cooldowns                                     | `src/core/jobs.js`                                                                         |
+| What                                                                                 | Where                                                                                      |
+| ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| An industry's price or income                                                        | `src/core/data/industries.js` (`base` = first one's price, `cps` = income per second each) |
+| Price growth, fine rate, deadline length, lobbyist prices                            | `src/core/constants.js`                                                                    |
+| Upgrade multipliers (scandal ×1.5, doubler ×2, company-wide ×2, +1% per achievement) | `src/core/constants.js`; applied in `derive()` in `src/core/economy.js`                    |
+| Scandal fine penalty (+1%)                                                           | `derive()` in `src/core/economy.js`                                                        |
+| Job pay and cooldowns                                                                | `src/core/jobs.js`                                                                         |
 
 If a unit test checks the old number, update the test too. That's expected: the test documents the rule.
 

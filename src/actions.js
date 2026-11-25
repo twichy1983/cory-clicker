@@ -60,6 +60,7 @@ function recordClick() {
 // Awards anything newly earned. `quiet` skips the toasts (used when loading a save).
 export function awardAchievements(quiet) {
   const fresh = checkAchievements(game, Date.now())
+  if (fresh.length) refreshDerived() // each achievement adds to company-wide income
   if (fresh.length && !quiet) {
     if (fresh.some((achievement) => MAJOR_ACH.has(achievement.id))) platform.happytime() // portal confetti, saved for big milestones
     if (fresh.length <= 3) fresh.forEach((achievement) => toast(`🏆 Achievement unlocked: ${achievement.name}`, "gold"))

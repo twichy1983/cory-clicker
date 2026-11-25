@@ -86,6 +86,7 @@ export function toggleShowAllUpgrades() {
 function upgradeTag(upgrade) {
   if (upgrade.type === "scandal") return "Scandal · " + INDUSTRIES[upgrade.ind].name
   if (upgrade.type === "mult") return "Efficiency · " + INDUSTRIES[upgrade.ind].name
+  if (upgrade.type === "global") return "Company-wide · all income ×2"
   return upgrade.kind === "x2" ? "Clicking · click power ×2" : "Clicking · +1% of income per click"
 }
 

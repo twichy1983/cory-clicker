@@ -1,4 +1,4 @@
-// Every upgrade in the store: scandals, efficiency doublers and click upgrades.
+// Every upgrade in the store: scandals, efficiency doublers, click upgrades and company-wide upgrades.
 import { COST_GROWTH } from "../constants.js"
 import { INDUSTRIES, IND_INDEX } from "./industries.js"
 import { SCANDALS, SCANDAL_THRESHOLDS } from "./scandals.js"
@@ -29,7 +29,16 @@ const DOUBLERS = [
   ["lemon", 50, "Franchise the Sidewalk", "Every sidewalk in the county now hosts a stand you technically don't own."],
   ["offshore", 1, "Cayman Mailbox", "Your global headquarters is a numbered PO box next to a smoothie shop."],
   ["offshore", 10, "Matryoshka LLC", "A company owned by a company owned by a company owned by... you, probably."],
-  ["offshore", 50, "Double Irish With a Dutch Sandwich", "Your tax structure is now officially a lunch order."]
+  ["offshore", 50, "Double Irish With a Dutch Sandwich", "Your tax structure is now officially a lunch order."],
+  // Added later so these two industries keep pace with the scandal-heavy ones. Append only: ids come from the position.
+  ["lemon", 25, "Sugar Water Rebrand", "It's not diluted. It's 'light.'"],
+  ["lemon", 100, "Lemonade Futures", "You sell next summer's lemonade today and short it tomorrow."],
+  ["lemon", 150, "Sidewalk Monopoly", "Every other stand in town mysteriously failed its health inspection."],
+  ["lemon", 200, "Lemonade-as-a-Service", "Customers now pay a monthly subscription to be thirsty."],
+  ["offshore", 25, "Nominee Directors", "A retired fisherman is CEO of 4,000 of your companies. He's thrilled."],
+  ["offshore", 100, "Passport Program", "You bought a small island nation's citizenship scheme. Then the nation."],
+  ["offshore", 150, "Treaty Shopping", "Your profits take a world tour and come home tax-free."],
+  ["offshore", 200, "Flag of Convenience", "Your yacht is registered in a country with no navy and no questions."]
 ]
 DOUBLERS.forEach(([key, req, name, desc], i) => {
   const ind = IND_INDEX[key],
@@ -74,5 +83,36 @@ CLICKS.forEach(([id, name, desc, cost, kind]) => {
     unlockAt: cost * 0.4,
     icon: kind === "x2" ? "🖱️" : "👆"
   })
+})
+// Company-wide upgrades: each doubles all income. Unlock once this run's earnings reach 40% of the price.
+/** @type {[id: string, name: string, desc: string, cost: number][]} */
+const GLOBALS = [
+  [
+    "g0",
+    "Too Big to Fail",
+    "Your collapse would take the whole economy with it. Lenders, regulators and juries adjust accordingly.",
+    1e8
+  ],
+  [
+    "g1",
+    "Shareholder Primacy",
+    "The board confirms your only duty is the stock price. Everything else is a rounding error.",
+    1e11
+  ],
+  [
+    "g2",
+    "Monopoly Moat",
+    "There's no competition left, so nobody can undercut you. Prices are now a suggestion you make to yourself.",
+    1e14
+  ],
+  [
+    "g3",
+    "Revolving Door Hires",
+    "Your new VP of Compliance used to run the agency that regulates you. She still has a key.",
+    1e17
+  ]
+]
+GLOBALS.forEach(([id, name, desc, cost]) => {
+  UPGRADES.push({ id, type: "global", name, desc, cost, unlockAt: cost * 0.4, icon: "🏛️" })
 })
 export const UPG_BY_ID = Object.fromEntries(UPGRADES.map((upgrade) => [upgrade.id, upgrade]))

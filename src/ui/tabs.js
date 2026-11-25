@@ -3,6 +3,7 @@ import { game } from "../game.js"
 import { UPGRADES } from "../core/data/upgrades.js"
 import { ACH, ACH_CATS } from "../core/achievements.js"
 import { totalJobWins } from "../core/jobs.js"
+import { ACHIEVEMENT_BONUS } from "../core/constants.js"
 import { fmt, money, fmtDuration } from "../core/format.js"
 import { $, esc } from "./dom.js"
 
@@ -29,6 +30,8 @@ export function renderStats() {
     ["Deadlines survived", state.cyclesSurvived],
     ["Bankruptcies", state.bankruptcies],
     ["Achievements", `${Object.keys(state.achievements).length} / ${ACH.length}`],
+    ["Income bonus from achievements", `+${Math.round((derived.achievementMult - 1) * 100)}%`],
+    ["Company-wide multiplier", "×" + fmt(derived.allMult)],
     ["Play time", fmtDuration(state.playTime * 1000)],
     ["Jobs completed", totalJobWins(state)],
     ["Playing since", new Date(state.startedAt).toLocaleString()]
@@ -46,7 +49,7 @@ export function renderAchievements(force) {
   const key = Object.keys(state.achievements).sort().join(",")
   if (!force && key === lastAchKey && $("achievements").childElementCount) return
   lastAchKey = key
-  let html = `<div class="achHead"><span>Achievements</span><span>${got} / ${ACH.length}</span></div>
+  let html = `<div class="achHead"><span>Achievements · +${Math.round(ACHIEVEMENT_BONUS * 100)}% income each</span><span>${got} / ${ACH.length}</span></div>
     <div class="achBar"><div style="width:${((got / ACH.length) * 100).toFixed(1)}%"></div></div>`
   for (const cat of ACH_CATS) {
     const list = ACH.filter((achievement) => achievement.cat === cat),

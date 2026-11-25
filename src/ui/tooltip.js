@@ -1,7 +1,7 @@
 // Hover details for anything with a data-tooltip="kind:id" attribute.
 // With a mouse the panel follows the pointer; on touch screens CSS docks it to the top or bottom edge.
 import { game } from "../game.js"
-import { HOUR } from "../core/constants.js"
+import { HOUR, SCANDAL_MULT, DOUBLER_MULT, GLOBAL_MULT } from "../core/constants.js"
 import { INDUSTRIES, TICKERS } from "../core/data/industries.js"
 import { UPG_BY_ID } from "../core/data/upgrades.js"
 import { ACH_BY_ID } from "../core/achievements.js"
@@ -25,6 +25,7 @@ function industryTip(i) {
     <div class="td">${esc(ind.flavor)}</div>
     <div>Each produces <b>${money(each)}/s</b> (base ${money(ind.cps)} × ${derived.indMult[i].toFixed(2)})</div>
     <div>${state.owned[i]} owned producing <b>${money(derived.indCps[i])}/s</b> (${share.toFixed(1)}% of income)</div>
+    ${derived.allMult > 1 ? `<div class="muted small">Includes the company-wide ×${derived.allMult.toFixed(2)}</div>` : ""}
     <div class="tc">Cost: ${money(buildingCost(state, i, buyAmt))}${buyAmt > 1 ? " for " + buyAmt : ""}</div>`
 }
 
@@ -36,11 +37,14 @@ function upgradeTip(id) {
     pen = ""
   if (upgrade.type === "scandal") {
     sec = INDUSTRIES[upgrade.ind].sector + " · Scandal"
-    bonus = `+10% ${esc(INDUSTRIES[upgrade.ind].name)} output`
+    bonus = `${esc(INDUSTRIES[upgrade.ind].name)} output ×${SCANDAL_MULT}`
     pen = `<div class="tp">Penalty: +1% Regulatory Fines</div>`
   } else if (upgrade.type === "mult") {
     sec = INDUSTRIES[upgrade.ind].sector + " · Efficiency"
-    bonus = `${esc(INDUSTRIES[upgrade.ind].name)} output ×2`
+    bonus = `${esc(INDUSTRIES[upgrade.ind].name)} output ×${DOUBLER_MULT}`
+  } else if (upgrade.type === "global") {
+    sec = "Company-wide"
+    bonus = `All income ×${GLOBAL_MULT}`
   } else {
     sec = "Clicking"
     bonus = upgrade.kind === "x2" ? "Click power ×2" : "Clicks also earn +1% of your income per second"

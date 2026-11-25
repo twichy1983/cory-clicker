@@ -1,5 +1,5 @@
 // Scandal upgrades, listed per industry key as [name, description].
-// Each one gives +10% to its industry and +1% regulatory fines.
+// Each one multiplies its industry's income by SCANDAL_MULT (×1.5, stacking) and adds +1% regulatory fines.
 export const SCANDALS = {
   auto: [
     [
