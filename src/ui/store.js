@@ -4,6 +4,7 @@ import { game } from "../game.js"
 import { INDUSTRIES, TICKERS } from "../core/data/industries.js"
 import { UPGRADES, UPG_BY_ID } from "../core/data/upgrades.js"
 import { buildingCost, availableUpgrades, upgradeCost } from "../core/economy.js"
+import { SCANDAL_MULT } from "../core/constants.js"
 import { fmt, money } from "../core/format.js"
 import { $, esc } from "./dom.js"
 
@@ -128,6 +129,9 @@ function renderUpgradeAffordability() {
 
 let lastRapKey = ""
 
+// Small multipliers keep two decimals (×2.25, where fmt() would round to ×2.3)
+const multiplierText = (value) => (value < 10 ? value.toFixed(2) : fmt(value))
+
 function renderRapSheet() {
   const owned = UPGRADES.filter((upgrade) => upgrade.type === "scandal" && game.state.upgrades[upgrade.id])
   const key = owned.map((upgrade) => upgrade.id).join(",")
@@ -138,12 +142,23 @@ function renderRapSheet() {
     element.innerHTML = `<div class="empty">Your record is spotless. For now.</div>`
     return
   }
+  // Each scandal multiplies its industry's output and adds 1% to the fine multiplier (see derive()).
+  const perIndustry = new Map()
+  for (const upgrade of owned) perIndustry.set(upgrade.ind, (perIndustry.get(upgrade.ind) || 0) + 1)
+  const totals = [...perIndustry]
+    .map(
+      ([ind, count]) =>
+        `<div class="rapTotal"><span>${INDUSTRIES[ind].icon} ${esc(INDUSTRIES[ind].name)} <span class="muted">· ${count} scandal${count > 1 ? "s" : ""}</span></span><span class="gain">output ×${multiplierText(Math.pow(SCANDAL_MULT, count))}</span></div>`
+    )
+    .join("")
   element.innerHTML =
-    `<div class="note first">${owned.length} scandal${owned.length > 1 ? "s" : ""} on record. Click one to read the charges.</div>` +
+    `<div class="note first">${owned.length} scandal${owned.length > 1 ? "s" : ""} on record. Combined bonuses:</div>` +
+    `<div class="rapTotals">${totals}<div class="rapTotal"><span>⚖️ Regulatory fines</span><span class="loss">+${owned.length}%</span></div></div>` +
+    `<div class="note">Click a scandal to read the charges.</div>` +
     owned
       .map(
         (upgrade) =>
-          `<details><summary>${upgrade.icon} ${esc(upgrade.name)}<span class="sec">${esc(INDUSTRIES[upgrade.ind].sector)}</span></summary><p>${esc(upgrade.desc)}</p></details>`
+          `<details><summary>${upgrade.icon} ${esc(upgrade.name)}<span class="sec">${esc(INDUSTRIES[upgrade.ind].sector)}</span><span class="rapBonus gain">×${SCANDAL_MULT}</span></summary><p>${esc(upgrade.desc)}</p><p class="rapEffect">Bonus: <span class="gain">${esc(INDUSTRIES[upgrade.ind].name)} output ×${SCANDAL_MULT}</span> · <span class="loss">fines +1%</span></p></details>`
       )
       .join("")
 }

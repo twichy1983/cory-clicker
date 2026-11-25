@@ -564,6 +564,27 @@ body.danger #dangerOverlay {
   font-size: 13px;
   line-height: 1.45;
 }
+#rapSheet summary .rapBonus {
+  float: right;
+  font-size: 12px;
+}
+#rapSheet p.rapEffect {
+  font-size: 12px;
+  color: var(--muted);
+}
+.rapTotals {
+  margin: 4px 0 10px;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+.rapTotal {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px 0;
+  font-size: 13px;
+}
 .empty {
   color: var(--muted);
   font-style: italic;
